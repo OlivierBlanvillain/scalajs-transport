@@ -1,3 +1,5 @@
+Fork showing the use [SockJS](https://github.com/sockjs/sockjs-client) instead of native WebSocket.
+
 # Actor system for Scala.js
 
 This project aims at providing an actor system for Scala.js, featuring:

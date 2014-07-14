@@ -10,6 +10,7 @@ import play.api.libs.json._
 import play.api.libs.iteratee._
 import play.api.libs.concurrent.Akka
 
+import play.sockjs.api._
 import akka.actor._
 import akka.pattern.ask
 import akka.scalajs.wsserver.ActorWebSocket
@@ -36,4 +37,7 @@ object Application extends Controller {
     chatManager ? NewConnection()
   }
 
+  val sockjs = SockJSRouter.async[JsValue] { request =>
+    (chatManager ? NewConnection()).map(_.asInstanceOf[(Iteratee[JsValue, Unit], Enumerator[JsValue])])
+  }
 }

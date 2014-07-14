@@ -631,7 +631,7 @@ class ProxyManager extends Actor {
   def receive = {
     case AttemptToConnect =>
       context.watch(context.actorOf(
-          Props(new ClientProxy("ws://localhost:9000/chat-ws-entry", context.parent))))
+        Props(new ClientProxy("http://localhost:9000/sockjs", context.parent))))
 
     case Disconnect =>
       context.children.foreach(context.stop(_))
