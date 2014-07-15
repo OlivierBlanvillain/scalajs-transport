@@ -631,7 +631,8 @@ class ProxyManager extends Actor {
   def receive = {
     case AttemptToConnect =>
       context.watch(context.actorOf(
-        Props(new ClientProxy("http://localhost:9000/sockjs", context.parent))))
+        // Props(new WebSocketClientProxy("ws://localhost:9000/websocket", context.parent))))
+        Props(new SockJsClientProxy("http://localhost:9000/sockjs", context.parent))))
 
     case Disconnect =>
       context.children.foreach(context.stop(_))

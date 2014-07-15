@@ -9,52 +9,49 @@ import akka.scalajs.jsapi._
 import org.scalajs.spickling._
 import org.scalajs.spickling.jsany._
 
-object ClientProxy {
+object WebSocketClientProxy {
   case object ConnectionError
 }
 
 case class WebSocketConnected(entryPointRef: ActorRef)
 
-class ClientProxy(wsUrl: String, connectedHandler: ActorRef) extends AbstractProxy {
+class WebSocketClientProxy(wsUrl: String, connectedHandler: ActorRef) extends AbstractProxy {
   /** Will send the WebSocketConnected message to parent actor. */
   def this(wsUrl: String) = this(wsUrl, null)
 
   import AbstractProxy._
-  import ClientProxy._
+  import WebSocketClientProxy._
 
   type PickleType = js.Any
   implicit protected def pickleBuilder: PBuilder[PickleType] = JSPBuilder
   implicit protected def pickleReader: PReader[PickleType] = JSPReader
 
-  var sockjs: SockJS = _
+  var webSocket: WebSocket = _
 
   override def preStart() = {
     super.preStart()
 
-    sockjs = new SockJS(wsUrl, null, js.Dictionary(
-      "debug" -> true,
-      "protocols_whitelist" -> js.Array("xdr-streaming", "xhr-streaming", "iframe-eventsource", "iframe-htmlfile", "xdr-polling", "xhr-polling", "iframe-xhr-polling", "jsonp-polling")
-    ))
-    sockjs.addEventListener("message", { (event: Event) =>
+    webSocket = new WebSocket(wsUrl)
+    webSocket.addEventListener("message", { (event: Event) =>
       self ! IncomingMessage(js.JSON.parse(
           event.asInstanceOf[MessageEvent].data.toString()))
     }, useCapture = false)
-    sockjs.addEventListener("close", { (event: Event) =>
+    webSocket.addEventListener("close", { (event: Event) =>
       self ! ConnectionClosed
     }, useCapture = false)
-    sockjs.addEventListener("error", { (event: Event) =>
+    webSocket.addEventListener("error", { (event: Event) =>
       self ! ConnectionError
     }, useCapture = false)
   }
 
   override def postStop() = {
     super.postStop()
-    sockjs.close()
+    webSocket.close()
   }
 
   override def receive = super.receive.orElse[Any, Unit] {
     case ConnectionError =>
-      throw new akka.AkkaException("sockjs connection error")
+      throw new akka.AkkaException("webSocket connection error")
   }
 
   override def receiveFromPeer = super.receiveFromPeer.orElse[Any, Unit] {
@@ -65,7 +62,7 @@ class ClientProxy(wsUrl: String, connectedHandler: ActorRef) extends AbstractPro
   }
 
   override protected def sendPickleToPeer(pickle: PickleType): Unit = {
-    sockjs.send(js.JSON.stringify(pickle))
+    webSocket.send(js.JSON.stringify(pickle))
   }
 
 }

@@ -3,7 +3,7 @@ import ScalaJSKeys._
 val commonSettings = Seq(
     organization := "org.scalajs",
     version := "0.1-SNAPSHOT",
-    scalaVersion := "2.10.4",
+    scalaVersion := "2.10.3",
     normalizedName ~= { _.replace("scala-js", "scalajs") },
     scalacOptions ++= Seq(
         "-deprecation",
@@ -14,7 +14,7 @@ val commonSettings = Seq(
 )
 
 lazy val root = project.in(file(".")).settings(commonSettings: _*)
-  .aggregate(actors, akkaWebsocketBridge)
+  .aggregate(actors, jsNetwork, playNetwork)
 
 lazy val actors = project.settings(commonSettings: _*)
   .settings(
@@ -22,12 +22,16 @@ lazy val actors = project.settings(commonSettings: _*)
         (sourceDirectory in Compile).value / "wscommon"
   )
 
-lazy val akkaWebsocketBridge = project.in(file("akka-websocket-bridge"))
+lazy val playNetwork = project.in(file("play-network"))
   .settings(commonSettings: _*)
   .settings(
       unmanagedSourceDirectories in Compile +=
         (sourceDirectory in (actors, Compile)).value / "wscommon"
   )
+
+lazy val jsNetwork = project.in(file("js-network"))
+  .settings(commonSettings: _*)
+  .dependsOn(actors)
 
 lazy val examples = project.settings(commonSettings: _*)
   .aggregate(webworkersExample, faultToleranceExample,
@@ -41,9 +45,10 @@ lazy val faultToleranceExample = project.in(file("examples/faulttolerance"))
   .settings(commonSettings: _*)
   .dependsOn(actors)
 
-lazy val chatExample = project.in(file("examples/chat-full-stack")).enablePlugins(PlayScala)
+lazy val chatExample = project.in(file("examples/chat-full-stack"))
+  .enablePlugins(PlayScala)
+  .dependsOn(playNetwork)
   .settings(commonSettings: _*)
-  .dependsOn(akkaWebsocketBridge)
   .settings(
       unmanagedSourceDirectories in Compile +=
         baseDirectory.value / "cscommon"
@@ -52,6 +57,7 @@ lazy val chatExample = project.in(file("examples/chat-full-stack")).enablePlugin
 lazy val chatExampleScalaJS = project.in(file("examples/chat-full-stack/scalajs"))
   .settings((commonSettings ++ scalaJSSettings): _*)
   .dependsOn(actors)
+  .dependsOn(jsNetwork)
   .settings(
       unmanagedSourceDirectories in Compile +=
         (baseDirectory in chatExample).value / "cscommon",
