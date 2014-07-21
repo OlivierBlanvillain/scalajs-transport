@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Scala.js actors example with WebRTC</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+</head>
+<body>
+
+<div id="playground">
+  <style>
+    div#buttons {
+      margin: 0 0 1em 0;
+    }
+    div#receive {
+    }
+    div#send {
+      float: left;
+      margin: 0 3em 1em 0;
+    }
+    div#sendReceive {
+      margin: 0 0 1em 0;
+    }
+    \h1 {
+      margin: 0 0 1em 0;
+    }
+    h2 {
+      margin: 0 0 0.5em 0;
+    }
+    textarea {
+      color: #444;
+      font-family: 'Courier New', monospace;
+      font-size: 1em;
+      height: 7.0em;
+      padding: 0.5em;
+    }
+  </style>
+  <div id="buttons">
+    <button id="startButton">Start</button>
+    <button id="sendButton">Send</button>
+    <button id="closeButton">Stop</button>
+  </div>
+
+  <div id="sendReceive">
+    <div id="send">
+      <h2>Send</h2>
+      <textarea id="dataChannelSend" disabled placeholder="Press Start, enter some text, then press Send."></textarea>
+    </div>
+    <div id="receive">
+      <h2>Receive</h2>
+      <textarea id="dataChannelReceive" disabled></textarea>
+    </div>
+  </div>
+</div>
+
+<script type="text/javascript" src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+
+<script type="text/javascript" src="./target/scala-2.10/scalajs-actors-example-webrtc-fastopt.js"></script>
+<script type="text/javascript">
+WebRTCExample().main();
+</script>
+
+</body>
+</html>

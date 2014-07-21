@@ -30,7 +30,7 @@ object AbstractProxy {
 }
 
 /** Common between [[akka.scalajs.wsserver.ServerProxy]] and
- *  [[akka.scalajs.wsclient.ClientProxy]].
+ *  [[akka.scalajs.client.ClientProxy]].
  */
 abstract class AbstractProxy extends Actor {
 

@@ -7,7 +7,7 @@ import scala.concurrent.duration._
 
 import akka.actor._
 import akka.pattern.Ask.ask
-import akka.scalajs.wsclient._
+import akka.scalajs.client._
 import akka.event.LoggingReceive
 import akka.util.Timeout
 import akka.scalajs.jsapi.Timers

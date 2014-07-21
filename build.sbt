@@ -35,7 +35,7 @@ lazy val jsNetwork = project.in(file("js-network"))
 
 lazy val examples = project.settings(commonSettings: _*)
   .aggregate(webworkersExample, faultToleranceExample,
-      chatExample, chatExampleScalaJS)
+      chatExample, chatExampleScalaJS, webrtcExample)
 
 lazy val webworkersExample = project.in(file("examples/webworkers"))
   .settings(commonSettings: _*)
@@ -43,6 +43,11 @@ lazy val webworkersExample = project.in(file("examples/webworkers"))
 
 lazy val faultToleranceExample = project.in(file("examples/faulttolerance"))
   .settings(commonSettings: _*)
+  .dependsOn(actors)
+
+lazy val webrtcExample = project.in(file("examples/webrtc"))
+  .settings(commonSettings: _*)
+  .dependsOn(jsNetwork)
   .dependsOn(actors)
 
 lazy val chatExample = project.in(file("examples/chat-full-stack"))
