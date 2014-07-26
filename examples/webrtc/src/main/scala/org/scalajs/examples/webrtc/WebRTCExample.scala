@@ -20,12 +20,36 @@ import akka.scalajs.jsapi._
 object WebRTCExample {
   @JSExport
   def main(): Unit = {
-    // val system = ActorSystem("WebRTCExample")
-    // val peerA = system.actorOf(Props(new PeerProxy), name = "peerA")
-    // val peerB = system.actorOf(Props(new PeerProxy), name = "peerB")
-    // println("Hello!")
+    println("Hello!")
+    val system = ActorSystem("WebRTCExample")
+    
+    class Local extends Actor {
+      override def receive = {
+        case PeerProxy.WebRTCConnected(peer) =>
+          peer ! "Hello World!"
+        case m =>
+          println("[local] Hey, look what I've got:")
+          println(m.toString)
+      }
+    }
+    class Remote extends Actor {
+      override def receive = {
+        case m =>
+          println("[remote] Hey, look what I've got:")
+          println(m.toString)
+      }
+    }
+
+    val local = system.actorOf(Props(new Local), name = "local")
+    val remote = system.actorOf(Props(new Remote), name = "remote")
+    val callerProxy = system.actorOf(Props(new CallerProxy(local)), name = "caller")
+    val calleeProxy = system.actorOf(Props(new CalleeProxy(remote)), name = "callee")
+    
+    callerProxy ! PeerProxy.SignalingChannel(calleeProxy)
+    calleeProxy ! PeerProxy.SignalingChannel(callerProxy)
   }
   
+
   val document = js.Dynamic.global.document
   val startButton = document.getElementById("startButton")
   val sendButton = document.getElementById("sendButton")
@@ -42,8 +66,8 @@ object WebRTCExample {
   
   var localPeerConnection: webkitRTCPeerConnection = null
   var remotePeerConnection: webkitRTCPeerConnection = null
-  var sendChannel: RTCDataChannel = null
   var receiveChannel: RTCDataChannel = null
+  var sendChannel: RTCDataChannel = null
 
   def createConnection(): Unit = {
     localPeerConnection = new webkitRTCPeerConnection(null, DataChannelsConstraint)
@@ -52,7 +76,7 @@ object WebRTCExample {
     sendChannel = localPeerConnection.createDataChannel("sendDataChannel")
     println("Created send data channel")
 
-    localPeerConnection.onicecandidate = gotLocalCandidate _
+    localPeerConnection.onicecandidate = gotLocalIceCandidate _
     sendChannel.onopen = handleSendChannelStateChange _
     sendChannel.onclose = handleSendChannelStateChange _
 
@@ -110,7 +134,7 @@ object WebRTCExample {
     localPeerConnection.setRemoteDescription(desc)
   }
 
-  def gotLocalCandidate(event: RTCIceCandidateEvent): Unit = {
+  def gotLocalIceCandidate(event: RTCIceCandidateEvent): Unit = {
     println("local ice callback")
     if(event.candidate != null) {
       remotePeerConnection.addIceCandidate(event.candidate)
