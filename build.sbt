@@ -35,7 +35,8 @@ lazy val jsNetwork = project.in(file("js-network"))
 
 lazy val examples = project.settings(commonSettings: _*)
   .aggregate(webworkersExample, faultToleranceExample,
-      chatExample, chatExampleScalaJS, webrtcExample)
+      chatExample, chatExampleScalaJS,
+      webrtcExample, webrtcFullStack, webrtcFullStackScalaJS)
 
 lazy val webworkersExample = project.in(file("examples/webworkers"))
   .settings(commonSettings: _*)
@@ -49,6 +50,32 @@ lazy val webrtcExample = project.in(file("examples/webrtc"))
   .settings(commonSettings: _*)
   .dependsOn(jsNetwork)
   .dependsOn(actors)
+
+lazy val webrtcFullStack = project.in(file("examples/webrtc-full-stack"))
+  .enablePlugins(PlayScala)
+  .dependsOn(playNetwork)
+  .settings(commonSettings: _*)
+  .settings(
+      unmanagedSourceDirectories in Compile +=
+        baseDirectory.value / "cscommon"
+  )
+
+lazy val webrtcFullStackScalaJS = project.in(file("examples/webrtc-full-stack/scalajs"))
+  .settings((commonSettings ++ scalaJSSettings): _*)
+  .dependsOn(actors)
+  .dependsOn(jsNetwork)
+  .settings(
+      unmanagedSourceDirectories in Compile +=
+        (baseDirectory in webrtcFullStack).value / "cscommon",
+      fastOptJS in Compile <<= (fastOptJS in Compile) triggeredBy (compile in (webrtcFullStack, Compile))
+  )
+  .settings(
+      Seq(fastOptJS, fullOptJS) map {
+        packageJSKey =>
+          crossTarget in (Compile, packageJSKey) :=
+            (baseDirectory in webrtcFullStack).value / "public/javascripts"
+      }: _*
+  )
 
 lazy val chatExample = project.in(file("examples/chat-full-stack"))
   .enablePlugins(PlayScala)
