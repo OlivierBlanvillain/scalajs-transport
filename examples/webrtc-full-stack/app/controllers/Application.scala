@@ -23,7 +23,8 @@ object Application extends Controller {
   implicit val timeout = akka.util.Timeout(5 seconds)
   implicit def ec = Akka.system.dispatcher
 
-  val peerMatcher = Akka.system.actorOf(Props[PeerMatcher], name = "peermatcher")
+  // val peerMatcher = Akka.system.actorOf(Props[PeerMatcher], name = "peermatcher")
+  val board = Akka.system.actorOf(Props[BoardActor], name = "board")
 
   def indexDev = Action {
     Ok(views.html.index(devMode = true))
@@ -33,27 +34,7 @@ object Application extends Controller {
     Ok(views.html.index(devMode = false))
   }
 
-  // def sockjs = SockJSRouter.acceptWithActor[String, String](req => out => {
-  //   val userActor = Props(classOf[UserActor], out)
-  //   peerMatcher ! userActor
-  //   userActor
-  // })
-
-  def chatWSEntry = ActorWebSocket { request =>
-    peerMatcher ? NewConnection()
+  def chatWSEntry = WebSocket.acceptWithActor[String, String] { request => 
+    UserActor.props(board)
   }
-
-
-  // def chatWSEntry = WebSocket.acceptWithActor[String, String](req => out => {
-  //   play.api.Logger.error(out.toString)
-  //   val userActor = Props(new UserActor(out))
-  //   peerMatcher ! userActor
-  //   userActor
-  // })
-
-
-  
-  // val sockjs = SockJSRouter.async[JsValue] { request =>
-  //   (manager ? NewConnection()).map(_.asInstanceOf[(Iteratee[JsValue, Unit], Enumerator[JsValue])])
-  // }
 }

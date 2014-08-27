@@ -1,3 +1,5 @@
 package actors
 
-case class NewConnection()
+object NewConnection
+case class Message(s: String)
+object Subscribe
