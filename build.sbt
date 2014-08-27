@@ -55,10 +55,8 @@ lazy val webrtcFullStack = project.in(file("examples/webrtc-full-stack"))
   .enablePlugins(PlayScala)
   .dependsOn(playNetwork)
   .settings(commonSettings: _*)
-  .settings(
-      unmanagedSourceDirectories in Compile +=
-        baseDirectory.value / "cscommon"
-  )
+  .settings(unmanagedSourceDirectories in Compile += baseDirectory.value / "cscommon")
+  .settings(unmanagedResourceDirectories in Compile += baseDirectory.value / "scalajs/src")
 
 lazy val webrtcFullStackScalaJS = project.in(file("examples/webrtc-full-stack/scalajs"))
   .settings((commonSettings ++ scalaJSSettings): _*)
@@ -102,3 +100,4 @@ lazy val chatExampleScalaJS = project.in(file("examples/chat-full-stack/scalajs"
             (baseDirectory in chatExample).value / "public/javascripts"
       }: _*
   )
+

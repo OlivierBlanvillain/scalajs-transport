@@ -41,3 +41,7 @@ out/
 
 # Mac
 .DS_Store
+
+*fastopt.js
+*fastopt.js.map
+*opt.js

@@ -8,16 +8,19 @@
         <title>@title</title>
         <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicon.png")">
         <script type='text/javascript' src='@routes.WebJarAssets.at(WebJarAssets.locate("jquery.min.js"))'></script>
+        <link rel="stylesheet"  href="@routes.Assets.at("stylesheets/main.css")">
+
         <!-- <script type='text/javascript' src='@routes.WebJarAssets.at(WebJarAssets.locate("sockjs.min.js"))'></script> -->
         
-        <!-- Bootstrap CDN -->
+        <!-- Bootstrap CDN 
+        <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css">
         <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css">
         <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap-theme.min.css">
         <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script>
         <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+        -->
         
-        
-        <script type="text/javascript">
+@*        <script type="text/javascript">
           $(function() {
             var ws;
             ws = new WebSocket("ws://localhost:9000/websocket");
@@ -33,6 +36,7 @@
             });
           });
         </script>
+*@
 
     </head>
     <body>
