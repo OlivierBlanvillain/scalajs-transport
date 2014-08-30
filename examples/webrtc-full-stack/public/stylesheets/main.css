@@ -2,11 +2,6 @@ html {
   font-family: sans-serif;
 }
 
-@import url(http://weloveiconfonts.com/api/?family=typicons);
-[class*="typicons-"]:before {
-  font-family: 'Typicons', sans-serif;
-}
-
 .module {
   width: 300px;
   margin: 20px auto;
@@ -67,7 +62,7 @@ html {
   display: flex;
 }
 #discussion .avatar {
-  min-width: 20px;
+  min-width: 10px;
   position: relative;
 }
 #discussion .avatar img {

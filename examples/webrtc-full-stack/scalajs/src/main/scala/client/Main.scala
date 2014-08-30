@@ -18,51 +18,76 @@ import models._
 import scala.scalajs.js
 import js.annotation.JSExport
 import org.scalajs.dom
-import org.scalajs.jquery.{jQuery => jQ, _}
 import akka.scalajs.jsapi._
+import org.scalajs.spickling._
+import org.scalajs.spickling.jsany._
 
 @JSExport("Client")
 object Main {
-  // RegisterPicklers.registerPicklers()
-  val system = ActorSystem("chat-client")
+  RegisterPicklers.registerPicklers()
+
+  implicit val system = ActorSystem("chat-client")
 
   @JSExport
   def startup(): Unit = {
-    println("Starting up...")
-    system.actorOf(WebSocketClientProxy.props("ws://localhost:9000/websocket")(DemoActor.props()))
+    WebSocketClient("ws://localhost:9000/websocket").connectWithActor { out =>
+      Props(new DemoActor(out))
+    }
   }
 }
 
 class DemoActor(out: ActorRef) extends Actor {
+  val me = User(System.currentTimeMillis()) // Poor man's UUID
+  
   override def preStart() = {
-    jQ("#msgform").submit({ (event: JQueryEventObject) =>
-      event.preventDefault()
-      val message = jQ("#msgtext").value()
-      jQ("#msgtext").value("")
-      out ! message
-    })
+    Page.onSubmit {
+      out ! Message(Page.getText(), me)
+      Page.clearText()
+    }
   }
   
   def receive = {
-    case message => 
-      val discussion = jQ("#discussion")
-      discussion.append(
-        s"""<li class="self">
-           |  <div class="avatar"></div>
-           |  <div class="messages">
-           |    <p>$message</p>
-           |  </div>
-           |</li>
-        """.stripMargin)
-      discussion.scrollTop(discussion.prop("scrollHeight").asInstanceOf[Int]) 
+    case Message(text, user, timestamp) if user == me =>
+      Page.appendMine(text)
+    case Message(text, user, timestamp) =>
+      Page.appendHis(text)
   }
 }
-object DemoActor {
-  def props()(out: ActorRef) = Props(new DemoActor(out))
+
+object Page {
+  import org.scalajs.jquery.{jQuery => jQ, _}
+  
+  def onSubmit(f: => Unit): Unit = {
+    jQ("#msgform").submit { (event: JQueryEventObject) =>
+      event.preventDefault()
+      f
+    }
+  }
+    
+  def getText(): String = jQ("#msgtext").value().toString
+  
+  def clearText(): Unit = jQ("#msgtext").value("")
+  
+  private def append(cssClass: String)(message: String): Unit = {
+    val discussion = jQ("#discussion")
+    discussion.append(
+      s"""<li class="$cssClass">
+         |  <div class="avatar"></div>
+         |  <div class="messages">
+         |    <p>$message</p>
+         |  </div>
+         |</li>
+      """.stripMargin)
+    discussion.scrollTop(discussion.prop("scrollHeight").asInstanceOf[Int]) 
+  }
+  def appendMine = append("self") _
+  def appendHis = append("other") _
 }
 
-case class Msg(s: String)
-
+case class WebSocketClient(url: String)(implicit system: ActorSystem) {
+  def connectWithActor(handlerProps: ActorRef => Props) =
+    system.actorOf(Props(new WebSocketClientProxy(url, handlerProps)))
+}
 class WebSocketClientProxy(url: String, handlerProps: ActorRef => Props) extends Actor {
   var webSocket: WebSocket = _
 
@@ -71,7 +96,9 @@ class WebSocketClientProxy(url: String, handlerProps: ActorRef => Props) extends
     
     webSocket = new WebSocket(url)
     webSocket.addEventListener("message", { (event: Event) =>
-      handlerActor ! js.JSON.parse(event.asInstanceOf[MessageEvent].data.toString())
+      val pickle = js.JSON.parse(event.asInstanceOf[MessageEvent].data.toString())
+      val message = PicklerRegistry.unpickle(pickle.asInstanceOf[js.Any])
+      handlerActor ! message
     }, useCapture = false)
     webSocket.addEventListener("close", { (event: Event) =>
       context.stop(self)
@@ -89,138 +116,7 @@ class WebSocketClientProxy(url: String, handlerProps: ActorRef => Props) extends
     case _: Terminated =>
       context.stop(self)
     case message =>
-      webSocket.send(js.JSON.stringify(message.asInstanceOf[js.Any]))
+      val pickle = PicklerRegistry.pickle(message)
+      webSocket.send(js.JSON.stringify(pickle))
   }
 }
-object WebSocketClientProxy {
-  def props(url: String)(handlerProps: ActorRef => Props) =
-    Props(new WebSocketClientProxy(url, handlerProps))
-}
-
-
-// case object AttemptToConnect
-// case class Send(text: String)
-// case class CreatePrivateChatRoom(dest: User)
-// case class AcceptPrivateChatWith(peerUser: User, peer: ActorRef)
-// case object Disconnect
-// case object Disconnected
-
-// class Manager extends Actor {
-//   val proxyManager = context.actorOf(Props(new ProxyManager))
-
-//   private[this] var myStatusAlert: JQuery = jQ()
-//   def statusAlert: JQuery = myStatusAlert
-//   def statusAlert_=(v: JQuery): Unit = {
-//     myStatusAlert.remove()
-//     myStatusAlert = v
-//     myStatusAlert.prependTo(Main.notifications)
-//   }
-
-//   def makeStatusAlert(style: String): JQuery =
-//     jQ(s"""<div class="alert alert-$style">""")
-
-//   def receive = disconnected()
-
-//   def disconnected(nextReconnectTimeout: FiniteDuration = 1 seconds): Receive = LoggingReceive {
-//     case m @ AttemptToConnect =>
-//       proxyManager ! m
-//       statusAlert = makeStatusAlert("info").append(
-//         jQ("<strong>Connecting ...</strong>"),
-//         jQ("<span> </span>").append(
-//           jQ("""<a href="#">""").text("Cancel").click {
-//             (e: JQueryEventObject) =>
-//               self ! Disconnect
-//               false
-//           }
-//         )
-//       )
-//       context.setReceiveTimeout(5 seconds)
-//       context.become(connecting(nextReconnectTimeout))
-//   }
-
-//   def waitingToAutoReconnect(autoReconnectDeadline: FiniteDuration,
-//       nextReconnectTimeout: FiniteDuration): Receive = LoggingReceive {
-//     case m @ AttemptToConnect =>
-//       context.become(disconnected(nextReconnectTimeout))
-//       self ! m
-
-//     case m @ ReceiveTimeout =>
-//       val now = nowDuration
-//       if (now >= autoReconnectDeadline)
-//         self ! AttemptToConnect
-//       else {
-//         val remaining = autoReconnectDeadline - nowDuration
-//         jQ(".reconnect-remaining-seconds").text(remaining.toSeconds.toString)
-//       }
-//   }
-
-//   def connecting(nextReconnectTimeout: FiniteDuration): Receive = LoggingReceive { withDisconnected(nextReconnectTimeout) {
-//     case ReceiveTimeout | Disconnect =>
-//       context.setReceiveTimeout(Duration.Undefined)
-//       proxyManager ! Disconnect
-
-//     case m @ WebSocketConnected(entryPoint) =>
-//       context.setReceiveTimeout(Duration.Undefined)
-
-//       val service = entryPoint
-//       service ! Connect(null)
-//       val alert = makeStatusAlert("success").append(
-//         jQ("<strong>").text(s"Connected as {Main.me.nick}")
-//       )
-//       statusAlert = alert
-//       Timers.setTimeout(3000) {
-//         alert.fadeOut()
-//       }
-
-//       // for ((room, tab) <- Main.roomTabInfos)
-//       //   self ! Join(room)
-//       // for ((peerUser, tab) <- Main.privateChatTabInfos)
-//       //   self ! CreatePrivateChatRoom(peerUser)
-
-//       context.become(connected(service))
-//   } }
-
-//   def connected(service: ActorRef): Receive = LoggingReceive { withDisconnected() {
-//     case m @ Disconnect =>
-//       proxyManager ! m
-//   } }
-
-//   def withDisconnected(nextReconnectTimeout: FiniteDuration = 1 seconds)(
-//       receive: Receive): Receive = receive.orElse[Any, Unit] {
-//     case Disconnected =>
-//       context.children.filterNot(proxyManager == _).foreach(context.stop(_))
-//       statusAlert = makeStatusAlert("danger").append(
-//         jQ("""<strong>You have been disconnected from the server.</strong>"""),
-//         jQ("""<span>Will try to reconnect in """+
-//             """<span class="reconnect-remaining-seconds"></span>"""+
-//             """ seconds. </span>""").append(
-//           jQ("""<a href="#">""").text("Reconnect now").click {
-//             (e: JQueryEventObject) =>
-//               self ! AttemptToConnect
-//           }
-//         )
-//       )
-//       jQ(".reconnect-remaining-seconds").text(nextReconnectTimeout.toSeconds.toString)
-//       val autoReconnectDeadline = nowDuration + nextReconnectTimeout
-//       context.setReceiveTimeout(1 seconds)
-//       context.become(waitingToAutoReconnect(
-//           autoReconnectDeadline, nextReconnectTimeout*2))
-//   }
-
-//   private def nowDuration = System.currentTimeMillis() milliseconds
-// }
-
-// class ProxyManager extends Actor {
-//   def receive = {
-//     case AttemptToConnect =>
-//       context.watch(context.actorOf(
-//         Props(new WebSocketClientProxy("ws://localhost:9000/websocket", context.parent))))
-
-//     case Disconnect =>
-//       context.children.foreach(context.stop(_))
-
-//     case Terminated(proxy) =>
-//       context.children.foreach(context.stop(_))
-//       context.parent ! Disconnected
-//   }
-// }

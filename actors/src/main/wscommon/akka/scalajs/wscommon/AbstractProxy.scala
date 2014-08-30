@@ -172,3 +172,4 @@ private class ActorRefAwarePicklerRegistry(proxy: AbstractProxy) extends Pickler
     }
   }
 }
+  
