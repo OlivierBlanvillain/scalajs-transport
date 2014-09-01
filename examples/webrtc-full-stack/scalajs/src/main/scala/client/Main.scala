@@ -21,6 +21,7 @@ import org.scalajs.dom
 import akka.scalajs.jsapi._
 import org.scalajs.spickling._
 import org.scalajs.spickling.jsany._
+import org.scalajs.jquery.{jQuery => jQ, _}
 
 @JSExport("Client")
 object Main {
@@ -37,37 +38,35 @@ object Main {
 }
 
 class DemoActor(out: ActorRef) extends Actor {
-  val me = User(System.currentTimeMillis()) // Poor man's UUID
-  
   override def preStart() = {
-    Page.onSubmit {
-      out ! Message(Page.getText(), me)
-      Page.clearText()
+    jQ("#msgform").submit { (event: JQueryEventObject) =>
+      event.preventDefault()
+      self ! Submit
     }
   }
   
+  override def postStop() = {
+    jQ("#msgtext").prop("disabled", true)
+    jQ("#discussion").append("<hr>")
+  }
+
   def receive = {
-    case Message(text, user, timestamp) if user == me =>
-      Page.appendMine(text)
-    case Message(text, user, timestamp) =>
-      Page.appendHis(text)
+    case PeerFound =>
+      jQ("#spinner").hide()
+      jQ("#msgform").show()
+    case Message(text) =>
+      Discussion.appendHis(text)
+    case Submit =>
+      val text = jQ("#msgtext").value().toString
+      jQ("#msgtext").value("")
+      out ! Message(text)
+      Discussion.appendMy(text)
   }
 }
 
-object Page {
-  import org.scalajs.jquery.{jQuery => jQ, _}
-  
-  def onSubmit(f: => Unit): Unit = {
-    jQ("#msgform").submit { (event: JQueryEventObject) =>
-      event.preventDefault()
-      f
-    }
-  }
-    
-  def getText(): String = jQ("#msgtext").value().toString
-  
-  def clearText(): Unit = jQ("#msgtext").value("")
-  
+object Discussion {
+  def appendMy = append("self") _
+  def appendHis = append("other") _
   private def append(cssClass: String)(message: String): Unit = {
     val discussion = jQ("#discussion")
     discussion.append(
@@ -80,8 +79,6 @@ object Page {
       """.stripMargin)
     discussion.scrollTop(discussion.prop("scrollHeight").asInstanceOf[Int]) 
   }
-  def appendMine = append("self") _
-  def appendHis = append("other") _
 }
 
 case class WebSocketClient(url: String)(implicit system: ActorSystem) {
@@ -120,3 +117,5 @@ class WebSocketClientProxy(url: String, handlerProps: ActorRef => Props) extends
       webSocket.send(js.JSON.stringify(pickle))
   }
 }
+
+object Submit

@@ -1,4 +1,6 @@
 package models
 
-case class User(uuid: Long)
-case class Message(text: String, user: User, timestamp: Long = System.currentTimeMillis())
+import akka.actor.ActorRef
+
+case object PeerFound
+case class Message(text: String)

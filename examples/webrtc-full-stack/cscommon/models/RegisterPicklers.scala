@@ -5,7 +5,7 @@ import org.scalajs.spickling._
 object RegisterPicklers {
   import PicklerRegistry.register
 
-  register[User]
+  register(PeerFound)
   register[Message]
 
   register(Nil)

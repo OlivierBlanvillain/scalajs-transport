@@ -3,22 +3,16 @@
 @main("Example") {
 
 <section class="module">
-    
   <ol id="discussion">
-    <li class="other">
-      <div class="avatar"></div>
-      <div class="messages">
-        <p>yeah, they do early flights cause they connect with big airports.  they wanna get u to your connection</p>
-      </div>
-    </li>
-    <li class="self">
-      <div class="avatar"></div>
-      <div class="messages">
-        <p>That makes sense.</p>
-      </div>
-    </li>
+    <div id="spinner">
+      <div class="rect1"></div>
+      <div class="rect2"></div>
+      <div class="rect3"></div>
+      <div class="rect4"></div>
+      <div class="rect5"></div>
+    </div>
   </ol>
-  <form id="msgform" class="form-horizontal" >
+  <form id="msgform" class="form-horizontal hidden">
     <input id="msgtext" type="text" placeholder="Send a message">
   </form>
 </section>

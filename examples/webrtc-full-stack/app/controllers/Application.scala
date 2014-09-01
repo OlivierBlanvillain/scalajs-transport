@@ -8,7 +8,7 @@ import play.api._
 import play.api.mvc._
 import play.api.libs.json._
 import play.api.libs.iteratee._
-import play.api.libs.concurrent.Akka
+import play.api.libs.concurrent.Akka.system
 import play.api.Play.current
 
 import play.sockjs.api._
@@ -24,8 +24,7 @@ import models._
 object Application extends Controller {
   RegisterPicklers.registerPicklers()
   
-  // val peerMatcher = Akka.system.actorOf(Props[PeerMatcher], name = "peermatcher")
-  val board = Akka.system.actorOf(Props[BoardActor], name = "board")
+  val peerMatcher = system.actorOf(PeerMatcher.props)
 
   def indexDev = Action {
     Ok(views.html.index(devMode = true))
@@ -36,7 +35,7 @@ object Application extends Controller {
   }
 
   def chatWSEntry = WebSocketServer.acceptWithActor { out =>
-    UserActor.props(board, out)
+    UserActor.props(peerMatcher, out)
   }
 }
 
@@ -58,7 +57,7 @@ class WebSocketServerProxy(out: ActorRef, handlerProps: ActorRef => Props) exten
   }
 
   def receive = {
-    case _: Terminated =>
+    case Terminated(_) =>
       context.stop(self)
     case pickle =>
       handlerActor ! PicklerRegistry.unpickle(pickle.asInstanceOf[JsValue])
