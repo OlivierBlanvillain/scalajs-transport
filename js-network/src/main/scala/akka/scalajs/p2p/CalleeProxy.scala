@@ -2,10 +2,6 @@ package akka.scalajs.p2p
 
 import akka.actor._
 import akka.scalajs.jsapi._
-import akka.scalajs.wscommon.AbstractProxy
-import org.scalajs.spickling._
-import org.scalajs.spickling.jsany._
-import scala.scalajs.js
 
 class CalleeProxy(connectedHandler: ActorRef) extends PeerProxy(connectedHandler) {
 

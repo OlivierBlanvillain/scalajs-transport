@@ -23,6 +23,8 @@ import org.scalajs.spickling._
 import org.scalajs.spickling.jsany._
 import org.scalajs.jquery.{jQuery => jQ, _}
 
+import akka.scalajs.client.WebSocketClient
+
 @JSExport("Client")
 object Main {
   RegisterPicklers.registerPicklers()
@@ -58,9 +60,11 @@ class DemoActor(out: ActorRef) extends Actor {
       Discussion.appendHis(text)
     case Submit =>
       val text = jQ("#msgtext").value().toString
-      jQ("#msgtext").value("")
-      out ! Message(text)
-      Discussion.appendMy(text)
+      if(!text.isEmpty) {
+        jQ("#msgtext").value("")
+        out ! Message(text)
+        Discussion.appendMy(text)
+      }
   }
 }
 
@@ -78,43 +82,6 @@ object Discussion {
          |</li>
       """.stripMargin)
     discussion.scrollTop(discussion.prop("scrollHeight").asInstanceOf[Int]) 
-  }
-}
-
-case class WebSocketClient(url: String)(implicit system: ActorSystem) {
-  def connectWithActor(handlerProps: ActorRef => Props) =
-    system.actorOf(Props(new WebSocketClientProxy(url, handlerProps)))
-}
-class WebSocketClientProxy(url: String, handlerProps: ActorRef => Props) extends Actor {
-  var webSocket: WebSocket = _
-
-  override def preStart() = {
-    val handlerActor = context.watch(context.actorOf(handlerProps(self)))
-    
-    webSocket = new WebSocket(url)
-    webSocket.addEventListener("message", { (event: Event) =>
-      val pickle = js.JSON.parse(event.asInstanceOf[MessageEvent].data.toString())
-      val message = PicklerRegistry.unpickle(pickle.asInstanceOf[js.Any])
-      handlerActor ! message
-    }, useCapture = false)
-    webSocket.addEventListener("close", { (event: Event) =>
-      context.stop(self)
-    }, useCapture = false)
-    webSocket.addEventListener("error", { (event: Event) =>
-      context.stop(self)
-    }, useCapture = false)
-  }
-
-  override def postStop() = {
-    webSocket.close()
-  }
-
-  def receive = {
-    case _: Terminated =>
-      context.stop(self)
-    case message =>
-      val pickle = PicklerRegistry.pickle(message)
-      webSocket.send(js.JSON.stringify(pickle))
   }
 }
 

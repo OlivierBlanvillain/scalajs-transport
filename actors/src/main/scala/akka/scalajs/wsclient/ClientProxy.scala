@@ -1,4 +1,4 @@
-package akka.scalajs.client
+package akka.scalajs.wsclient
 
 import akka.actor._
 import akka.scalajs.wscommon._
@@ -9,18 +9,18 @@ import akka.scalajs.jsapi._
 import org.scalajs.spickling._
 import org.scalajs.spickling.jsany._
 
-object WebSocketClientProxy {
+object ClientProxy {
   case object ConnectionError
 }
 
 case class WebSocketConnected(entryPointRef: ActorRef)
 
-class WebSocketClientProxy(wsUrl: String, connectedHandler: ActorRef) extends AbstractProxy {
+class ClientProxy(wsUrl: String, connectedHandler: ActorRef) extends AbstractProxy {
   /** Will send the WebSocketConnected message to parent actor. */
   def this(wsUrl: String) = this(wsUrl, null)
 
   import AbstractProxy._
-  import WebSocketClientProxy._
+  import ClientProxy._
 
   type PickleType = js.Any
   implicit protected def pickleBuilder: PBuilder[PickleType] = JSPBuilder
@@ -51,7 +51,7 @@ class WebSocketClientProxy(wsUrl: String, connectedHandler: ActorRef) extends Ab
 
   override def receive = super.receive.orElse[Any, Unit] {
     case ConnectionError =>
-      throw new akka.AkkaException("webSocket connection error")
+      throw new akka.AkkaException("WebSocket connection error")
   }
 
   override def receiveFromPeer = super.receiveFromPeer.orElse[Any, Unit] {

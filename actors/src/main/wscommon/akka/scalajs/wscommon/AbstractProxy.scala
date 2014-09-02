@@ -30,7 +30,7 @@ object AbstractProxy {
 }
 
 /** Common between [[akka.scalajs.wsserver.ServerProxy]] and
- *  [[akka.scalajs.client.ClientProxy]].
+ *  [[akka.scalajs.wsclient.ClientProxy]].
  */
 abstract class AbstractProxy extends Actor {
 
@@ -172,4 +172,3 @@ private class ActorRefAwarePicklerRegistry(proxy: AbstractProxy) extends Pickler
     }
   }
 }
-  
