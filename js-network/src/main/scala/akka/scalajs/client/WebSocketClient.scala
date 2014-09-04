@@ -9,15 +9,15 @@ import org.scalajs.spickling._
 import org.scalajs.spickling.jsany._
 
 case class WebSocketClient(url: String)(implicit system: ActorSystem) {
-  def connectWithActor(handlerProps: ActorRef => Props) =
+  def connectWithActor(handlerProps: ActorRef => Props): ActorRef =
     system.actorOf(Props(new WebSocketClientProxy(url, handlerProps)))
-  
 }
 private class WebSocketClientProxy(url: String, handlerProps: ActorRef => Props) extends Actor {
+  var handlerActor: ActorRef = _
   var webSocket: WebSocket = _
 
   override def preStart() = {
-    val handlerActor = context.watch(context.actorOf(handlerProps(self)))
+    handlerActor = context.watch(context.actorOf(handlerProps(self)))
     
     webSocket = new WebSocket(url)
     webSocket.addEventListener("message", { (event: Event) =>
@@ -26,10 +26,10 @@ private class WebSocketClientProxy(url: String, handlerProps: ActorRef => Props)
       handlerActor ! message
     }, useCapture = false)
     webSocket.addEventListener("close", { (event: Event) =>
-      context.stop(self)
+      handlerActor ! PoisonPill
     }, useCapture = false)
     webSocket.addEventListener("error", { (event: Event) =>
-      context.stop(self)
+      handlerActor ! PoisonPill
     }, useCapture = false)
   }
 
@@ -38,7 +38,7 @@ private class WebSocketClientProxy(url: String, handlerProps: ActorRef => Props)
   }
 
   def receive = {
-    case Terminated(_) =>
+    case Terminated(a) if a == handlerActor =>
       context.stop(self)
     case message =>
       val pickle = PicklerRegistry.pickle(message)

@@ -5,13 +5,15 @@ import org.scalajs.spickling._
 object RegisterPicklers {
   import PicklerRegistry.register
 
-  register(PeerFound)
+  register(PeerFound1)
+  register(PeerFound2)
   register[Message]
-
+    
+  def registerPicklers(): Unit = ()
+  
+  /* List
   register(Nil)
   register[::[Any]]
-
-  def registerPicklers(): Unit = ()
 
   implicit object ConsPickler extends Pickler[::[Any]] {
     def pickle[P](value: ::[Any])(implicit registry: PicklerRegistry, builder: PBuilder[P]): P = {
@@ -28,4 +30,5 @@ object RegisterPicklers {
       }).asInstanceOf[::[Any]]
     }
   }
+  */
 }

@@ -1,17 +1,6 @@
 package actors
 
-import scala.language.postfixOps
-
-import scala.concurrent.duration._
-
 import akka.actor._
-import akka.actor.SupervisorStrategy.{Stop, Escalate}
-import akka.event.LoggingReceive
-import akka.pattern.{ask, pipe}
-import akka.util.Timeout
-import akka.scalajs.wsserver._
-import akka.scalajs.wscommon.AbstractProxy.Welcome
-
 import models._
 
 class PeerMatcher extends Actor with ActorLogging {
@@ -24,8 +13,8 @@ class PeerMatcher extends Actor with ActorLogging {
   def pending(user: ActorRef): Receive = {
     case NewConnection =>
       context.unwatch(sender)
-      sender ! Connected(user)
-      user ! Connected(sender)
+      sender ! Connected2(user)
+      user ! Connected1(sender)
       context.unbecome()
     case Terminated(_) =>
       context.unbecome()
@@ -41,8 +30,12 @@ class UserActor(out: ActorRef, board: ActorRef) extends Actor with ActorLogging 
   }
 
   def receive: Receive = {
-    case Connected(peer) =>
-      out ! PeerFound
+    case Connected1(peer) =>
+      out ! PeerFound1
+      context.watch(peer)
+      context.become(connected(peer))
+    case Connected2(peer) =>
+      out ! PeerFound2
       context.watch(peer)
       context.become(connected(peer))
   }
@@ -60,6 +53,7 @@ object UserActor {
   def props(board: ActorRef, out: ActorRef) = Props(new UserActor(out, board))
 }
 
-case class Connected(peer: ActorRef)
+case class Connected2(peer: ActorRef)
+case class Connected1(peer: ActorRef)
 case class Forward(message: Any)
 object NewConnection

@@ -53,7 +53,14 @@ class DemoActor(out: ActorRef) extends Actor {
   }
 
   def receive = {
-    case PeerFound =>
+    case PeerFound1 =>
+      // callerProxy = system.actorOf(Props(new CallerProxy(local)), name = "caller")
+      // callerProxy ! PeerProxy.SignalingChannel(calleeProxy)
+      jQ("#spinner").hide()
+      jQ("#msgform").show()
+    case PeerFound2 =>
+      // calleeProxy = system.actorOf(Props(new CalleeProxy(remote)), name = "callee")
+      // calleeProxy ! PeerProxy.SignalingChannel(callerProxy)
       jQ("#spinner").hide()
       jQ("#msgform").show()
     case Message(text) =>
