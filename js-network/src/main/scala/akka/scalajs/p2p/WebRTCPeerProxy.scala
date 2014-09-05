@@ -7,7 +7,7 @@ import org.scalajs.spickling.jsany._
 import scala.scalajs.js
 
 private abstract class WebRTCPeerProxy(handlerProps: ActorRef => Props) extends Actor {
-  RegisterPicklers.registerPicklers()
+  RegisterWebRTCPicklers.registerPicklers()
   var peerConnection: webkitRTCPeerConnection = _
   var dataChannel: Option[RTCDataChannel] = None
   var handlerActor: ActorRef = _

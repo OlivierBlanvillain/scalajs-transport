@@ -10,7 +10,7 @@ private case class IceCandidate(candidate: RTCIceCandidate)
 private case class SessionDescription(description: RTCSessionDescription)
 private case class SignalingChannel(peer: ActorRef)
 
-private object RegisterPicklers {
+private object RegisterWebRTCPicklers {
   import org.scalajs.spickling._
   import PicklerRegistry.register
 

@@ -1,29 +1,14 @@
 package client
 
-import scala.language.postfixOps
-
-import scala.collection.mutable
-import scala.concurrent.duration._
-
-import akka.actor._
-import akka.pattern.Ask.ask
-import akka.scalajs.client._
-import akka.event.LoggingReceive
-import akka.util.Timeout
-import akka.scalajs.jsapi.Timers
-import akka.actor.PoisonPill
-
-import models._
-
+import scala.scalajs.js.annotation.JSExport
 import scala.scalajs.js
-import js.annotation.JSExport
-import org.scalajs.dom
-import akka.scalajs.jsapi._
-import org.scalajs.spickling._
-import org.scalajs.spickling.jsany._
 import org.scalajs.jquery.{jQuery => jQ, _}
 
+import akka.actor._
 import akka.scalajs.client.WebSocketClient
+import akka.scalajs.p2p._
+
+import models._
 
 @JSExport("Client")
 object Main {
@@ -33,10 +18,21 @@ object Main {
 
   @JSExport
   def startup(): Unit = {
-    WebSocketClient("ws://localhost:9000/websocket").connectWithActor { out =>
-      Props(new DemoActor(out))
-    }
+    WebSocketClient("ws://localhost:9000/websocket").connectWithActor(EstablishRtcActor.props)
   }
+}
+
+class EstablishRtcActor(out: ActorRef) extends Actor {
+  override def receive() = {
+    case YouWillBeCallee =>
+      val ref = WebRTCCallee.answerWithActor(DemoActor.props)(context.system)
+      out ! ref
+    case calleeRef: ActorRef =>
+      WebRTCCaller(calleeRef).callWithActor(DemoActor.props)(context.system)
+  }
+}
+object EstablishRtcActor {
+  def props(out: ActorRef) = Props(new EstablishRtcActor(out))
 }
 
 class DemoActor(out: ActorRef) extends Actor {
@@ -45,6 +41,8 @@ class DemoActor(out: ActorRef) extends Actor {
       event.preventDefault()
       self ! Submit
     }
+    jQ("#spinner").hide()
+    jQ("#msgform").show()
   }
   
   override def postStop() = {
@@ -53,16 +51,6 @@ class DemoActor(out: ActorRef) extends Actor {
   }
 
   def receive = {
-    case PeerFound1 =>
-      // callerProxy = system.actorOf(Props(new CallerProxy(local)), name = "caller")
-      // callerProxy ! PeerProxy.SignalingChannel(calleeProxy)
-      jQ("#spinner").hide()
-      jQ("#msgform").show()
-    case PeerFound2 =>
-      // calleeProxy = system.actorOf(Props(new CalleeProxy(remote)), name = "callee")
-      // calleeProxy ! PeerProxy.SignalingChannel(callerProxy)
-      jQ("#spinner").hide()
-      jQ("#msgform").show()
     case Message(text) =>
       Discussion.appendHis(text)
     case Submit =>
@@ -73,6 +61,11 @@ class DemoActor(out: ActorRef) extends Actor {
         Discussion.appendMy(text)
       }
   }
+  
+  object Submit
+}
+object DemoActor {
+  def props(out: ActorRef) = Props(new DemoActor(out))
 }
 
 object Discussion {
@@ -91,5 +84,3 @@ object Discussion {
     discussion.scrollTop(discussion.prop("scrollHeight").asInstanceOf[Int]) 
   }
 }
-
-object Submit
