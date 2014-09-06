@@ -12,7 +12,7 @@ import models._
 object Application extends Controller {
   RegisterPicklers.registerPicklers()
   
-  val peerMatcher = system.actorOf(PeerMatcher.props)
+  val peerMatcher = system.actorOf(PeerMatcher.props, "PeerMatcher")
 
   def indexDev = Action {
     Ok(views.html.index(devMode = true))

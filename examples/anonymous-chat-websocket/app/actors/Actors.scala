@@ -1,22 +1,30 @@
 package actors
 
+import play.api.Logger
+
 import akka.actor._
+
 import models._
 
 class PeerMatcher extends Actor with ActorLogging {
-  def receive: Receive = {
-    case NewConnection =>
-      context.watch(sender)
-      context.become(pending(sender))
+  override def postStop = {
+    play.api.Logger.error("postStop!")
+  }
+  
+  override def receive: Receive = {
+    case NewConnection(user) =>
+      context.watch(user)
+      context.become(pending(user))
   }
     
   def pending(user: ActorRef): Receive = {
-    case NewConnection =>
-      context.unwatch(sender)
-      sender ! Connected(user)
-      user ! Connected(sender)
+    case NewConnection(otherUser) =>
+      context.unwatch(user)
+      user ! Connected(otherUser)
+      otherUser ! Connected(user)
       context.unbecome()
-    case Terminated(_) =>
+    
+    case Terminated(ref) if ref == user =>
       context.unbecome()
   }
 }
@@ -25,30 +33,16 @@ object PeerMatcher {
 }
 
 class UserActor(out: ActorRef, board: ActorRef) extends Actor with ActorLogging {
-  override def preStart() = {
-    board ! NewConnection
+  override def preStart(): Unit = {
+    board ! NewConnection(out)
   }
 
-  def receive: Receive = {
-    case Connected(peer) =>
-      out ! PeerFound
-      context.watch(peer)
-      context.become(connected(peer))
-  }
-  
-  def connected(peer: ActorRef): Receive = {
-    case Forward(m) =>
-      out ! m
-    case Terminated(_) =>
-      context.stop(self)
-    case m =>
-      peer ! Forward(m)
+  override def receive: Receive =  {
+    case m => Logger.error(m.toString)
   }
 }
 object UserActor {
   def props(board: ActorRef, out: ActorRef) = Props(new UserActor(out, board))
 }
 
-case class Connected(peer: ActorRef)
-case class Forward(message: Any)
-object NewConnection
+case class NewConnection(remote: ActorRef)

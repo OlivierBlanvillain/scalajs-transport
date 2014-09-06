@@ -9,19 +9,20 @@ import org.scalajs.spickling._
 
 object AbstractProxy {
   // Messages sent across the network
-  case class Welcome(entryPoint: ActorRef)
   case class SendMessage(msg: Any, receiver: ActorRef, sender: ActorRef)
+  case class MessageToHandler(msg: Any)
   case class ForeignTerminated(ref: ActorRef)
 
   // Local messages
-  case class IncomingMessage(pickle: Any) // JsValue/js.Any = P
+  case object ConnectionOpened
   case object ConnectionClosed
   case class SendToPeer(message: Any)
 
   /** Register the messages sent across the network to the pickler registry. */
   private lazy val _registerPicklers: Unit = {
     import PicklerRegistry.register
-    register[Welcome]
+    
+    register[MessageToHandler]
     register[SendMessage]
     register[ForeignTerminated]
   }
@@ -32,8 +33,7 @@ object AbstractProxy {
 /** Common between [[akka.scalajs.wsserver.ServerProxy]] and
  *  [[akka.scalajs.wsclient.ClientProxy]].
  */
-abstract class AbstractProxy extends Actor {
-
+abstract class AbstractProxy(handlerProps: ActorRef => Props) extends Actor {
   import AbstractProxy._
 
   type PickleType
@@ -56,11 +56,9 @@ abstract class AbstractProxy extends Actor {
   private val foreignIDs = mutable.Map.empty[ActorRef, String]
   private val foreignIDsRev = mutable.Map.empty[String, ActorRef]
 
-  def receive = {
-    case IncomingMessage(pickle) =>
-      val msg = picklerRegistry.unpickle(pickle.asInstanceOf[PickleType])
-      receiveFromPeer(msg)
-
+  private var handlerActor: ActorRef = _
+  
+  override def receive = {
     case ConnectionClosed =>
       context.stop(self)
 
@@ -68,7 +66,9 @@ abstract class AbstractProxy extends Actor {
       sendToPeer(message)
 
     case Terminated(ref) =>
-      if (localIDs.contains(ref)) {
+      if(ref == handlerActor) {
+        context.stop(self)
+      } else if(localIDs.contains(ref)) {
         sendToPeer(ForeignTerminated(ref)) // do this *before* altering localIDs
         localIDs.remove(ref).foreach(localIDsRev -= _)
       }
@@ -76,14 +76,23 @@ abstract class AbstractProxy extends Actor {
 
     case ForeignTerminated(ref) =>
       context.stop(ref)
-  }
+      
+    case ConnectionOpened =>
+      val handler = context.watch(context.actorOf(Props(new HandlerProxy)))
+      this.handlerActor = context.watch(context.actorOf(handlerProps(handler)))
 
-  protected def receiveFromPeer: Receive = {
-    case m @ SendMessage(message, receiver, sender) =>
-      receiver.tell(message, sender)
+    case pickle =>
+      val msg = picklerRegistry.unpickle(pickle.asInstanceOf[PickleType])
+      msg match {
+        case SendMessage(message, receiver, sender) =>
+          receiver.tell(message, sender)
 
-    case ForeignTerminated(ref) =>
-      context.stop(ref)
+        case ForeignTerminated(ref) =>
+          context.stop(ref)
+        
+        case MessageToHandler(m) =>
+          this.handlerActor ! m
+      }
   }
 
   protected def sendToPeer(msg: Any): Unit = {
@@ -93,13 +102,14 @@ abstract class AbstractProxy extends Actor {
 
   protected def sendPickleToPeer(pickle: PickleType): Unit
 
-  private[wscommon] def pickleActorRef[P](ref: ActorRef)(
-      implicit builder: PBuilder[P]): P = {
-    val (side, id) = if (context.children.exists(_ == ref)) {
+  private[wscommon] def pickleActorRef[P](ref: ActorRef)(implicit builder: PBuilder[P]): P = {
+    
+    val (side, id) = if(context.children.exists(_ == ref) && ref != this.handlerActor) {
       /* This is a proxy actor for an actor on the client.
        * We need to unbox it to recover the ID the client gave to us for it.
        */
-      ("receiver", foreignIDs(ref))
+      val f = foreignIDs(ref)
+      ("receiver", f)
     } else {
       /* This is an actor on the server (or somewhere else).
        * The client will have to make a proxy for this one with an ID we choose.
@@ -117,8 +127,7 @@ abstract class AbstractProxy extends Actor {
         ("id", builder.makeString(id)))
   }
 
-  private[wscommon] def unpickleActorRef[P](pickle: P)(
-      implicit reader: PReader[P]): ActorRef = {
+  private[wscommon] def unpickleActorRef[P](pickle: P)(implicit reader: PReader[P]): ActorRef = {
     val side = reader.readString(reader.readObjectField(pickle, "side"))
     val id = reader.readString(reader.readObjectField(pickle, "id"))
 
@@ -138,6 +147,15 @@ abstract class AbstractProxy extends Actor {
   }
 }
 
+private class HandlerProxy extends Actor {
+  import AbstractProxy._
+
+  def receive = {
+    case message =>
+      context.parent ! SendToPeer(MessageToHandler(message))
+  }
+}
+
 private class ForeignActorProxy extends Actor {
   import AbstractProxy._
 
@@ -151,21 +169,21 @@ private class ForeignActorProxy extends Actor {
 private class ActorRefAwarePicklerRegistry(proxy: AbstractProxy) extends PicklerRegistry {
   val base = PicklerRegistry
 
-  override def pickle[P](value: Any)(implicit builder: PBuilder[P],
-      registry: PicklerRegistry): P = {
+  override def pickle[P](value: Any)(implicit builder: PBuilder[P], registry: PicklerRegistry): P = {
     value match {
-      case ref: ActorRef => builder.makeObject(("ref", proxy.pickleActorRef(ref)))
-      case _             => base.pickle(value)
+      case ref: ActorRef =>
+        builder.makeObject(("ref", proxy.pickleActorRef(ref)))
+      case _ =>
+        base.pickle(value)
     }
   }
 
-  override def unpickle[P](pickle: P)(implicit reader: PReader[P],
-      registry: PicklerRegistry): Any = {
-    if (reader.isNull(pickle)) {
+  override def unpickle[P](pickle: P)(implicit reader: PReader[P], registry: PicklerRegistry): Any = {
+    if(reader.isNull(pickle)) {
       null
     } else {
       val refData = reader.readObjectField(pickle, "ref")
-      if (!reader.isUndefined(refData))
+      if(!reader.isUndefined(refData))
         proxy.unpickleActorRef(refData)
       else
         base.unpickle(pickle)

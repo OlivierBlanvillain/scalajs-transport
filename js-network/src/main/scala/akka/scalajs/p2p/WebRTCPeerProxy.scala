@@ -12,11 +12,11 @@ private abstract class WebRTCPeerProxy(handlerProps: ActorRef => Props) extends 
   var dataChannel: Option[RTCDataChannel] = None
   var handlerActor: ActorRef = _
 
-  override def preStart() = {
+  override def preStart(): Unit = {
     peerConnection = new webkitRTCPeerConnection(null, DataChannelsConstraint)
   }
   
-  override def postStop() = {
+  override def postStop(): Unit = {
     dataChannel.foreach(_.close())
     peerConnection.close()
   }
