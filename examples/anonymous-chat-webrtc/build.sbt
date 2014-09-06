@@ -1,4 +1,4 @@
-name := "anonymous-chat"
+name := "anonymous-chat-webrtc"
 
 libraryDependencies ++= Seq(
   "org.scalajs" %% "scalajs-pickling-play-json" % "0.3",
