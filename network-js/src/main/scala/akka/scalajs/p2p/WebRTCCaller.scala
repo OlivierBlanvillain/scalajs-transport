@@ -8,8 +8,8 @@ case class WebRTCCaller(calleeRef: ActorRef) {
     system.actorOf(Props(new WebRTCCallerProxy(calleeRef, handlerProps)))
 }
 
-private class WebRTCCallerProxy(calleeRef: ActorRef, handlerProps: ActorRef => Props) extends WebRTCPeerProxy(handlerProps) {
-
+private class WebRTCCallerProxy(calleeRef: ActorRef, handlerProps: ActorRef => Props)
+    extends WebRTCPeerProxy(handlerProps) {
   override def preStart(): Unit = {
     super.preStart()
     self ! SignalingChannel(calleeRef)

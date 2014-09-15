@@ -8,7 +8,8 @@ object WebRTCCallee {
     system.actorOf(Props(new WebRTCCalleeProxy(handlerProps)))
 }
 
-private class WebRTCCalleeProxy(handlerProps: ActorRef => Props) extends WebRTCPeerProxy(handlerProps) {
+private class WebRTCCalleeProxy(handlerProps: ActorRef => Props)
+    extends WebRTCPeerProxy(handlerProps) {
   var peer: ActorRef = _
   
   override def receivedSignalingChannel(signalingChannel: ActorRef): Unit = {

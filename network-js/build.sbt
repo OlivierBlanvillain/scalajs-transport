@@ -2,8 +2,6 @@ import ScalaJSKeys._
 
 scalaJSSettings
 
-name := "Js Network"
-
-normalizedName := "js-network"
+name := "Scala.js-Javascript network"
 
 libraryDependencies += "org.scalajs" %%% "scalajs-pickling" % "0.3"

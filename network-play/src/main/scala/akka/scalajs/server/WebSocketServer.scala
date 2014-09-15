@@ -18,7 +18,8 @@ object WebSocketServer {
   }
 }
 
-private class WebSocketServerProxy(out: ActorRef, handlerProps: ActorRef => Props) extends AbstractProxy(handlerProps) {
+private class WebSocketServerProxy(out: ActorRef, handlerProps: ActorRef => Props)
+    extends AbstractProxy(handlerProps) {
   import AbstractProxy._
   
   type PickleType = JsValue

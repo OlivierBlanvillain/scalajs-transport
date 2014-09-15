@@ -1,22 +1,26 @@
 package actors
 
 import akka.actor._
+// import akka.scalajs.p2p.RegisterWebRTCPicklers
+
 import models._
 
-class PeerMatcher extends Actor with ActorLogging {
-  def receive: Receive = {
-    case NewConnection =>
-      context.watch(sender)
-      context.become(pending(sender))
+class PeerMatcher extends Actor {
+  // RegisterWebRTCPicklers.registerPicklers()
+  
+  override def receive: Receive = {
+    case NewConnection(user) =>
+      context.watch(user)
+      context.become(pending(user))
   }
     
   def pending(user: ActorRef): Receive = {
-    case NewConnection =>
-      context.unwatch(sender)
-      sender ! Connected(user, false)
-      user ! Connected(sender, true)
+    case NewConnection(otherUser) =>
+      context.unwatch(user)
+      user ! Connected(otherUser)
       context.unbecome()
-    case Terminated(_) =>
+    
+    case Terminated(ref) if ref == user =>
       context.unbecome()
   }
 }
@@ -24,33 +28,15 @@ object PeerMatcher {
   val props = Props(new PeerMatcher())
 }
 
-class UserActor(out: ActorRef, board: ActorRef) extends Actor with ActorLogging {
-  override def preStart() = {
-    board ! NewConnection
+class UserActor(out: ActorRef, board: ActorRef) extends Actor {
+  override def preStart(): Unit = {
+    board ! NewConnection(out)
   }
 
-  def receive: Receive = {
-    case Connected(peer, isCallee) =>
-      if(isCallee) {
-        out ! YouWillBeCallee
-      }
-      context.watch(peer)
-      context.become(connected(peer))
-  }
-  
-  def connected(peer: ActorRef): Receive = {
-    case Forward(m) =>
-      out ! m
-    case m @ Terminated(_) =>
-      context.stop(self)
-    case m =>
-      peer ! Forward(m)
-  }
+  override def receive = Actor.emptyBehavior
 }
 object UserActor {
   def props(board: ActorRef, out: ActorRef) = Props(new UserActor(out, board))
 }
 
-case class Connected(peer: ActorRef, isCallee: Boolean)
-case class Forward(message: Any)
-object NewConnection
+case class NewConnection(remote: ActorRef)

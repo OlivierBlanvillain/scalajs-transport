@@ -2,8 +2,6 @@ scalaVersion := "2.10.4"
 
 name := "Scala.js-Play network"
 
-normalizedName := "play-network"
-
 resolvers += "Typesafe repository" at "http://repo.typesafe.com/typesafe/releases/"
 
 resolvers += Resolver.url("scala-js-releases",

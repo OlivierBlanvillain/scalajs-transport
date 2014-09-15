@@ -23,10 +23,10 @@ object Main {
 }
 
 class EstablishRtcActor(out: ActorRef) extends Actor {
-  override def receive() = {
-    case YouWillBeCallee =>
+  override def receive: Receive = {
+    case Connected(peer) =>
       val ref = WebRTCCallee.answerWithActor(DemoActor.props)(context.system)
-      out ! ref
+      peer ! ref
     case calleeRef: ActorRef =>
       WebRTCCaller(calleeRef).callWithActor(DemoActor.props)(context.system)
   }
@@ -51,15 +51,16 @@ class DemoActor(out: ActorRef) extends Actor {
   }
 
   def receive = {
-    case Message(text) =>
-      Discussion.appendHis(text)
     case Submit =>
       val text = jQ("#msgtext").value().toString
       if(!text.isEmpty) {
         jQ("#msgtext").value("")
-        out ! Message(text)
+        out ! Msg(text)
         Discussion.appendMy(text)
       }
+      
+    case Msg(text) =>
+      Discussion.appendHis(text)
   }
   
   object Submit

@@ -1,16 +1,10 @@
 package actors
 
-import play.api.Logger
-
 import akka.actor._
 
 import models._
 
-class PeerMatcher extends Actor with ActorLogging {
-  override def postStop = {
-    play.api.Logger.error("postStop!")
-  }
-  
+class PeerMatcher extends Actor {
   override def receive: Receive = {
     case NewConnection(user) =>
       context.watch(user)
@@ -32,14 +26,12 @@ object PeerMatcher {
   val props = Props(new PeerMatcher())
 }
 
-class UserActor(out: ActorRef, board: ActorRef) extends Actor with ActorLogging {
+class UserActor(out: ActorRef, board: ActorRef) extends Actor {
   override def preStart(): Unit = {
     board ! NewConnection(out)
   }
 
-  override def receive: Receive =  {
-    case m => Logger.error(m.toString)
-  }
+  override def receive = Actor.emptyBehavior
 }
 object UserActor {
   def props(board: ActorRef, out: ActorRef) = Props(new UserActor(out, board))

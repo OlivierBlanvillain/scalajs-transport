@@ -2,5 +2,5 @@ package models
 
 import akka.actor.ActorRef
 
-case object YouWillBeCallee
-case class Message(text: String)
+case class Msg(text: String)
+case class Connected(peer: ActorRef)

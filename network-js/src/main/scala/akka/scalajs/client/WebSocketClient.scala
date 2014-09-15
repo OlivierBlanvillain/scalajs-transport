@@ -14,7 +14,8 @@ case class WebSocketClient(url: String)(implicit system: ActorSystem) {
     system.actorOf(Props(new WebSocketClientProxy(url, handlerProps)))
   }
 }
-private class WebSocketClientProxy(url: String, handlerProps: ActorRef => Props) extends AbstractProxy(handlerProps) {
+private class WebSocketClientProxy(url: String, handlerProps: ActorRef => Props)
+    extends AbstractProxy(handlerProps) {
   import AbstractProxy._
   
   type PickleType = js.Any
