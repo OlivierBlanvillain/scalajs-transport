@@ -5,7 +5,7 @@ import play.api.libs.json._
 import play.api.Play.current
 
 import akka.actor._
-import akka.scalajs.wscommon.AbstractProxy
+import akka.scalajs.common.AbstractProxy
 
 import org.scalajs.spickling._
 import org.scalajs.spickling.playjson._

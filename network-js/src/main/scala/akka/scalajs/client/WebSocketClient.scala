@@ -4,7 +4,7 @@ import scala.scalajs.js
 
 import akka.actor._
 import akka.scalajs.jsapi._
-import akka.scalajs.wscommon.AbstractProxy
+import akka.scalajs.common.AbstractProxy
 
 import org.scalajs.spickling._
 import org.scalajs.spickling.jsany._

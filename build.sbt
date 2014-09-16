@@ -35,7 +35,7 @@ lazy val networkJs = project.in(file("network-js"))
 lazy val examples = project.settings(commonSettings: _*)
   .aggregate(webworkersExample, faultToleranceExample,
       chatExample, chatExampleScalaJS,
-      webrtcExample, anonymousChatWebsocket, anonymousChatWebsocketScalaJS, anonymousChatWebrtc, anonymousChatWebrtcScalaJS)
+      webRTCExample, anonymousChatWebSocket, anonymousChatWebSocketScalaJS, anonymousChatWebRTC, anonymousChatWebRTCScalaJS)
 
 lazy val webworkersExample = project.in(file("examples/webworkers"))
   .settings(commonSettings: _*)
@@ -45,56 +45,56 @@ lazy val faultToleranceExample = project.in(file("examples/faulttolerance"))
   .settings(commonSettings: _*)
   .dependsOn(actors)
 
-lazy val webrtcExample = project.in(file("examples/webrtc"))
+lazy val webRTCExample = project.in(file("examples/webrtc"))
   .settings(commonSettings: _*)
   .dependsOn(networkJs)
   .dependsOn(actors)
 
-lazy val anonymousChatWebsocket = project.in(file("examples/anonymous-chat-websocket"))
+lazy val anonymousChatWebSocket = project.in(file("examples/anonymous-chat-websocket"))
   .enablePlugins(PlayScala)
   .dependsOn(networkPlay)
   .settings(commonSettings: _*)
   .settings(unmanagedSourceDirectories in Compile += baseDirectory.value / "cscommon")
   .settings(unmanagedResourceDirectories in Compile += baseDirectory.value / "scalajs/src")
 
-lazy val anonymousChatWebsocketScalaJS = project.in(file("examples/anonymous-chat-websocket/scalajs"))
+lazy val anonymousChatWebSocketScalaJS = project.in(file("examples/anonymous-chat-websocket/scalajs"))
   .settings((commonSettings ++ scalaJSSettings): _*)
   .dependsOn(actors)
   .dependsOn(networkJs)
   .settings(
     unmanagedSourceDirectories in Compile +=
-      (baseDirectory in anonymousChatWebsocket).value / "cscommon",
-    fastOptJS in Compile <<= (fastOptJS in Compile) triggeredBy (compile in (anonymousChatWebsocket, Compile))
+      (baseDirectory in anonymousChatWebSocket).value / "cscommon",
+    fastOptJS in Compile <<= (fastOptJS in Compile) triggeredBy (compile in (anonymousChatWebSocket, Compile))
   )
   .settings(
     Seq(fastOptJS, fullOptJS) map {
       packageJSKey =>
         crossTarget in (Compile, packageJSKey) :=
-          (baseDirectory in anonymousChatWebsocket).value / "public/javascripts"
+          (baseDirectory in anonymousChatWebSocket).value / "public/javascripts"
     }: _*
   )
 
-lazy val anonymousChatWebrtc = project.in(file("examples/anonymous-chat-webrtc"))
+lazy val anonymousChatWebRTC = project.in(file("examples/anonymous-chat-webrtc"))
   .enablePlugins(PlayScala)
   .dependsOn(networkPlay)
   .settings(commonSettings: _*)
   .settings(unmanagedSourceDirectories in Compile += baseDirectory.value / "cscommon")
   .settings(unmanagedResourceDirectories in Compile += baseDirectory.value / "scalajs/src")
 
-lazy val anonymousChatWebrtcScalaJS = project.in(file("examples/anonymous-chat-webrtc/scalajs"))
+lazy val anonymousChatWebRTCScalaJS = project.in(file("examples/anonymous-chat-webrtc/scalajs"))
   .settings((commonSettings ++ scalaJSSettings): _*)
   .dependsOn(actors)
   .dependsOn(networkJs)
   .settings(
     unmanagedSourceDirectories in Compile +=
-      (baseDirectory in anonymousChatWebrtc).value / "cscommon",
-    fastOptJS in Compile <<= (fastOptJS in Compile) triggeredBy (compile in (anonymousChatWebrtc, Compile))
+      (baseDirectory in anonymousChatWebRTC).value / "cscommon",
+    fastOptJS in Compile <<= (fastOptJS in Compile) triggeredBy (compile in (anonymousChatWebRTC, Compile))
   )
   .settings(
     Seq(fastOptJS, fullOptJS) map {
       packageJSKey =>
         crossTarget in (Compile, packageJSKey) :=
-          (baseDirectory in anonymousChatWebrtc).value / "public/javascripts"
+          (baseDirectory in anonymousChatWebRTC).value / "public/javascripts"
     }: _*
   )
 

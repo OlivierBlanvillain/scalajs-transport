@@ -1,12 +1,12 @@
 package actors
 
 import akka.actor._
-// import akka.scalajs.p2p.RegisterWebRTCPicklers
+import akka.scalajs.common.RegisterWebRTCPicklers
 
 import models._
 
 class PeerMatcher extends Actor {
-  // RegisterWebRTCPicklers.registerPicklers()
+  RegisterWebRTCPicklers.registerPicklers()
   
   override def receive: Receive = {
     case NewConnection(user) =>

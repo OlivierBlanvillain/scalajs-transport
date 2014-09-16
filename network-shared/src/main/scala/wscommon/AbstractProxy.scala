@@ -1,9 +1,9 @@
-package akka.scalajs.wscommon
+package akka.scalajs.common
 
 import scala.collection.mutable
 
 import akka.actor._
-import akka.scalajs.wscommon._
+import akka.scalajs.common._
 
 import org.scalajs.spickling._
 
@@ -102,7 +102,7 @@ abstract class AbstractProxy(handlerProps: ActorRef => Props) extends Actor {
 
   protected def sendPickleToPeer(pickle: PickleType): Unit
 
-  private[wscommon] def pickleActorRef[P](ref: ActorRef)(implicit builder: PBuilder[P]): P = {
+  private[common] def pickleActorRef[P](ref: ActorRef)(implicit builder: PBuilder[P]): P = {
     
     val (side, id) = if(context.children.exists(_ == ref) && ref != this.handlerActor) {
       /* This is a proxy actor for an actor on the client.
@@ -127,7 +127,7 @@ abstract class AbstractProxy(handlerProps: ActorRef => Props) extends Actor {
         ("id", builder.makeString(id)))
   }
 
-  private[wscommon] def unpickleActorRef[P](pickle: P)(implicit reader: PReader[P]): ActorRef = {
+  private[common] def unpickleActorRef[P](pickle: P)(implicit reader: PReader[P]): ActorRef = {
     val side = reader.readString(reader.readObjectField(pickle, "side"))
     val id = reader.readString(reader.readObjectField(pickle, "id"))
 

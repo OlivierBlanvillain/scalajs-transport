@@ -1,10 +1,13 @@
 package akka.scalajs.p2p
 
+import scala.scalajs.js
+
 import akka.actor._
 import akka.scalajs.jsapi._
+import akka.scalajs.common._
+
 import org.scalajs.spickling._
 import org.scalajs.spickling.jsany._
-import scala.scalajs.js
 
 private abstract class WebRTCPeerProxy(handlerProps: ActorRef => Props) extends Actor {
   RegisterWebRTCPicklers.registerPicklers()
@@ -25,14 +28,16 @@ private abstract class WebRTCPeerProxy(handlerProps: ActorRef => Props) extends 
     case SignalingChannel(peer: ActorRef) =>
       peerConnection.onicecandidate = { event: RTCIceCandidateEvent =>
         if(event.candidate != null) {
-          peer ! IceCandidate(event.candidate)
+          peer ! IceCandidate(js.JSON.stringify(event.candidate))
         }
       }
       receivedSignalingChannel(peer)
     case SessionDescription(description) =>
-      receivedSessionDescription(description)
+      receivedSessionDescription(
+        new RTCSessionDescription(js.JSON.parse(description).asInstanceOf[RTCSessionDescriptionInit])
+      )
     case IceCandidate(candidate) =>
-      peerConnection.addIceCandidate(candidate)
+      peerConnection.addIceCandidate(new RTCIceCandidate(js.JSON.parse(candidate).asInstanceOf[RTCIceCandidate]))
     case Terminated(a) if a == handlerActor =>
       context.stop(self)
     case message =>

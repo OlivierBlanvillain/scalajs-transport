@@ -1,6 +1,9 @@
 package akka.scalajs.p2p
 
+import scala.scalajs.js
+
 import akka.actor._
+import akka.scalajs.common._
 import akka.scalajs.jsapi._
 
 object WebRTCCallee {
@@ -23,7 +26,8 @@ private class WebRTCCalleeProxy(handlerProps: ActorRef => Props)
     peerConnection.setRemoteDescription(remoteDescription)
     peerConnection.createAnswer { localDescription: RTCSessionDescription =>
       peerConnection.setLocalDescription(localDescription)
-      peer ! SessionDescription(localDescription)
+      // peer ! SessionDescription(localDescription)
+      peer ! SessionDescription(js.JSON.stringify(localDescription))
     }  
   }
 }

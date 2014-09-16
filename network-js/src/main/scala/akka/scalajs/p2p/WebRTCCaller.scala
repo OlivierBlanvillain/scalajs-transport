@@ -1,6 +1,9 @@
 package akka.scalajs.p2p
 
+import scala.scalajs.js
+
 import akka.actor._
+import akka.scalajs.common._
 import akka.scalajs.jsapi._
 
 case class WebRTCCaller(calleeRef: ActorRef) {
@@ -20,7 +23,8 @@ private class WebRTCCallerProxy(calleeRef: ActorRef, handlerProps: ActorRef => P
     setDataChannel(peerConnection.createDataChannel("sendDataChannel"))
     peerConnection.createOffer { description: RTCSessionDescription =>
       peerConnection.setLocalDescription(description)
-      peer ! SessionDescription(description)
+      // peer ! SessionDescription(description)
+      peer ! SessionDescription(js.JSON.stringify(description))
     }
   }
   
