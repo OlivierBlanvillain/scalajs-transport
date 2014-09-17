@@ -9,12 +9,12 @@ import akka.scalajs.common.AbstractProxy
 import org.scalajs.spickling._
 import org.scalajs.spickling.jsany._
 
-case class WebSocketClient(url: String)(implicit system: ActorSystem) {
+case class SockJSClient(url: String)(implicit system: ActorSystem) {
   def connectWithActor(handlerProps: ActorRef => Props): ActorRef = {
-    system.actorOf(Props(new WebSocketClientProxy(url, handlerProps)))
+    system.actorOf(Props(new SockJSClientProxy(url, handlerProps)))
   }
 }
-private class WebSocketClientProxy(url: String, handlerProps: ActorRef => Props)
+private class SockJSClientProxy(url: String, handlerProps: ActorRef => Props)
     extends AbstractProxy(handlerProps) {
   import AbstractProxy._
   
@@ -22,30 +22,30 @@ private class WebSocketClientProxy(url: String, handlerProps: ActorRef => Props)
   implicit protected def pickleBuilder: PBuilder[PickleType] = JSPBuilder
   implicit protected def pickleReader: PReader[PickleType] = JSPReader
 
-  var webSocket: WebSocket = _
+  var sockjs: SockJS = _
 
   override def preStart(): Unit = {
     super.preStart()
     self ! ConnectionOpened // TODO: Better detect connection establishment
-    webSocket = new WebSocket(url)
-    webSocket.addEventListener("message", { (event: Event) =>
+    sockjs = new SockJS(url)
+    sockjs.addEventListener("message", { (event: Event) =>
       val pickle = js.JSON.parse(event.asInstanceOf[MessageEvent].data.toString())
       self ! pickle
     }, useCapture = false)
-    webSocket.addEventListener("close", { (event: Event) =>
+    sockjs.addEventListener("close", { (event: Event) =>
       self ! ConnectionClosed
     }, useCapture = false)
-    webSocket.addEventListener("error", { (event: Event) =>
+    sockjs.addEventListener("error", { (event: Event) =>
       self ! ConnectionClosed
     }, useCapture = false)
   }
 
   override def postStop() = {
     super.postStop()
-    webSocket.close()
+    sockjs.close()
   }
 
   override protected def sendPickleToPeer(pickle: PickleType): Unit = {
-    webSocket.send(js.JSON.stringify(pickle))
+    sockjs.send(js.JSON.stringify(pickle))
   }
 }

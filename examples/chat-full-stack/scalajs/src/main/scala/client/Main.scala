@@ -420,7 +420,7 @@ class Manager extends Actor {
       context.setReceiveTimeout(Duration.Undefined)
       proxyManager ! Disconnect
 
-    case m @ WebSocketConnected(entryPoint) =>
+    case m @ ConnectionEstablished(entryPoint) =>
       context.setReceiveTimeout(Duration.Undefined)
 
       val service = entryPoint
@@ -628,11 +628,16 @@ class PrivateChatManager private (
 }
 
 class ProxyManager extends Actor {
+  implicit val system = context.system
+  
   def receive = {
     case AttemptToConnect =>
-      context.watch(context.actorOf(
+      SockJSClient("http://localhost:9000/sockjs").connectWithActor { out =>
+        ClientHandlerActor.props(context.parent, out)
+      }
+      // context.watch(context.actorOf(
         // Props(new WebSocketClientProxy("ws://localhost:9000/websocket", context.parent))))
-        Props(new SockJsClientProxy("http://localhost:9000/sockjs", context.parent))))
+        // Props(new SockJsClientProxy("http://localhost:9000/sockjs", context.parent))))
 
     case Disconnect =>
       context.children.foreach(context.stop(_))
@@ -640,4 +645,13 @@ class ProxyManager extends Actor {
     case Terminated(proxy) =>
       context.parent ! Disconnected
   }
+}
+
+class ClientHandlerActor(parent: ActorRef, out: ActorRef) extends Actor {
+  override def receive = {
+    case m => parent forward m
+  }
+}
+object ClientHandlerActor {
+  def props(parent: ActorRef, out: ActorRef) = Props(new ClientHandlerActor(parent, out))
 }

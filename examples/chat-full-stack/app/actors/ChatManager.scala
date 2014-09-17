@@ -9,7 +9,6 @@ import akka.actor.SupervisorStrategy.{Stop, Escalate}
 import akka.event.LoggingReceive
 import akka.pattern.{ask, pipe}
 import akka.util.Timeout
-import akka.scalajs.wsserver._
 
 import models._
 
@@ -23,7 +22,7 @@ class ChatManager extends Actor with ActorLogging {
   roomsManager ! RoomsManager.SetUsersManager(usersManager)
 
   def receive = LoggingReceive {
-    case m @ NewConnection() =>
+    case m @ NewConnection(_, _) =>
       log.info("chat manager, new connection")
       usersManager.forward(m)
   }
@@ -125,7 +124,7 @@ class UsersManager(val roomsManager: ActorRef) extends Actor with ActorLogging {
   var connectedUsers = Map.empty[ActorRef, User]
 
   def receive = LoggingReceive {
-    case m @ NewConnection() =>
+    case m @ NewConnection(_, _) =>
       context.watch(context.actorOf(
           Props(classOf[UserManager], roomsManager))).forward(m)
 
@@ -155,9 +154,9 @@ class UserManager(val roomsManager: ActorRef) extends Actor with ActorLogging {
   var user: User = User.Nobody
 
   def receive = LoggingReceive {
-    case m @ NewConnection() =>
-      sender ! ActorWebSocket.actorForWebSocketHandler(self)
-      context.children.foreach(context.watch(_))
+    case m @ NewConnection(handler, _) =>
+      handler ! self
+      context.watch(handler)
 
     case Connect(user) =>
       peer = sender

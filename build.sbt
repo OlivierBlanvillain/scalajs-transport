@@ -14,7 +14,8 @@ val commonSettings = Seq(
   )
 )
 
-lazy val root = project.in(file(".")).settings(commonSettings: _*)
+lazy val root = project.in(file("."))
+  .settings(commonSettings: _*)
   .aggregate(actors)
 
 lazy val actors = project.settings(commonSettings: _*)

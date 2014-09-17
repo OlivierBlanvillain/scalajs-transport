@@ -20,3 +20,5 @@ case class JoinedRoom(users: List[User])
 case class UserJoined(user: User)
 case class UserLeft(user: User)
 case class ReceiveMessage(message: Message)
+
+case class ConnectionEstablished(manager: ActorRef)

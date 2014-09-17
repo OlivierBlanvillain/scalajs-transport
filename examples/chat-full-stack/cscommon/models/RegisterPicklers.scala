@@ -33,6 +33,8 @@ object RegisterPicklers {
   register[UserLeft]
   register[ReceiveMessage]
 
+  register[ConnectionEstablished]
+
   def registerPicklers(): Unit = ()
 
   implicit object ConsPickler extends Pickler[::[Any]] {
