@@ -1,9 +1,10 @@
 import ScalaJSKeys._
 
+
 val commonSettings = Seq(
   organization := "org.scalajs",
   version := "0.1-SNAPSHOT",
-  scalaVersion := "2.10.3",
+  scalaVersion := "2.11.2",
   normalizedName ~= { _.replace("scala-js", "scalajs") },
   scalacOptions ++= Seq(
     "-deprecation",
@@ -80,6 +81,7 @@ lazy val anonymousChatWebRTC = project.in(file("examples/anonymous-chat-webrtc")
   .settings(commonSettings: _*)
   .settings(unmanagedSourceDirectories in Compile += baseDirectory.value / "cscommon")
   .settings(unmanagedResourceDirectories in Compile += baseDirectory.value / "scalajs/src")
+  .settings(net.virtualvoid.sbt.graph.Plugin.graphSettings: _*)
 
 lazy val anonymousChatWebRTCScalaJS = project.in(file("examples/anonymous-chat-webrtc/scalajs"))
   .settings((commonSettings ++ scalaJSSettings): _*)

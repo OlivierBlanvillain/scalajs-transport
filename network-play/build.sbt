@@ -1,4 +1,4 @@
-scalaVersion := "2.10.4"
+scalaVersion := "2.11.2"
 
 name := "Scala.js-Play network"
 
@@ -9,7 +9,7 @@ resolvers += Resolver.url("scala-js-releases",
   Resolver.ivyStylePatterns)
 
 libraryDependencies ++= Seq(
-  "com.typesafe.akka" %% "akka-actor" % "2.3.3",
-  "com.typesafe.play" %% "play" % "2.3.0",
-  "org.scalajs" %% "scalajs-pickling-play-json" % "0.3"
+  "com.typesafe.akka" %% "akka-actor" % "2.3.6",
+  "com.typesafe.play" %% "play" % "2.3.4",
+  "org.scalajs" %% "scalajs-pickling-play-json" % "0.3.1"
 )

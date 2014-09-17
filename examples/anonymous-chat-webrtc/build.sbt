@@ -1,7 +1,7 @@
 name := "anonymous-chat-webrtc"
 
 libraryDependencies ++= Seq(
-  "org.scalajs" %% "scalajs-pickling-play-json" % "0.3",
+  "org.scalajs" %% "scalajs-pickling-play-json" % "0.3.1",
   "org.webjars" %% "webjars-play" % "2.3.0",
   "com.github.fdimuccio" %% "play2-sockjs" % "0.3.0",
   "org.webjars" % "sockjs-client" % "0.3.4",
