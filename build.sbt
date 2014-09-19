@@ -22,14 +22,14 @@ lazy val actors = project.settings(commonSettings: _*)
 
 lazy val networkSharedSettings = Seq(
   unmanagedSourceDirectories in Compile +=
-    (baseDirectory in root).value / "network-shared" / "src" / "main" / "scala"
+    (baseDirectory in root).value / "network/shared"
 )
 
-lazy val networkPlay = project.in(file("network-play"))
+lazy val networkPlay = project.in(file("network/play"))
   .settings(commonSettings: _*)
   .settings(networkSharedSettings: _*)
 
-lazy val networkJs = project.in(file("network-js"))
+lazy val networkJs = project.in(file("network/js"))
   .settings(commonSettings: _*)
   .settings(networkSharedSettings: _*)
   .dependsOn(actors)
