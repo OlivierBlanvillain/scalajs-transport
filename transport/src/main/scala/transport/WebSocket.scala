@@ -10,7 +10,7 @@ trait WebSocketTransport extends Transport {
 
 class WebSocketClient extends WebSocketTransport {
   override def listen(): Future[(WebSocketUrl, Promise[Transport.ConnectionListener])] =
-    Future.failed(TransportException(""))
+    Future.failed(new UnsupportedOperationException(""))
   
   override def connect(remote: WebSocketUrl): Future[ConnectionHandle] =
     ???
@@ -24,7 +24,7 @@ class WebSocketServer extends WebSocketTransport {
     ???
   
   override def connect(remote: WebSocketUrl): Future[ConnectionHandle] =
-    Future.failed(TransportException(""))
+    Future.failed(new UnsupportedOperationException(""))
   
   override def shutdown(): Future[Unit] =
     Future.successful()

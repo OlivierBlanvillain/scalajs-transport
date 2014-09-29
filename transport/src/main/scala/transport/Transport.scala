@@ -24,10 +24,10 @@ trait Transport {
 }
 object Transport {
 
-  /** An interface to be implemented by the user of a Transport to listen to inbound connections. */
+  /** An interface to be implemented by the user of Transport to listen to inbound connections. */
   trait ConnectionListener {
 
-     /** Called by the Transport to notify an inbound ConnectionHandle. */
+    /** Called by the Transport to notify an inbound ConnectionHandle. */
     def notify(inboundConnection: ConnectionHandle): Unit
   }
 
@@ -40,10 +40,11 @@ trait ConnectionHandle {
   def handlerPromise(): Promise[ConnectionHandle.MessageListener]
 
   /** Asynchronously sends a payload to the remote endpoint. */
-   def write(outboundPayload: String): Unit
+  def write(outboundPayload: String): Unit
 
   /** Closes connection. */
   def close(): Unit
+
 }
 object ConnectionHandle {
   
@@ -51,10 +52,11 @@ object ConnectionHandle {
    *  payloads. */
   trait MessageListener {
     
-     /** Called by the ConnectionHandle to notify an inbound payload. */
+    /** Called by the ConnectionHandle to notify an inbound payload. */
     def notify(inboundPayload: String): Unit
     
-     /** Called by the ConnectionHandle when the connection is closed. */
+    /** Called by the ConnectionHandle when the connection is closed. */
     def closed(): Unit
   }
+
 }
