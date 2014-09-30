@@ -4,6 +4,7 @@ import scala.concurrent._
 
 /** SPI for asynchronous transport mechanisms. */
 trait Transport {
+  import Transport._
   
   /** Abstract representation of a mean sufficient to establish a connection between two
    *  Transports. */
@@ -13,7 +14,7 @@ trait Transport {
    *  attempt, the resulting pair contains an Address to be used to establish new connections, and
    *  a Promise for a ConnectionListener. By completing this Promise, that listener becomes
    *  responsible for handling incoming connection. */
-  def listen(): Future[(Address, Promise[Transport.ConnectionListener])]
+  def listen(): Future[(Address, Promise[ConnectionListener])]
   
   /** Asynchronously opens a duplex connection between two Transports. */
   def connect(remote: Address): Future[ConnectionHandle]
@@ -35,9 +36,11 @@ object Transport {
 
 /** SPI for duplex connections created by a Transports. */
 trait ConnectionHandle {
-
-  /** Returns a Promise to be completed to listen for incoming payload. */
-  def handlerPromise(): Promise[ConnectionHandle.MessageListener]
+  import ConnectionHandle._
+  
+  /** Returns a Promise to be completed to listen for incoming payload. Incoming messages should be
+   *  buffered until the listener is registered. */
+  def handlerPromise: Promise[MessageListener]
 
   /** Asynchronously sends a payload to the remote endpoint. */
   def write(outboundPayload: String): Unit
