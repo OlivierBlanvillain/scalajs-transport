@@ -6,53 +6,55 @@ import scala.concurrent._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.{ Failure, Success }
 
-import scala.collection.mutable.Queue
+import scala.collection.mutable
 
-object Proxy {
-  def apply(): (ConnectionHandle, ConnectionHandle) = {
-    ???
-  }
-}
-
-class ProxyConnectionHandle {
+class ProxyConnectionHandle extends ConnectionHandle {
+  import ProxyConnectionHandle._
   
   private var peer: ProxyConnectionHandle = _
   private val promise: Promise[MessageListener] = Promise()
-  private val pendingMessages: Queue[Message] = new Queue[Message]
+  private val pendingMessages: mutable.Queue[Message] = new mutable.Queue[Message]
   
+  promise.future.onSuccess {
+    case listener =>
+      pendingMessages.foreach { incoming(_, listener) }
+  }
+  
+  private def incoming(message: Message, listener: MessageListener): Unit = {
+    message match {
+      case Closed =>
+        listener.closed()
+      case Payload(payload) =>
+        listener.notify(payload)
+    }
+  }
+  
+  private def notify(message: Message): Unit = {
+    promise.future.value match {
+      case Some(Success(listener)) =>
+        incoming(message, listener)
+      case _ =>
+        pendingMessages.enqueue(message)
+    }
+  }
+    
+  override def handlerPromise: Promise[MessageListener] = promise
+  override def write(outboundPayload: String): Unit = peer.notify(Payload(outboundPayload))
+  override def close(): Unit = peer.notify(Closed.asInstanceOf[Message])
+  
+}
+object ProxyConnectionHandle {
   private sealed trait Message
   private case object Closed extends Message
   private case class Payload(payload: String) extends Message
   
-  // promise.future.onSuccess {
-    // pendingMessages.foreach {
-    //   case Payload =>
-    //   case Closed =>
-    // }
-  // }
-  
-  private def notify(outboundPayload: String): Unit = {
-    promise.future.value match {
-      case Some(Success(peer)) =>
-        peer.notify(outboundPayload)
-      case _ =>
-        pendingMessages.enqueue(Payload(outboundPayload))
-    }
+  def newPair(): (ConnectionHandle, ConnectionHandle) = {
+    val c1 = new ProxyConnectionHandle()
+    val c2 = new ProxyConnectionHandle()
+    c1.peer = c2
+    c2.peer = c1
+    (c1, c2)
   }
-  
-  private def notifyClosed(): Unit = {
-    promise.future.value match {
-      case Some(Success(peer)) =>
-        peer.closed()
-      case _ =>
-        pendingMessages.enqueue(Closed)
-    }
-  }
-  
-  def handlerPromise: Promise[MessageListener] = promise
-  def write(outboundPayload: String): Unit = peer.notify(outboundPayload)
-  def close(): Unit = peer.notifyClosed()
-  
 }
 
 
