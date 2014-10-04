@@ -1,6 +1,5 @@
 import ScalaJSKeys._
 
-
 val commonSettings = Seq(
   organization := "org.scalajs",
   version := "0.1-SNAPSHOT",
@@ -76,13 +75,36 @@ lazy val anonymousChatWebSocketScalaJS = project.in(file("examples/anonymous-cha
     }: _*
   )
 
+lazy val autowire = project.in(file("examples/autowire"))
+  .enablePlugins(PlayScala)
+  .dependsOn(networkPlay)
+  .settings(commonSettings: _*)
+  .settings(unmanagedSourceDirectories in Compile += baseDirectory.value / "shared")
+  .settings(unmanagedResourceDirectories in Compile += baseDirectory.value / "scalajs/src")
+
+lazy val autowireScalaJS = project.in(file("examples/autowire/scalajs"))
+  .settings((commonSettings ++ scalaJSSettings): _*)
+  .dependsOn(actors)
+  .dependsOn(networkJs)
+  .settings(
+    unmanagedSourceDirectories in Compile +=
+      (baseDirectory in autowire).value / "shared",
+    fastOptJS in Compile <<= (fastOptJS in Compile) triggeredBy (compile in (autowire, Compile))
+  )
+  .settings(
+    Seq(fastOptJS, fullOptJS) map {
+      packageJSKey =>
+        crossTarget in (Compile, packageJSKey) :=
+          (baseDirectory in autowire).value / "public/javascripts"
+    }: _*
+  )
+
 lazy val anonymousChatWebRTC = project.in(file("examples/anonymous-chat-webrtc"))
   .enablePlugins(PlayScala)
   .dependsOn(networkPlay)
   .settings(commonSettings: _*)
   .settings(unmanagedSourceDirectories in Compile += baseDirectory.value / "cscommon")
   .settings(unmanagedResourceDirectories in Compile += baseDirectory.value / "scalajs/src")
-  .settings(net.virtualvoid.sbt.graph.Plugin.graphSettings: _*)
 
 lazy val anonymousChatWebRTCScalaJS = project.in(file("examples/anonymous-chat-webrtc/scalajs"))
   .settings((commonSettings ++ scalaJSSettings): _*)

@@ -1,0 +1,13 @@
+@(devMode: Boolean)
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Autowire example</title>
+    
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <script type="text/javascript" src="@routes.Assets.at(s"javascripts/autowire-${if(devMode) "fastopt" else "opt"}.js")"></script>
+    <link rel="stylesheet" type="text/css" href="@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap.min.css"))" />
+  </head>
+  <body style="margin: 0;" onload="ScalaJSExample().main()"></body>
+</html>
