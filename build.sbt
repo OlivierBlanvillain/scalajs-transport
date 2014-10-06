@@ -29,7 +29,7 @@ lazy val transportJvm = project.in(file("transport/jvm"))
   .settings(transportSharedSettings: _*)
 
 lazy val transportJs = project.in(file("transport/js"))
-  .settings(commonSettings: _*)
+  .settings((commonSettings ++ scalaJSSettings): _*)
   .settings(transportSharedSettings: _*)
 
 lazy val networkSharedSettings = Seq(
@@ -93,7 +93,8 @@ lazy val autowire = project.in(file("examples/autowire/jvm"))
   .dependsOn(networkPlay)
   .dependsOn(transportJvm)
   .settings(commonSettings: _*)
-  .settings(unmanagedSourceDirectories in Compile += baseDirectory.value / ".." / "shared")
+  .settings(unmanagedSourceDirectories in Compile += baseDirectory.value / "../shared")
+  .settings(unmanagedResourceDirectories in Compile += baseDirectory.value / "../js/src")
 
 lazy val autowireScalaJS = project.in(file("examples/autowire/js"))
   .settings((commonSettings ++ scalaJSSettings): _*)
@@ -102,7 +103,7 @@ lazy val autowireScalaJS = project.in(file("examples/autowire/js"))
   .dependsOn(transportJs)
   .settings(
     unmanagedSourceDirectories in Compile +=
-      (baseDirectory in autowire).value / "shared",
+      (baseDirectory in autowire).value / "../shared",
     fastOptJS in Compile <<= (fastOptJS in Compile) triggeredBy (compile in (autowire, Compile))
   )
   .settings(

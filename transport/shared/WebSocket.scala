@@ -2,9 +2,9 @@ package transport
 
 import scala.concurrent._
 
+case class WebSocketUrl(url: String)
+
 trait WebSocketTransport extends Transport {
-  case class WebSocketUrl(url: String)
-  
   type Address = WebSocketUrl
 }
 
