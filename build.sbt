@@ -19,6 +19,19 @@ lazy val root = project.in(file("."))
 
 lazy val actors = project.settings(commonSettings: _*)
 
+lazy val transportSharedSettings = Seq(
+  unmanagedSourceDirectories in Compile +=
+    (baseDirectory in root).value / "transport/shared"
+)
+
+lazy val transportJvm = project.in(file("transport/jvm"))
+  .settings(commonSettings: _*)
+  .settings(transportSharedSettings: _*)
+
+lazy val transportJs = project.in(file("transport/js"))
+  .settings(commonSettings: _*)
+  .settings(transportSharedSettings: _*)
+
 lazy val networkSharedSettings = Seq(
   unmanagedSourceDirectories in Compile +=
     (baseDirectory in root).value / "network/shared"
@@ -75,17 +88,18 @@ lazy val anonymousChatWebSocketScalaJS = project.in(file("examples/anonymous-cha
     }: _*
   )
 
-lazy val autowire = project.in(file("examples/autowire"))
+lazy val autowire = project.in(file("examples/autowire/jvm"))
   .enablePlugins(PlayScala)
   .dependsOn(networkPlay)
+  .dependsOn(transportJvm)
   .settings(commonSettings: _*)
-  .settings(unmanagedSourceDirectories in Compile += baseDirectory.value / "shared")
-  .settings(unmanagedResourceDirectories in Compile += baseDirectory.value / "scalajs/src")
+  .settings(unmanagedSourceDirectories in Compile += baseDirectory.value / ".." / "shared")
 
-lazy val autowireScalaJS = project.in(file("examples/autowire/scalajs"))
+lazy val autowireScalaJS = project.in(file("examples/autowire/js"))
   .settings((commonSettings ++ scalaJSSettings): _*)
   .dependsOn(actors)
   .dependsOn(networkJs)
+  .dependsOn(transportJs)
   .settings(
     unmanagedSourceDirectories in Compile +=
       (baseDirectory in autowire).value / "shared",

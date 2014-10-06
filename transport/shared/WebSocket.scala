@@ -8,17 +8,6 @@ trait WebSocketTransport extends Transport {
   type Address = WebSocketUrl
 }
 
-class WebSocketClient extends WebSocketTransport {
-  override def listen(): Future[(WebSocketUrl, Promise[Transport.ConnectionListener])] =
-    Future.failed(new UnsupportedOperationException(""))
-  
-  override def connect(remote: WebSocketUrl): Future[ConnectionHandle] =
-    ???
-  
-  override def shutdown(): Future[Unit] =
-    Future.successful()
-}
-
 class WebSocketServer extends WebSocketTransport {
   override def listen(): Future[(WebSocketUrl, Promise[Transport.ConnectionListener])] =
     ???
@@ -27,7 +16,7 @@ class WebSocketServer extends WebSocketTransport {
     Future.failed(new UnsupportedOperationException(""))
   
   override def shutdown(): Future[Unit] =
-    Future.successful()
+    Future.successful(())
 }
 
 trait SockJSTransport extends Transport
