@@ -1,5 +1,6 @@
-package transport
+package transport.websocket
 
+import transport._
 import scala.concurrent._
 
 case class WebSocketUrl(url: String)

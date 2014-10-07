@@ -11,6 +11,7 @@ import autowire._
 import shared.Api
 
 import transport._
+import websocket._
 import ConnectionHandle.MessageListener
 import scala.collection.mutable
 
@@ -19,13 +20,13 @@ object Client extends autowire.Client[String, upickle.Reader, upickle.Writer] {
   
   var pendingPromise: Option[Promise[String]] = None
 
-  val address = WebSocketUrl("todo")
+  val address = WebSocketUrl("ws://localhost:9000/socket")
   val transport = new WebSocketClient()
   val connection = transport.connect(address)
   connection.foreach { _.handlerPromise.success(
     new MessageListener {
       def notify(inboundPayload: String) = {
-        // Ain't gonna work for interleaved method calls.
+        // TODO: Ain't gonna work for interleaved method calls.
         pendingPromise.foreach { _.success(inboundPayload) }
         pendingPromise = None
       }
