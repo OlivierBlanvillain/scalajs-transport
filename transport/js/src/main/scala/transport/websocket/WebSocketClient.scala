@@ -1,13 +1,12 @@
 package transport.websocket
 
 import transport._
-import ConnectionHandle._
 import scala.concurrent._
 import scala.util.{ Success, Failure }
 import jsapi._
 
 class WebSocketClient(implicit executionContext: ExecutionContext) extends WebSocketTransport {
-  override def listen(): Future[(WebSocketUrl, Promise[Transport.ConnectionListener])] = {
+  override def listen(): Future[(WebSocketUrl, Promise[ConnectionListener])] = {
     Future.failed(new UnsupportedOperationException(
       "Browsers can only initiate WebSockets connections."))
   }
@@ -39,11 +38,11 @@ class WebSocketClient(implicit executionContext: ExecutionContext) extends WebSo
           }
         }, useCapture = false)
         
-        def handlerPromise: Promise[MessageListener] = promise
+        override def handlerPromise: Promise[MessageListener] = promise
         
-        def write(outboundPayload: String): Unit = webSocket.send(outboundPayload)
+        override def write(outboundPayload: String): Unit = webSocket.send(outboundPayload)
         
-        def close(): Unit = webSocket.close()
+        override def close(): Unit = webSocket.close()
       }
     )
   }

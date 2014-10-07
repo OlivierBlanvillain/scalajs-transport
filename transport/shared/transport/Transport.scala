@@ -4,8 +4,6 @@ import scala.concurrent._
 
 /** SPI for asynchronous transport mechanisms. */
 trait Transport {
-  import Transport._
-  
   /** Abstract representation of a mean sufficient to establish a connection between two
    *  Transports. */
   type Address
@@ -13,7 +11,7 @@ trait Transport {
   /** Asynchronously attempts to listen and accept incoming connection. In case of successful
    *  attempt, the resulting pair contains an Address to be used to establish new connections, and
    *  a Promise for a ConnectionListener. By completing this Promise, that listener becomes
-   *  responsible for handling incoming connection. */
+   *  responsible for handling incoming connection. While the Promise is not completed no incoming *  connections are accepted. */
   def listen(): Future[(Address, Promise[ConnectionListener])]
   
   /** Asynchronously opens a duplex connection between two Transports. */
@@ -23,21 +21,16 @@ trait Transport {
   def shutdown(): Future[Unit]
 
 }
-object Transport {
 
-  /** An interface to be implemented by the user of Transport to listen to inbound connections. */
-  trait ConnectionListener {
+/** An interface to be implemented by the user of Transport to listen to inbound connections. */
+trait ConnectionListener {
 
-    /** Called by the Transport to notify an inbound ConnectionHandle. */
-    def notify(inboundConnection: ConnectionHandle): Unit
-  }
-
+  /** Called by the Transport to notify an inbound ConnectionHandle. */
+  def notify(inboundConnection: ConnectionHandle): Unit
 }
 
 /** SPI for duplex connections created by a Transports. */
 trait ConnectionHandle {
-  import ConnectionHandle._
-  
   /** Returns a Promise to be completed to listen for incoming payload. Incoming messages should be
    *  buffered until the listener is registered. */
   def handlerPromise: Promise[MessageListener]
@@ -49,17 +42,14 @@ trait ConnectionHandle {
   def close(): Unit
 
 }
-object ConnectionHandle {
-  
-  /** An interface to be implemented by the user of a ConnectionHandle to listen to inbound
-   *  payloads. */
-  trait MessageListener {
-    
-    /** Called by the ConnectionHandle to notify an inbound payload. */
-    def notify(inboundPayload: String): Unit
-    
-    /** Called by the ConnectionHandle when the connection is closed. */
-    def closed(): Unit
-  }
 
+/** An interface to be implemented by the user of a ConnectionHandle to listen to inbound
+ *  payloads. */
+trait MessageListener {
+  
+  /** Called by the ConnectionHandle to notify an inbound payload. */
+  def notify(inboundPayload: String): Unit
+  
+  /** Called by the ConnectionHandle when the connection is closed. */
+  def closed(): Unit
 }

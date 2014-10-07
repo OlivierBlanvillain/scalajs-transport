@@ -1,7 +1,5 @@
 package transport
 
-import ConnectionHandle._
-
 import scala.concurrent._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.{ Failure, Success }

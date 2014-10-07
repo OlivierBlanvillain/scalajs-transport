@@ -12,7 +12,6 @@ import shared.Api
 
 import transport._
 import websocket._
-import ConnectionHandle.MessageListener
 import scala.collection.mutable
 
 object Client extends autowire.Client[String, upickle.Reader, upickle.Writer] {

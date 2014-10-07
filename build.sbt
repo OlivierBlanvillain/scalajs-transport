@@ -90,7 +90,6 @@ lazy val anonymousChatWebSocketScalaJS = project.in(file("examples/anonymous-cha
 
 lazy val autowire = project.in(file("examples/autowire/jvm"))
   .enablePlugins(PlayScala)
-  .dependsOn(networkPlay)
   .dependsOn(transportJvm)
   .settings(commonSettings: _*)
   .settings(unmanagedSourceDirectories in Compile += baseDirectory.value / "../shared")
@@ -98,8 +97,6 @@ lazy val autowire = project.in(file("examples/autowire/jvm"))
 
 lazy val autowireScalaJS = project.in(file("examples/autowire/js"))
   .settings((commonSettings ++ scalaJSSettings): _*)
-  .dependsOn(actors)
-  .dependsOn(networkJs)
   .dependsOn(transportJs)
   .settings(
     unmanagedSourceDirectories in Compile +=

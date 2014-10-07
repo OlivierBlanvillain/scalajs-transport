@@ -5,7 +5,7 @@
 # Home page
 GET     /                           controllers.Application.indexDev
 GET     /opt                        controllers.Application.indexOpt
-POST    /api/*segments              controllers.Application.api(segments)
+# POST    /api/*segments              controllers.Application.api(segments)
 
 # Web socket entry point
 GET     /socket                     controllers.Application.socket
