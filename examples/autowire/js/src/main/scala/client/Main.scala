@@ -11,7 +11,7 @@ import autowire._
 import shared.Api
 
 import transport._
-import websocket._
+import transport.client._
 import scala.collection.mutable
 
 object Client extends autowire.Client[String, upickle.Reader, upickle.Writer] {
@@ -19,8 +19,8 @@ object Client extends autowire.Client[String, upickle.Reader, upickle.Writer] {
   
   var pendingPromise: Option[Promise[String]] = None
 
-  val address = WebSocketUrl("ws://localhost:9000/socket")
-  val transport = new WebSocketClient()
+  val address = SockJSUrl("http://localhost:9000/socket")
+  val transport = new SockJSClient()
   val connection = transport.connect(address)
   connection.foreach { _.handlerPromise.success(
     new MessageListener {

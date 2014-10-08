@@ -13,8 +13,10 @@ import shared.Api
 import autowire.Core.Request
 
 import transport._
-import websocket._
-import transport.websocket.WebSocketPlayServer
+import transport.server._
+import play.api.libs.json._
+
+// import play.sockjs.api._
 
 object Application extends Controller {
   
@@ -25,10 +27,10 @@ object Application extends Controller {
   def indexOpt = Action {
     Ok(views.html.index(devMode = false))
   }
+
+  val transport = SockJSServer()
   
-  def socket = transport.action()
-  
-  val transport = WebSocketPlayServer(routes.Application.socket)
+  lazy val socket = transport.action()
   
   transport.listen().map {
     _._2.success {
@@ -49,18 +51,6 @@ object Application extends Controller {
     }
   }
 }
-
-// class MyWebSocketActor(out: ActorRef) extends Actor {
-//   override def receive = {
-//     case pickle: String =>
-//       val request: Request[String] = upickle.read[Request[String]](pickle)
-//       val result: Future[String] = AutowireServer.route[Api](Server)(request)
-//       result.foreach { out ! _ }
-//   }
-// }
-// object MyWebSocketActor {
-//   def props(out: ActorRef) = Props(new MyWebSocketActor(out))
-// }
 
 object Server extends Api {
   def list(path: String): Seq[String] = {

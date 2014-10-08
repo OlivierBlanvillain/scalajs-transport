@@ -24,7 +24,7 @@ lazy val transportSharedSettings = Seq(
     (baseDirectory in root).value / "transport/shared"
 )
 
-lazy val transportJvm = project.in(file("transport/jvm"))
+lazy val transportJvm = project.in(file("transport/play"))
   .settings(commonSettings: _*)
   .settings(transportSharedSettings: _*)
 

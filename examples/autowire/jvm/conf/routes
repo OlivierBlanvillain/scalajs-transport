@@ -3,15 +3,11 @@
 # ~~~~
 
 # Home page
-GET     /                           controllers.Application.indexDev
-GET     /opt                        controllers.Application.indexOpt
-# POST    /api/*segments              controllers.Application.api(segments)
+GET     /                            controllers.Application.indexDev
+GET     /opt                         controllers.Application.indexOpt
 
-# Web socket entry point
-GET     /socket                     controllers.Application.socket
-
-# SockJS entry point
-# ->      /sockjs                     controllers.Application.sockjs
+# Socket entry point
+->      /socket                      controllers.Application.socket
 
 #webjars
 GET     /webjars/*file               controllers.WebJarAssets.at(file)
