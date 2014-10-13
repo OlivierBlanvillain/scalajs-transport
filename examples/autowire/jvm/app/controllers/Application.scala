@@ -17,15 +17,17 @@ import transport.server._
 
 object Application extends Controller {
   
-  def indexDev = Action {
-    Ok(views.html.index(devMode = true))
+  def indexDev = Action { implicit request =>
+    Ok(views.html.index(devMode = true, transport.javascriptAddressTemplate))
   }
 
-  def indexOpt = Action {
-    Ok(views.html.index(devMode = false))
+  def indexOpt = Action { implicit request =>
+    Ok(views.html.index(devMode = false, transport.javascriptAddressTemplate))
   }
+  
+  val transport = WebSocketServer(routes.Application.socket)
 
-  val transport = SockJSServer()
+  // val transport = SockJSServer()
   
   lazy val socket = transport.action()
   
@@ -49,7 +51,7 @@ object Application extends Controller {
   }
 }
 
-object Server extends Api {
+object Server extends Api { 
   def list(path: String): Seq[String] = {
     val chunks = path.split("/", -1)
     val prefix = "./" + chunks.dropRight(1).mkString("/")

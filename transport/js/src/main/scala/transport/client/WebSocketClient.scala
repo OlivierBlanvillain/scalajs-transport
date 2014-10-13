@@ -53,3 +53,7 @@ class WebSocketClient(implicit executionContext: ExecutionContext) extends WebSo
   
   override def shutdown(): Unit = ()
 }
+object WebSocketClient {
+  def addressFromPlayTemplate: WebSocketUrl =
+    WebSocketUrl(scala.scalajs.js.Dynamic.global.webSocketUrl.asInstanceOf[String])
+}

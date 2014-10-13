@@ -4,10 +4,11 @@ import scala.concurrent._
 
 import play.api.Application
 import play.api.mvc._
+import play.twirl.api.Html
 
 import transport._
 
-case class WebSocketServer(implicit ec: ExecutionContext, app: Application)
+case class WebSocketServer(socketRoute: Call)(implicit ec: ExecutionContext, app: Application)
     extends WebSocketTransport {
   private val promise = Promise[ConnectionListener]()
   
@@ -25,6 +26,10 @@ case class WebSocketServer(implicit ec: ExecutionContext, app: Application)
    */
   def action(): WebSocket[String, String] = WebSocket.tryAcceptWithActor[String, String] {
     BridgeActor.actionHandle(promise)
+  }
+  
+  def javascriptAddressTemplate(implicit request: RequestHeader) = Html {
+    s"""var webSocketUrl = '${socketRoute.webSocketURL()}';"""
   }
   
   override def listen(): Future[Promise[ConnectionListener]] =
