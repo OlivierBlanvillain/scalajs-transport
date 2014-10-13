@@ -12,26 +12,29 @@ import upickle._
 import shared.Api
 import autowire.Core.Request
 
+import play.sockjs.api.SockJSRouter
 import transport._
 import transport.server._
 
 object Application extends Controller {
   
   def indexDev = Action { implicit request =>
-    Ok(views.html.index(devMode = true, transport.javascriptAddressTemplate))
+    Ok(views.html.index(devMode = true,
+      SockJSServer.javascriptRoute(sockJS)))
   }
 
   def indexOpt = Action { implicit request =>
-    Ok(views.html.index(devMode = false, transport.javascriptAddressTemplate))
+    Ok(views.html.index(devMode = false,
+      WebSocketServer.javascriptRoute(routes.Application.webSocket)))
   }
   
-  val transport = WebSocketServer(routes.Application.socket)
+  val webSocketTransport = WebSocketServer()
+  val webSocket = webSocketTransport.action()
 
-  // val transport = SockJSServer()
+  val sockJStransport = SockJSServer()
+  val sockJS = sockJStransport.action()
   
-  lazy val socket = transport.action()
-  
-  transport.listen().map {
+  sockJStransport.listen().map {
     _.success {
       new ConnectionListener {
         override def notify(connection: ConnectionHandle): Unit = {

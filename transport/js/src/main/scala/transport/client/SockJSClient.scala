@@ -6,10 +6,9 @@ import scala.util.{ Success, Failure }
 import jsapi._
 
 class SockJSClient(implicit executionContext: ExecutionContext) extends SockJSTransport {
-  override def listen(): Future[Promise[ConnectionListener]] = {
+  override def listen(): Future[Promise[ConnectionListener]] =
     Future.failed(new UnsupportedOperationException(
       "Browsers can only initiate SockJSs connections."))
-  }
   
   override def connect(remote: SockJSUrl): Future[ConnectionHandle] = {
     val connectionPromise = Promise[ConnectionHandle]()
@@ -53,4 +52,9 @@ class SockJSClient(implicit executionContext: ExecutionContext) extends SockJSTr
   }
   
   override def shutdown(): Unit = ()
+}
+object SockJSClient {
+  /** Load the SockJSUrl defined in a play template. */
+  def addressFromPlayRoute: SockJSUrl =
+    SockJSUrl(scala.scalajs.js.Dynamic.global.sockJSUrl.asInstanceOf[String])
 }

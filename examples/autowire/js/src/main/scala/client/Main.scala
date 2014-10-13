@@ -19,8 +19,8 @@ object Client extends autowire.Client[String, upickle.Reader, upickle.Writer] {
   
   var pendingPromise: Option[Promise[String]] = None
 
-  val address = WebSocketClient.addressFromPlayTemplate
-  val transport = new WebSocketClient()
+  val address = SockJSClient.addressFromPlayRoute
+  val transport = new SockJSClient()
   val connection = transport.connect(address)
   connection.foreach { _.handlerPromise.success(
     new MessageListener {

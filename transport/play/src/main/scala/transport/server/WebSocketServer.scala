@@ -8,7 +8,7 @@ import play.twirl.api.Html
 
 import transport._
 
-case class WebSocketServer(socketRoute: Call)(implicit ec: ExecutionContext, app: Application)
+case class WebSocketServer(implicit ec: ExecutionContext, app: Application)
     extends WebSocketTransport {
   private val promise = Promise[ConnectionListener]()
   
@@ -20,18 +20,14 @@ case class WebSocketServer(socketRoute: Call)(implicit ec: ExecutionContext, app
    *  GET     /socket                     controllers.Application.socket
    *  
    *  // In controllers.Application:
-   *  val transport = WebSocketServer(routes.Application.socket)
+   *  val transport = WebSocketServer()
    *  def socket = transport.action()
    *  }}}
    */
   def action(): WebSocket[String, String] = WebSocket.tryAcceptWithActor[String, String] {
     BridgeActor.actionHandle(promise)
   }
-  
-  def javascriptAddressTemplate(implicit request: RequestHeader) = Html {
-    s"""var webSocketUrl = '${socketRoute.webSocketURL()}';"""
-  }
-  
+
   override def listen(): Future[Promise[ConnectionListener]] =
     Future.successful(promise)
   
@@ -40,4 +36,12 @@ case class WebSocketServer(socketRoute: Call)(implicit ec: ExecutionContext, app
       "Servers cannot initiate WebSockets connections."))
   
   override def shutdown(): Unit = ()
+}
+
+object WebSocketServer {
+  /** Generates a JavaScript route to a WebSocketServer. Use WebSocketClient.addressFromPlayRoute
+   *  to load the route as a WebSocketUrl on the client side. */
+  def javascriptRoute(socketRoute: Call)(implicit request: RequestHeader) = Html {
+    s"""var webSocketUrl = '${socketRoute.webSocketURL()}';"""
+  }
 }

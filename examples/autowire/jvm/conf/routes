@@ -6,9 +6,9 @@
 GET     /                            controllers.Application.indexDev
 GET     /opt                         controllers.Application.indexOpt
 
-# Socket entry point
-# ->      /socket                      controllers.Application.socket
-GET     /socket                      controllers.Application.socket
+# Socket entry points
+GET     /websocket                   controllers.Application.webSocket
+->      /sockjs                      controllers.Application.sockJS
 
 #webjars
 GET     /webjars/*file               controllers.WebJarAssets.at(file)
