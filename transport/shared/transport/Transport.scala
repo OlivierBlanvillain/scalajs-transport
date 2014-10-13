@@ -9,16 +9,16 @@ trait Transport {
   type Address
   
   /** Asynchronously attempts to listen and accept incoming connection. In case of successful
-   *  attempt, the resulting pair contains an Address to be used to establish new connections, and
-   *  a Promise for a ConnectionListener. By completing this Promise, that listener becomes
-   *  responsible for handling incoming connection. While the Promise is not completed no incoming *  connections are accepted. */
-  def listen(): Future[(Address, Promise[ConnectionListener])]
+   *  attempt, returns a Promise of a ConnectionListener. By completing this Promise, thelistener
+   *  becomes responsible for handling incoming connection. While the Promise is not completed no
+   *  incoming connections are accepted. */
+  def listen(): Future[Promise[ConnectionListener]]
   
   /** Asynchronously opens a duplex connection between two Transports. */
   def connect(remote: Address): Future[ConnectionHandle]
   
   /** Shuts down the Transport and releases all corresponding resources. */
-  def shutdown(): Future[Unit]
+  def shutdown(): Unit
 
 }
 

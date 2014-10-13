@@ -14,9 +14,6 @@ import autowire.Core.Request
 
 import transport._
 import transport.server._
-import play.api.libs.json._
-
-// import play.sockjs.api._
 
 object Application extends Controller {
   
@@ -33,7 +30,7 @@ object Application extends Controller {
   lazy val socket = transport.action()
   
   transport.listen().map {
-    _._2.success {
+    _.success {
       new ConnectionListener {
         override def notify(connection: ConnectionHandle): Unit = {
           connection.handlerPromise.success {

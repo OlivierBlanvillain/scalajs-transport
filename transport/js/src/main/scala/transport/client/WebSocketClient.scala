@@ -6,10 +6,9 @@ import scala.util.{ Success, Failure }
 import jsapi._
 
 class WebSocketClient(implicit executionContext: ExecutionContext) extends WebSocketTransport {
-  override def listen(): Future[(WebSocketUrl, Promise[ConnectionListener])] = {
+  override def listen(): Future[Promise[ConnectionListener]] =
     Future.failed(new UnsupportedOperationException(
       "Browsers can only initiate WebSockets connections."))
-  }
   
   override def connect(remote: WebSocketUrl): Future[ConnectionHandle] = {
     val connectionPromise = Promise[ConnectionHandle]()
@@ -52,6 +51,5 @@ class WebSocketClient(implicit executionContext: ExecutionContext) extends WebSo
     connectionPromise.future
   }
   
-  override def shutdown(): Future[Unit] =
-    Future.successful(())
+  override def shutdown(): Unit = ()
 }

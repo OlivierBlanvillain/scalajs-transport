@@ -6,7 +6,7 @@ import scala.util.{ Success, Failure }
 import jsapi._
 
 class SockJSClient(implicit executionContext: ExecutionContext) extends SockJSTransport {
-  override def listen(): Future[(SockJSUrl, Promise[ConnectionListener])] = {
+  override def listen(): Future[Promise[ConnectionListener]] = {
     Future.failed(new UnsupportedOperationException(
       "Browsers can only initiate SockJSs connections."))
   }
@@ -52,6 +52,5 @@ class SockJSClient(implicit executionContext: ExecutionContext) extends SockJSTr
     connectionPromise.future
   }
   
-  override def shutdown(): Future[Unit] =
-    Future.successful(())
+  override def shutdown(): Unit = ()
 }
