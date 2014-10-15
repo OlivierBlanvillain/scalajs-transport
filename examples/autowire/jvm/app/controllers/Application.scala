@@ -13,8 +13,8 @@ import shared.Api
 import autowire.Core.Request
 
 import play.sockjs.api.SockJSRouter
-import transport._
 import transport.server._
+import transport.util._
 
 object Application extends Controller {
   
@@ -34,24 +34,28 @@ object Application extends Controller {
   val sockJStransport = SockJSServer()
   val sockJS = sockJStransport.action()
   
-  sockJStransport.listen().map {
-    _.success {
-      new ConnectionListener {
-        override def notify(connection: ConnectionHandle): Unit = {
-          connection.handlerPromise.success {
-            new MessageListener {
-              override def notify(pickle: String): Unit = {
-                val request: Request[String] = upickle.read[Request[String]](pickle)
-                val result: Future[String] = AutowireServer.route[Api](Server)(request)
-                result.foreach { connection write _ }
-              }
-              override def closed(): Unit = ()
-            }
-          }
-        }
-      }
-    }
+  sockJStransport.listen().map { promise =>
+    promise.success(new magicConnectionListener(AutowireServer.route[Api](Server)))
   }
+
+  // sockJStransport.listen().map {
+  //   _.success {
+  //     new ConnectionListener {
+  //       override def notify(connection: ConnectionHandle): Unit = {
+  //         connection.handlerPromise.success {
+  //           new MessageListener {
+  //             override def notify(pickle: String): Unit = {
+  //               val request: Request[String] = upickle.read[Request[String]](pickle)
+  //               val result: Future[String] = AutowireServer.route[Api](Server)(request)
+  //               result.foreach { connection write _ }
+  //             }
+  //             override def closed(): Unit = ()
+  //           }
+  //         }
+  //       }
+  //     }
+  //   }
+  // }
 }
 
 object Server extends Api { 

@@ -4,6 +4,8 @@ resolvers ++= Seq(
 )
 
 libraryDependencies ++= Seq(
+  "com.lihaoyi" %%% "upickle" % "0.2.2",
+  "com.lihaoyi" %%% "autowire" % "0.2.1",
   "org.webjars" % "sockjs-client" % "0.3.4",
   "com.github.fdimuccio" %% "play2-sockjs" % "0.3.0",
   "com.typesafe.akka" %% "akka-actor" % "2.3.6",

@@ -55,6 +55,6 @@ class SockJSClient(implicit executionContext: ExecutionContext) extends SockJSTr
 }
 object SockJSClient {
   /** Load the SockJSUrl defined in a play template. */
-  def addressFromPlayRoute: SockJSUrl =
+  def addressFromPlayRoute(): SockJSUrl =
     SockJSUrl(scala.scalajs.js.Dynamic.global.sockJSUrl.asInstanceOf[String])
 }

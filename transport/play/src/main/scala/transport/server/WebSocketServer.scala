@@ -39,7 +39,7 @@ case class WebSocketServer(implicit ec: ExecutionContext, app: Application)
 }
 
 object WebSocketServer {
-  /** Generates a JavaScript route to a WebSocketServer. Use WebSocketClient.addressFromPlayRoute
+  /** Generates a JavaScript route to a WebSocketServer. Use WebSocketClient.addressFromPlayRoute()
    *  to load the route as a WebSocketUrl on the client side. */
   def javascriptRoute(socketRoute: Call)(implicit request: RequestHeader) = Html {
     s"""var webSocketUrl = '${socketRoute.webSocketURL()}';"""

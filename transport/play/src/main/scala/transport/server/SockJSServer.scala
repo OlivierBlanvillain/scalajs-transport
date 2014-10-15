@@ -39,7 +39,7 @@ case class SockJSServer(implicit ec: ExecutionContext, app: Application)
 }
 
 object SockJSServer {
-  /** Generates a JavaScript route to a SockJSServer. Use SockJSClient.addressFromPlayRoute
+  /** Generates a JavaScript route to a SockJSServer. Use SockJSClient.addressFromPlayRoute()
    *  to load the route as a SockJSUrl on the client side. */
   def javascriptRoute(router: SockJSRouter)(implicit request: play.api.mvc.RequestHeader) = Html {
     s"""var sockJSUrl = '${play.api.mvc.Call("GET", router.prefix).absoluteURL()}';"""

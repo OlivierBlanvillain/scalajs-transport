@@ -10,58 +10,15 @@ import upickle._
 import autowire._
 import shared.Api
 
-import transport._
 import transport.client._
+import transport.util._
 import scala.collection.mutable
+import SockJSClient.addressFromPlayRoute
 
 object Client extends autowire.Client[String, upickle.Reader, upickle.Writer] {
-  case class IdentifiedRequest(id: Int, request: Request)
-  
-  var pendingPromise: Option[Promise[String]] = None
-
-  val address = SockJSClient.addressFromPlayRoute
-  val transport = new SockJSClient()
-  val connection = transport.connect(address)
-  connection.foreach { _.handlerPromise.success(
-    new MessageListener {
-      def notify(inboundPayload: String) = {
-        // TODO: Ain't gonna work for interleaved method calls.
-        pendingPromise.foreach { _.success(inboundPayload) }
-        pendingPromise = None
-      }
-      def closed() = ()
-    }  
-  )}
-  
-  // var promiseId: Int = 0
-  // def nextPromiseId(): Int = {
-  //   promiseId += 1
-  //   promiseId
-  // }
-  // val pendingPromises = mutable.Map.empty[Integer, Promise[String]]
-  
-  // override def doCall(request: Request): Future[String] = {
-  //   val promise: Promise[String] = Promise()
-  //   val id = nextPromiseId()
-  //   pendingPromises.update(id, promise)
-
-  //   connection.foreach { _.write(upickle.write(
-  //     IdentifiedRequest(id, request)
-  //   ))}
-
-  //   promise.future
-  //   // dom.extensions.Ajax.post(
-  //   //   url = "/api/" + req.path.mkString("/"),
-  //   //   data = upickle.write(req.args)
-  //   // ).map(_.responseText)
-  // }
-  
-  override def doCall(request: Request): Future[String] = {
-    connection.foreach { _.write(upickle.write(request))}
-    pendingPromise = Some(Promise())
-    pendingPromise.get.future
-  }
-
+  val connection = new SockJSClient().connect(addressFromPlayRoute())
+  val ccc = connectionSomethingClient(connection)
+  def doCall(request: Request): Future[String] = ccc.doCall(request)
   def read[Result: upickle.Reader](p: String) = upickle.read[Result](p)
   def write[Result: upickle.Writer](r: Result) = upickle.write(r)
 }
