@@ -7,10 +7,13 @@ import play.api.test.Helpers._
 
 class Integration extends BrowserSpecification {
 
-  "run in a browser" in new WithBrowser(PHANTOM) {
-    browser goTo "/"
-    browser waitUntil browser.pageSource.contains("build.sbt")
-    browser.pageSource must contain("42")
+  "Application" should {
+
+    "Handle concurrent requests" in new WithBrowser(PHANTOM) {
+      browser goTo "/"
+      browser waitUntil browser.pageSource.contains("build.sbt")
+      browser.pageSource must contain("42")
+    }
+
   }
-  
 }

@@ -11,14 +11,23 @@ import autowire._
 import shared.Api
 
 import transport.client._
-import transport.util._
+import transport.autowire._
 import scala.collection.mutable
 import SockJSClient.addressFromPlayRoute
 
 object Client extends autowire.Client[String, upickle.Reader, upickle.Writer] {
-  val connection = new SockJSClient().connect(addressFromPlayRoute())
-  val ccc = connectionSomethingClient(connection)
-  def doCall(request: Request): Future[String] = ccc.doCall(request)
+  val pendingPromises = new PendingPromises[String]()
+  
+  val futureConnection = new SockJSClient().connect(addressFromPlayRoute())
+  
+  futureConnection.foreach { _.handlerPromise.success(
+    new IdentifiedMessageListener(pendingPromises)
+  )}
+  
+  def doCall(request: Request): Future[String] = futureConnection.flatMap {
+    new IdentifiedCallOverConnection(_, pendingPromises)(request)
+  }
+  
   def read[Result: upickle.Reader](p: String) = upickle.read[Result](p)
   def write[Result: upickle.Writer](r: Result) = upickle.write(r)
 }
