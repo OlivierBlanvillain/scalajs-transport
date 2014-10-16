@@ -1,5 +1,6 @@
 package transport.util
 
+import scala.collection.mutable
 import autowire._
 import upickle._
 import scala.concurrent._
@@ -9,51 +10,61 @@ import autowire.Core.Request
 case class connectionSomethingClient(connection: Future[ConnectionHandle])(
       implicit ec: ExecutionContext) {
   
-  var pendingPromise: Option[Promise[String]] = None
+  val magic = new SomeMagicObject[String]()
   
   connection.foreach { _.handlerPromise.success(
     new MessageListener {
       def notify(inboundPayload: String): Unit = {
-        // TODO: Ain't gonna work for interleaved method calls.
-        pendingPromise.foreach { _.success(inboundPayload) }
-        pendingPromise = None
+        val identifiedResponse = upickle.read[IdentifiedResponse](inboundPayload)
+        magic.gett(identifiedResponse.id).success(identifiedResponse.res)
       }
-      def closed(): Unit = ()
     }
   )}
   
   def doCall(request: Request[String]): Future[String] = {
-    connection.foreach { _.write(upickle.write(request))}
-    pendingPromise = Some(Promise())
-    pendingPromise.get.future
-    // val (future, identifiedRequest) = somemagicobject.next(request)
-    // connection.foreach { _.write(upickle.write(identifiedRequest)) }
-    // future
+    val (future, id) = magic.nextt()
+    connection.foreach { _.write(upickle.write(IdentifiedRequest(request, id))) }
+    future
   }
 
-  // object somemagicobject {
-  //   def next(request: Request[String]): (Future[String], IdentifiedRequest) = ???
-  //   def success = ???
-  // }
-}
-
-case class magicConnectionListener(doreq: Request[String] => Future[String])(
-      implicit ec: ExecutionContext) extends ConnectionListener {
-  override def notify(connection: ConnectionHandle): Unit = {
-    connection.handlerPromise.success {
-      new MessageListener {
-        override def notify(pickle: String): Unit = {
-          val request: Request[String] = upickle.read[Request[String]](pickle)
-          val result: Future[String] = doreq(request)
-          result.foreach { connection write _ }
-        }
-        override def closed(): Unit = ()
-      }
+  class SomeMagicObject[T] {
+    private var id = 0
+    private val map = mutable.Map.empty[Int, Promise[T]]
+    
+    def nextt(): (Future[T], Int) = {
+      val p = Promise[T]()
+      id = id + 1
+      map += ((id, p))
+      (p.future, id)
+    }
+    def gett(id: Int): Promise[T] = {
+      val p = map(id)
+      map -= id
+      p
     }
   }
 }
 
-// // case class IdentifiedRequest(request: Request[String], id: Int)
+// Server
+case class magicConnectionListener(doreq: Request[String] => Future[String])(
+      implicit ec: ExecutionContext) extends ConnectionListener {
+  override def notify(connection: ConnectionHandle): Unit = {
+    connection.handlerPromise.success {
 
-// // case class IdentifiedResponse(response: String, id: Int)
+      new MessageListener {
+        override def notify(pickle: String): Unit = {
+          val identifiedRequest = upickle.read[IdentifiedRequest](pickle)
+          val result: Future[String] = doreq(identifiedRequest.req)
+          result.foreach { response =>
+            connection.write(upickle.write(IdentifiedResponse(response, identifiedRequest.id)))
+          }
+        }
+      }
 
+    }
+  }
+}
+
+case class IdentifiedRequest(req: Request[String], id: Int)
+
+case class IdentifiedResponse(res: String, id: Int)

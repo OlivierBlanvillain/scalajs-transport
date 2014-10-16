@@ -10,6 +10,7 @@ class Integration extends BrowserSpecification {
   "run in a browser" in new WithBrowser(PHANTOM) {
     browser goTo "/"
     browser waitUntil browser.pageSource.contains("build.sbt")
+    browser.pageSource must contain("42")
   }
   
 }

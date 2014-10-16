@@ -51,5 +51,5 @@ trait MessageListener {
   def notify(inboundPayload: String): Unit
   
   /** Called by the ConnectionHandle when the connection is closed. */
-  def closed(): Unit
+  def closed(): Unit = ()
 }

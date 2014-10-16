@@ -28,6 +28,10 @@ object ScalaJSExample {
   @JSExport
   def main(): Unit = {
     
+    Client[Api].double(21).call() onSuccess {
+      case result: Int => dom.document.body.appendChild(h2(result).render)
+    }
+    
     val inputBox = input.render
     val outputBox = div.render
 
@@ -51,7 +55,7 @@ object ScalaJSExample {
       div(
         cls:="container",
         h1("File Browser"),
-        p("Enter a file path to s"),
+        p("Enter a file path to show"),
         inputBox,
         outputBox
       ).render

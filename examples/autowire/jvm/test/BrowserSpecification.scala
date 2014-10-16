@@ -14,14 +14,8 @@ trait BrowserSpecification extends Specification {
 
   lazy val PHANTOM = {
     val sCaps = new DesiredCapabilities()
-    val phantomjsPath = {
-      if(null != System.getenv("PHANTOMJS_PATH")){
-        System.getenv("PHANTOMJS_PATH")
-      } else {
-        System.getProperty("PHANTOMJS_PATH")
-      }
-    }
-
+    val phantomjsPath = System.getenv("PHANTOMJS_PATH")
+    
     sCaps.setJavascriptEnabled(true);
     sCaps.setCapability("takesScreenshot", true);
     sCaps.setCapability(PhantomJSDriverService.PHANTOMJS_EXECUTABLE_PATH_PROPERTY, phantomjsPath)

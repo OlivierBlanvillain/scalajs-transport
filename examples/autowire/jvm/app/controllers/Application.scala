@@ -65,6 +65,7 @@ object Server extends Api {
     val files = Option(new java.io.File(prefix).list()).toSeq.flatten
     files.filter(_.startsWith(chunks.last))
   }
+  def double(i: Int) = 2 * i
 }
 
 object AutowireServer extends autowire.Server[String, upickle.Reader, upickle.Writer]{
