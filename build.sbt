@@ -20,18 +20,13 @@ lazy val root = project.in(file("."))
 
 lazy val actors = project.settings(commonSettings: _*)
 
-lazy val transportSharedSettings = Seq(
-  unmanagedSourceDirectories in Compile +=
-    (baseDirectory in root).value / "transport/shared"
-)
-
 lazy val transportJvm = project.in(file("transport/play"))
   .settings(commonSettings: _*)
-  .settings(transportSharedSettings: _*)
+  .settings(unmanagedSourceDirectories in Compile += baseDirectory.value / "../shared")
 
 lazy val transportJs = project.in(file("transport/js"))
   .settings((commonSettings ++ scalaJSSettings): _*)
-  .settings(transportSharedSettings: _*)
+  .settings(unmanagedSourceDirectories in Compile += baseDirectory.value / "../shared")
 
 lazy val networkSharedSettings = Seq(
   unmanagedSourceDirectories in Compile +=
@@ -47,42 +42,16 @@ lazy val networkJs = project.in(file("network/js"))
   .settings(networkSharedSettings: _*)
   .dependsOn(actors)
 
-lazy val examples = project.settings(commonSettings: _*)
-  .aggregate(
-    webRTCExample,
-    chatWebSocket,
-    chatWebRTC,
-    autowire
-  )
+lazy val examples = project.settings(commonSettings: _*).aggregate(
+  webRTCExample,
+  chatWebSocket,
+  chatWebRTC,
+  autowire)
 
 lazy val webRTCExample = project.in(file("examples/webrtc"))
   .settings(commonSettings: _*)
   .dependsOn(networkJs)
   .dependsOn(actors)
-
-lazy val chatWebSocket = project.in(file("examples/chat-websocket"))
-  .enablePlugins(PlayScala)
-  .dependsOn(networkPlay)
-  .settings(commonSettings: _*)
-  .settings(unmanagedSourceDirectories in Compile += baseDirectory.value / "cscommon")
-  .settings(unmanagedResourceDirectories in Compile += baseDirectory.value / "scalajs/src")
-
-lazy val chatWebSocketScalaJS = project.in(file("examples/chat-websocket/scalajs"))
-  .settings((commonSettings ++ scalaJSSettings): _*)
-  .dependsOn(actors)
-  .dependsOn(networkJs)
-  .settings(
-    unmanagedSourceDirectories in Compile +=
-      (baseDirectory in chatWebSocket).value / "cscommon",
-    fastOptJS in Compile <<= (fastOptJS in Compile) triggeredBy (compile in (chatWebSocket, Compile))
-  )
-  .settings(
-    Seq(fastOptJS, fullOptJS) map {
-      packageJSKey =>
-        crossTarget in (Compile, packageJSKey) :=
-          (baseDirectory in chatWebSocket).value / "public/javascripts"
-    }: _*
-  )
 
 lazy val autowire = project.in(file("examples/autowire/jvm"))
   .enablePlugins(PlayScala)
@@ -91,7 +60,7 @@ lazy val autowire = project.in(file("examples/autowire/jvm"))
   .settings(unmanagedSourceDirectories in Compile += baseDirectory.value / "../shared")
   .settings(unmanagedResourceDirectories in Compile += baseDirectory.value / "../js/src")
 
-lazy val autowireScalaJS = project.in(file("examples/autowire/js"))
+lazy val autowireJs = project.in(file("examples/autowire/js"))
   .settings((commonSettings ++ scalaJSSettings): _*)
   .dependsOn(transportJs)
   .settings(
@@ -107,20 +76,44 @@ lazy val autowireScalaJS = project.in(file("examples/autowire/js"))
     }: _*
   )
 
-lazy val chatWebRTC = project.in(file("examples/chat-webrtc"))
+lazy val chatWebSocket = project.in(file("examples/chat-websocket/jvm"))
   .enablePlugins(PlayScala)
   .dependsOn(networkPlay)
   .settings(commonSettings: _*)
-  .settings(unmanagedSourceDirectories in Compile += baseDirectory.value / "cscommon")
-  .settings(unmanagedResourceDirectories in Compile += baseDirectory.value / "scalajs/src")
+  .settings(unmanagedSourceDirectories in Compile += baseDirectory.value / "../shared")
+  .settings(unmanagedResourceDirectories in Compile += baseDirectory.value / "../js/src")
 
-lazy val chatWebRTCScalaJS = project.in(file("examples/chat-webrtc/scalajs"))
+lazy val chatWebSocketJs = project.in(file("examples/chat-websocket/js"))
   .settings((commonSettings ++ scalaJSSettings): _*)
   .dependsOn(actors)
   .dependsOn(networkJs)
   .settings(
     unmanagedSourceDirectories in Compile +=
-      (baseDirectory in chatWebRTC).value / "cscommon",
+      (baseDirectory in chatWebSocket).value / "../shared",
+    fastOptJS in Compile <<= (fastOptJS in Compile) triggeredBy (compile in (chatWebSocket, Compile))
+  )
+  .settings(
+    Seq(fastOptJS, fullOptJS) map {
+      packageJSKey =>
+        crossTarget in (Compile, packageJSKey) :=
+          (baseDirectory in chatWebSocket).value / "public/javascripts"
+    }: _*
+  )
+
+lazy val chatWebRTC = project.in(file("examples/chat-webrtc/jvm"))
+  .enablePlugins(PlayScala)
+  .dependsOn(networkPlay)
+  .settings(commonSettings: _*)
+  .settings(unmanagedSourceDirectories in Compile += baseDirectory.value / "../shared")
+  .settings(unmanagedResourceDirectories in Compile += baseDirectory.value / "../js/src")
+
+lazy val chatWebRTCJs = project.in(file("examples/chat-webrtc/js"))
+  .settings((commonSettings ++ scalaJSSettings): _*)
+  .dependsOn(actors)
+  .dependsOn(networkJs)
+  .settings(
+    unmanagedSourceDirectories in Compile +=
+      (baseDirectory in chatWebRTC).value / "../shared",
     fastOptJS in Compile <<= (fastOptJS in Compile) triggeredBy (compile in (chatWebRTC, Compile))
   )
   .settings(
