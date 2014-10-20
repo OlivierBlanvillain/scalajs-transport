@@ -1,6 +1,7 @@
 name := "autowire"
 
 libraryDependencies ++= Seq(
+  "org.seleniumhq.selenium" % "selenium-java" % "2.43.1",
   "com.github.detro.ghostdriver" % "phantomjsdriver" % "1.0.4" % "test",
   "org.webjars" %% "webjars-play" % "2.3.0",
   "org.webjars" % "bootstrap" % "3.2.0",

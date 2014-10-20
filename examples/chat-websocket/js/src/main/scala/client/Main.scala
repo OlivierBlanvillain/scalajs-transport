@@ -5,9 +5,10 @@ import scala.scalajs.js
 import org.scalajs.jquery.{jQuery => jQ, _}
 
 import akka.actor._
-import akka.scalajs.client.WebSocketClient
+import akka.scalajs.client.SockJSClient
 
 import models._
+import transport.client.SockJSClient.addressFromPlayRoute
 
 @JSExport("Client")
 object Main {
@@ -17,7 +18,8 @@ object Main {
 
   @JSExport
   def startup(): Unit = {
-    WebSocketClient("ws://localhost:9000/websocket").connectWithActor(DemoActor.props)
+    println(addressFromPlayRoute().url)
+    SockJSClient(addressFromPlayRoute().url).connectWithActor(DemoActor.props)
   }
 }
 
