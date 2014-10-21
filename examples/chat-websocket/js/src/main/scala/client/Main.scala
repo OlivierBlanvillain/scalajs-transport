@@ -21,8 +21,7 @@ object Main {
 
   @JSExport
   def startup(): Unit = {
-    val futureConnection = new SockJSClient().connect(addressFromPlayRoute())
-    HandleWithActor(DemoActor.props)(futureConnection)
+    ActorWrapper(new SockJSClient()).connectWithActor(addressFromPlayRoute())(DemoActor.props)
   }
 }
 

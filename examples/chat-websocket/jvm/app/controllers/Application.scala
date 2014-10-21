@@ -14,6 +14,8 @@ import transport.akka._
 object Application extends Controller {
   RegisterPicklers.registerPicklers()
   
+  implicit val implicitSystem = system
+  
   val peerMatcher = system.actorOf(PeerMatcher.props, "PeerMatcher")
 
   def indexDev = Action { implicit request =>
@@ -30,5 +32,5 @@ object Application extends Controller {
   val sockJStransport = SockJSServer()
   val sockJS = sockJStransport.action()
   
-  AcceptWithActor(UserActor.props(peerMatcher))(sockJStransport)
+  ActorWrapper(sockJStransport).acceptWithActor(UserActor.props(peerMatcher))
 }
