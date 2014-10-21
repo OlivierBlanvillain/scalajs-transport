@@ -20,6 +20,8 @@ lazy val root = project.in(file("."))
 
 lazy val actors = project.settings(commonSettings: _*)
 
+lazy val transport = project.settings(commonSettings: _*).aggregate(transportJvm, transportJs)
+
 lazy val transportJvm = project.in(file("transport/play"))
   .settings(commonSettings: _*)
   .settings(unmanagedSourceDirectories in Compile += baseDirectory.value / "../shared")
@@ -27,6 +29,7 @@ lazy val transportJvm = project.in(file("transport/play"))
 lazy val transportJs = project.in(file("transport/js"))
   .settings((commonSettings ++ scalaJSSettings): _*)
   .settings(unmanagedSourceDirectories in Compile += baseDirectory.value / "../shared")
+  .dependsOn(actors)
 
 lazy val networkSharedSettings = Seq(
   unmanagedSourceDirectories in Compile +=
@@ -79,7 +82,6 @@ lazy val autowireJs = project.in(file("examples/autowire/js"))
 lazy val chatWebSocket = project.in(file("examples/chat-websocket/jvm"))
   .enablePlugins(PlayScala)
   .dependsOn(transportJvm)
-  .dependsOn(networkPlay)
   .settings(commonSettings: _*)
   .settings(unmanagedSourceDirectories in Compile += baseDirectory.value / "../shared")
   .settings(unmanagedResourceDirectories in Compile += baseDirectory.value / "../js/src")
@@ -88,7 +90,6 @@ lazy val chatWebSocketJs = project.in(file("examples/chat-websocket/js"))
   .settings((commonSettings ++ scalaJSSettings): _*)
   .dependsOn(actors)
   .dependsOn(transportJs)
-  .dependsOn(networkJs)
   .settings(
     unmanagedSourceDirectories in Compile +=
       (baseDirectory in chatWebSocket).value / "../shared",

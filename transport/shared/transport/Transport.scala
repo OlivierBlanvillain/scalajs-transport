@@ -19,7 +19,6 @@ trait Transport {
   
   /** Shuts down the Transport and releases all corresponding resources. */
   def shutdown(): Unit
-
 }
 
 /** An interface to be implemented by the user of Transport to listen to inbound connections. */
@@ -40,7 +39,6 @@ trait ConnectionHandle {
 
   /** Closes connection. */
   def close(): Unit
-
 }
 
 /** An interface to be implemented by the user of a ConnectionHandle to listen to inbound

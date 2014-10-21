@@ -19,13 +19,11 @@ import transport.autowire._
 object Application extends Controller {
   
   def indexDev = Action { implicit request =>
-    Ok(views.html.index(devMode = true,
-      SockJSServer.javascriptRoute(sockJS)))
+    Ok(views.html.index(devMode = true, SockJSServer.javascriptRoute(sockJS)))
   }
 
   def indexOpt = Action { implicit request =>
-    Ok(views.html.index(devMode = false,
-      WebSocketServer.javascriptRoute(routes.Application.webSocket)))
+    Ok(views.html.index(devMode = false, SockJSServer.javascriptRoute(sockJS)))
   }
   
   val webSocketTransport = WebSocketServer()

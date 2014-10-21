@@ -5,10 +5,13 @@ import scala.scalajs.js
 import org.scalajs.jquery.{jQuery => jQ, _}
 
 import akka.actor._
-import akka.scalajs.client.SockJSClient
 
 import models._
-import transport.client.SockJSClient.addressFromPlayRoute
+import transport.client._
+import transport.akka._
+import SockJSClient.addressFromPlayRoute
+
+import scalajs.concurrent.JSExecutionContext.Implicits.runNow
 
 @JSExport("Client")
 object Main {
@@ -18,8 +21,8 @@ object Main {
 
   @JSExport
   def startup(): Unit = {
-    println(addressFromPlayRoute().url)
-    SockJSClient(addressFromPlayRoute().url).connectWithActor(DemoActor.props)
+    val futureConnection = new SockJSClient().connect(addressFromPlayRoute())
+    HandleWithActor(DemoActor.props)(futureConnection)
   }
 }
 

@@ -1,9 +1,8 @@
-package akka.scalajs.common
+package transport.akka
 
 import scala.collection.mutable
 
 import akka.actor._
-import akka.scalajs.common._
 
 import org.scalajs.spickling._
 
@@ -30,9 +29,6 @@ object AbstractProxy {
   private def registerPicklers(): Unit = _registerPicklers
 }
 
-/** Common between [[akka.scalajs.wsserver.ServerProxy]] and
- *  [[akka.scalajs.wsclient.ClientProxy]].
- */
 abstract class AbstractProxy(handlerProps: ActorRef => Props) extends Actor {
   import AbstractProxy._
 
@@ -102,8 +98,8 @@ abstract class AbstractProxy(handlerProps: ActorRef => Props) extends Actor {
 
   protected def sendPickleToPeer(pickle: PickleType): Unit
 
-  private[common] def pickleActorRef[P](ref: ActorRef)(implicit builder: PBuilder[P]): P = {
-     
+  private[akka] def pickleActorRef[P](ref: ActorRef)(implicit builder: PBuilder[P]): P = {
+    
     val (side, id) = if(context.children.exists(_ == ref) && ref != this.handlerActor) {
       /* This is a proxy actor for an actor on the client.
        * We need to unbox it to recover the ID the client gave to us for it.
@@ -127,7 +123,7 @@ abstract class AbstractProxy(handlerProps: ActorRef => Props) extends Actor {
         ("id", builder.makeString(id)))
   }
 
-  private[common] def unpickleActorRef[P](pickle: P)(implicit reader: PReader[P]): ActorRef = {
+  private[akka] def unpickleActorRef[P](pickle: P)(implicit reader: PReader[P]): ActorRef = {
     val side = reader.readString(reader.readObjectField(pickle, "side"))
     val id = reader.readString(reader.readObjectField(pickle, "id"))
 
