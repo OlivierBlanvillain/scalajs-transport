@@ -12,13 +12,13 @@ private class BridgeActor(listener: ConnectionListener, out: ActorRef)(
   val promise = Promise[MessageListener]()
   var poorMansBuffer: Future[MessageListener] = promise.future
 
-  val connectionHandle = new ConnectionHandle {
-    override def handlerPromise: Promise[MessageListener] = promise
-    override def write(outboundPayload: String): Unit = out ! outboundPayload
-    override def close(): Unit = context.stop(self)
-  }
   
   override def preStart: Unit = {
+    val connectionHandle = new ConnectionHandle {
+      override def handlerPromise: Promise[MessageListener] = promise
+      override def write(outboundPayload: String): Unit = out ! outboundPayload
+      override def close(): Unit = self ! PoisonPill
+    }
     listener.notify(connectionHandle)
   }
   

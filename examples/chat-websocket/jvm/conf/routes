@@ -7,7 +7,6 @@ GET     /                           controllers.Application.indexDev
 GET     /opt                        controllers.Application.indexOpt
 
 # Socket entry points
-GET     /websocket                   controllers.Application.webSocket
 ->      /sockjs                      controllers.Application.sockJS
 
 #webjars

@@ -45,12 +45,6 @@ lazy val networkJs = project.in(file("network/js"))
   .settings(networkSharedSettings: _*)
   .dependsOn(actors)
 
-lazy val examples = project.settings(commonSettings: _*).aggregate(
-  webRTCExample,
-  chatWebSocket,
-  chatWebRTC,
-  autowire)
-
 lazy val webRTCExample = project.in(file("examples/webrtc"))
   .settings(commonSettings: _*)
   .dependsOn(networkJs)
@@ -105,6 +99,7 @@ lazy val chatWebSocketJs = project.in(file("examples/chat-websocket/js"))
 
 lazy val chatWebRTC = project.in(file("examples/chat-webrtc/jvm"))
   .enablePlugins(PlayScala)
+  .dependsOn(transportJvm)
   .dependsOn(networkPlay)
   .settings(commonSettings: _*)
   .settings(unmanagedSourceDirectories in Compile += baseDirectory.value / "../shared")
@@ -113,6 +108,7 @@ lazy val chatWebRTC = project.in(file("examples/chat-webrtc/jvm"))
 lazy val chatWebRTCJs = project.in(file("examples/chat-webrtc/js"))
   .settings((commonSettings ++ scalaJSSettings): _*)
   .dependsOn(actors)
+  .dependsOn(transportJs)
   .dependsOn(networkJs)
   .settings(
     unmanagedSourceDirectories in Compile +=

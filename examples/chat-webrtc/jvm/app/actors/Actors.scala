@@ -36,7 +36,7 @@ class UserActor(out: ActorRef, board: ActorRef) extends Actor {
   override def receive = Actor.emptyBehavior
 }
 object UserActor {
-  def props(board: ActorRef, out: ActorRef) = Props(new UserActor(out, board))
+  def props(board: ActorRef)(out: ActorRef) = Props(new UserActor(out, board))
 }
 
 case class NewConnection(remote: ActorRef)

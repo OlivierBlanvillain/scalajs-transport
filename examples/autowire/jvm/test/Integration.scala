@@ -9,7 +9,7 @@ class Integration extends BrowserSpecification {
 
   "Autowire helper" should {
 
-    "Handle concurrent requests" in new WithBrowser(PHANTOM) {
+    "Handle concurrent requests" in new WithBrowser(Phantom) {
       browser goTo "/"
       browser waitUntil browser.pageSource.contains("build.sbt")
       browser.pageSource must contain("42")

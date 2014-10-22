@@ -9,13 +9,19 @@ import org.openqa.selenium.firefox.FirefoxDriver
 import org.openqa.selenium.htmlunit.HtmlUnitDriver
 import org.openqa.selenium.remote.DesiredCapabilities
 import org.openqa.selenium.phantomjs.{ PhantomJSDriverService, PhantomJSDriver }
+import org.openqa.selenium.chrome.{ ChromeDriverService, ChromeDriver }
 
-// Copied from https://github.com/buster84/playTutorialWithCucumber
 trait BrowserSpecification extends Specification {
 
   def Firefox = WebDriverFactory(FIREFOX)
+  
+  def Chrome = {
+    System.setProperty("webdriver.chrome.driver", "/opt/google/chromedriver")
+    TestBrowser(new ChromeDriver(), None).webDriver
+  }
 
   def Phantom = {
+    // Copied from https://github.com/buster84/playTutorialWithCucumber
     val sCaps = new DesiredCapabilities()
     val phantomjsPath = System.getenv("PHANTOMJS_PATH")
     
