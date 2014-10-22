@@ -1,15 +1,9 @@
 package transport.akka
 
-import akka.actor._
-import akka.scalajs.jsapi._
-
 import scala.scalajs.js
 
 import org.scalajs.spickling._
 import org.scalajs.spickling.jsany._
-
-import transport._
-import scala.concurrent._
 
 trait Serializer extends AbstractSerializer {
   type PickleType = js.Any
