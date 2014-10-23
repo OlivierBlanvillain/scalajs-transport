@@ -23,7 +23,6 @@ private class WebRTCCallerProxy(calleeRef: ActorRef, handlerProps: ActorRef => P
     setDataChannel(peerConnection.createDataChannel("sendDataChannel"))
     peerConnection.createOffer { description: RTCSessionDescription =>
       peerConnection.setLocalDescription(description)
-      // peer ! SessionDescription(description)
       peer ! SessionDescription(js.JSON.stringify(description))
     }
   }

@@ -18,28 +18,28 @@ class WebSocketClient(implicit executionContext: ExecutionContext) extends WebSo
       val promise = Promise[MessageListener]()
       private var poorMansBuffer: Future[MessageListener] = promise.future
       
-      webSocket.addEventListener("open", { (event: Event) =>
+      webSocket.onopen = { (event: Event) =>
         connectionPromise.success(this)
-      }, useCapture = false)
-      webSocket.addEventListener("message", { (event: Event) =>
+      }
+      webSocket.onmessage = { (event: MessageEvent) =>
         poorMansBuffer = poorMansBuffer.andThen {
           case Success(listener) =>
-            listener.notify(event.asInstanceOf[MessageEvent].data.toString())
+            listener.notify(event.data.toString())
         }
-      }, useCapture = false)
-      webSocket.addEventListener("close", { (event: Event) =>
+      }
+      webSocket.onclose = { (event: Event) =>
         poorMansBuffer = poorMansBuffer.andThen {
           case Success(listener) =>
             listener.closed()
         }
-      }, useCapture = false)
-      webSocket.addEventListener("error", { (event: Event) =>
+      }
+      webSocket.onerror = { (event: Event) =>
         // TODO: transmit this error to the listener.
         poorMansBuffer = poorMansBuffer.andThen {
           case Success(listener) =>
             listener.closed()
         }
-      }, useCapture = false)
+      }
       
       override def handlerPromise: Promise[MessageListener] = promise
       

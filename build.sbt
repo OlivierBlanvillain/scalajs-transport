@@ -20,8 +20,6 @@ lazy val root = project.in(file("."))
 
 lazy val actors = project.settings(commonSettings: _*)
 
-lazy val transport = project.settings(commonSettings: _*).aggregate(transportJvm, transportJs)
-
 lazy val transportJvm = project.in(file("transport/play"))
   .settings(commonSettings: _*)
   .settings(unmanagedSourceDirectories in Compile += baseDirectory.value / "../shared")

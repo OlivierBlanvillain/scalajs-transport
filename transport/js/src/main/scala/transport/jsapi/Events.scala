@@ -24,3 +24,5 @@ trait CloseEvent extends Event {
   val code: js.Number = ???
   val reason: js.String = ???
 }
+
+trait ErrorEvent extends Event

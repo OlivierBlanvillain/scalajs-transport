@@ -18,28 +18,28 @@ class SockJSClient(implicit executionContext: ExecutionContext) extends SockJSTr
       val promise = Promise[MessageListener]()
       private var poorMansBuffer: Future[MessageListener] = promise.future
       
-      sockJS.addEventListener("open", { (event: Event) =>
+      sockJS.onopen = { (event: Event) =>
         connectionPromise.success(this)
-      }, useCapture = false)
-      sockJS.addEventListener("message", { (event: Event) =>
+      }
+      sockJS.onmessage = { (event: MessageEvent) =>
         poorMansBuffer = poorMansBuffer.andThen {
           case Success(listener) =>
-            listener.notify(event.asInstanceOf[MessageEvent].data.toString())
+            listener.notify(event.data.toString())
         }
-      }, useCapture = false)
-      sockJS.addEventListener("close", { (event: Event) =>
+      }
+      sockJS.onclose = { (event: Event) =>
         poorMansBuffer = poorMansBuffer.andThen {
           case Success(listener) =>
             listener.closed()
         }
-      }, useCapture = false)
-      sockJS.addEventListener("error", { (event: Event) =>
+      }
+      sockJS.onerror = { (event: Event) =>
         // TODO: transmit this error to the listener.
         poorMansBuffer = poorMansBuffer.andThen {
           case Success(listener) =>
             listener.closed()
         }
-      }, useCapture = false)
+      }
       
       override def handlerPromise: Promise[MessageListener] = promise
       

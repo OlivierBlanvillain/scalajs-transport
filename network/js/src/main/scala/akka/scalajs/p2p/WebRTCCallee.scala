@@ -26,7 +26,6 @@ private class WebRTCCalleeProxy(handlerProps: ActorRef => Props)
     peerConnection.setRemoteDescription(remoteDescription)
     peerConnection.createAnswer { localDescription: RTCSessionDescription =>
       peerConnection.setLocalDescription(localDescription)
-      // peer ! SessionDescription(localDescription)
       peer ! SessionDescription(js.JSON.stringify(localDescription))
     }  
   }
