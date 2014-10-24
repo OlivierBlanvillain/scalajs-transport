@@ -5,7 +5,7 @@ import scala.concurrent._
 import scala.util.{ Success, Failure }
 import jsapi._
 
-class WebSocketClient(implicit executionContext: ExecutionContext) extends WebSocketTransport {
+class WebSocketClient(implicit ec: ExecutionContext) extends WebSocketTransport {
   override def listen(): Future[Promise[ConnectionListener]] =
     Future.failed(new UnsupportedOperationException(
       "Browsers can only initiate WebSockets connections."))

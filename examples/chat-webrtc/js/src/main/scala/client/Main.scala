@@ -2,14 +2,19 @@ package client
 
 import scala.scalajs.js.annotation.JSExport
 import scala.scalajs.js
+import scala.concurrent.duration._
 import org.scalajs.jquery.{jQuery => jQ, _}
 
+import akka.pattern.Ask.ask
 import akka.actor._
 import akka.scalajs.p2p._
+import akka.util.Timeout
 
 import models._
+import transport._
 import transport.client._
 import transport.akka._
+import transport.p2p._
 import SockJSClient.addressFromPlayRoute
 
 import scalajs.concurrent.JSExecutionContext.Implicits.runNow
@@ -28,12 +33,25 @@ object Main {
 }
 
 class EstablishRtcActor(out: ActorRef) extends Actor {
+  implicit val timeout = Timeout(5.seconds)
+
   override def receive: Receive = {
     case Connected(peer) =>
-      val ref = WebRTCCallee.answerWithActor(DemoActor.props)(context.system)
-      peer ! ref
-    case calleeRef: ActorRef =>
-      WebRTCCaller(calleeRef).callWithActor(DemoActor.props)(context.system)
+      val actorConnection = context.actorOf(ActorToConnection.props)
+      (actorConnection ? ActorToConnection.GetConnection).foreach {
+        case connection: ConnectionHandle =>
+          context.actorOf(ConnectionToActor.props(connection, DemoActor.props))
+      }
+      peer ! actorConnection
+    case ref: ActorRef =>
+      val actorConnection = context.actorOf(ActorToConnection.props)
+      actorConnection ! ref
+      ref ! actorConnection
+
+      (actorConnection ? ActorToConnection.GetConnection).foreach {
+        case connection: ConnectionHandle =>
+          context.actorOf(ConnectionToActor.props(connection, DemoActor.props))
+      }
   }
 }
 object EstablishRtcActor {
