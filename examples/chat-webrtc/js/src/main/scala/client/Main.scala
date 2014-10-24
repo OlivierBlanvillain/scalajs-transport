@@ -2,13 +2,10 @@ package client
 
 import scala.scalajs.js.annotation.JSExport
 import scala.scalajs.js
-import scala.concurrent.duration._
 import org.scalajs.jquery.{jQuery => jQ, _}
 
-import akka.pattern.Ask.ask
 import akka.actor._
 import akka.scalajs.p2p._
-import akka.util.Timeout
 
 import models._
 import transport._
@@ -33,24 +30,20 @@ object Main {
 }
 
 class EstablishRtcActor(out: ActorRef) extends Actor {
-  implicit val timeout = Timeout(5.seconds)
-
   override def receive: Receive = {
     case Connected(peer) =>
-      val actorConnection = context.actorOf(ActorToConnection.props)
-      (actorConnection ? ActorToConnection.GetConnection).foreach {
-        case connection: ConnectionHandle =>
-          context.actorOf(ConnectionToActor.props(connection, DemoActor.props))
+      val (actorConnection, futureConnection) = ActorToConnection(context.system)
+      futureConnection.foreach { connection =>
+        context.actorOf(ConnectionToActor.props(connection, DemoActor.props))
       }
       peer ! actorConnection
     case ref: ActorRef =>
-      val actorConnection = context.actorOf(ActorToConnection.props)
+      val (actorConnection, futureConnection) = ActorToConnection(context.system)
       actorConnection ! ref
       ref ! actorConnection
 
-      (actorConnection ? ActorToConnection.GetConnection).foreach {
-        case connection: ConnectionHandle =>
-          context.actorOf(ConnectionToActor.props(connection, DemoActor.props))
+      futureConnection.foreach { connection =>
+        context.actorOf(ConnectionToActor.props(connection, DemoActor.props))
       }
   }
 }
