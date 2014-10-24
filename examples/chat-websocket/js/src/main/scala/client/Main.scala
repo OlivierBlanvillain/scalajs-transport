@@ -31,7 +31,7 @@ class DemoActor(out: ActorRef) extends Actor {
     jQ("#discussion").append("<hr>")
   }
 
-  override def receive: Receive = {
+  def receive: Receive = {
     case Connected(peer) =>
       jQ("#msgform").submit { (event: JQueryEventObject) =>
         event.preventDefault()

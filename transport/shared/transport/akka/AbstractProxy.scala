@@ -54,7 +54,7 @@ abstract class AbstractProxy(handlerProps: ActorRef => Props) extends Actor {
 
   private var handlerActor: ActorRef = _
   
-  override def receive = {
+  def receive = {
     case ConnectionClosed =>
       context.stop(self)
 

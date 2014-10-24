@@ -64,7 +64,7 @@ class Local(out: ActorRef) extends Actor {
     sendButton.disabled = false
     closeButton.disabled = false
   }
-  override def receive = {
+  def receive = {
     case data: String =>
       println("Sent data: " + data)
       out ! data
@@ -75,7 +75,7 @@ class Remote(out: ActorRef) extends Actor {
   override def preStart = {
     WebRTCExample.remote = self
   }
-  override def receive = {
+  def receive = {
     case data: String =>
       println("Received message: " + data)
       document.getElementById("dataChannelReceive").value = data

@@ -1,8 +1,9 @@
 package client
 
 import scala.scalajs.js.annotation.JSExport
+import scala.concurrent.Future
 import scala.scalajs.js
-import org.scalajs.jquery.{jQuery => jQ, _}
+import org.scalajs.jquery.{ jQuery => jQ, _ }
 
 import akka.actor._
 import akka.scalajs.p2p._
@@ -30,21 +31,26 @@ object Main {
 }
 
 class EstablishRtcActor(out: ActorRef) extends Actor {
-  override def receive: Receive = {
+  def receive: Receive = {
     case Connected(peer) =>
       val (actorConnection, futureConnection) = ActorToConnection(context.system)
-      futureConnection.foreach { connection =>
-        context.actorOf(ConnectionToActor.props(connection, DemoActor.props))
-      }
+      use(futureConnection)
       peer ! actorConnection
-    case ref: ActorRef =>
-      val (actorConnection, futureConnection) = ActorToConnection(context.system)
-      actorConnection ! ref
-      ref ! actorConnection
 
-      futureConnection.foreach { connection =>
+    case remoteActorConnection: ActorRef =>
+      val (actorConnection, futureConnection) = ActorToConnection(context.system)
+      actorConnection ! remoteActorConnection
+      remoteActorConnection ! actorConnection
+      use(futureConnection)
+  }
+  
+  def use(futureConnection: Future[ConnectionHandle]): Unit = {
+    futureConnection.foreach { signalingChannel =>
+      val futureRTC = new WebRTCTransport().connect(signalingChannel)
+      futureRTC.foreach { connection =>
         context.actorOf(ConnectionToActor.props(connection, DemoActor.props))
       }
+    }
   }
 }
 object EstablishRtcActor {

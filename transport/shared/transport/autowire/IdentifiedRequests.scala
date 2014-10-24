@@ -44,7 +44,7 @@ class IdentifiedCallOverConnection(
 class IdentifiedMessageListener(promises: PendingPromises[String])(
       implicit ec: ExecutionContext) extends MessageListener {
 
-  override def notify(inboundPayload: String): Unit = {
+  def notify(inboundPayload: String): Unit = {
     val identifiedResponse = upickle.read[ResponseWithId](inboundPayload)
     promises.get(identifiedResponse.id).success(identifiedResponse.res)
   }
@@ -56,9 +56,9 @@ class IdentifiedMessageListener(promises: PendingPromises[String])(
 class IdentifiedConnectionListener(actualCall: Request[String] => Future[String])(
       implicit ec: ExecutionContext) extends ConnectionListener {
   
-  override def notify(connection: ConnectionHandle): Unit = connection.handlerPromise.success {
+  def notify(connection: ConnectionHandle): Unit = connection.handlerPromise.success {
     new MessageListener {
-      override def notify(pickle: String): Unit = {
+      def notify(pickle: String): Unit = {
         val identifiedRequest = upickle.read[RequestWithId](pickle)
         val result: Future[String] = actualCall(identifiedRequest.req)
         result.foreach { response =>

@@ -5,7 +5,7 @@ import akka.actor._
 import models._
 
 class PeerMatcher extends Actor {
-  override def receive: Receive = {
+  def receive: Receive = {
     case NewConnection(user) =>
       context.watch(user)
       context.become(pending(user))
@@ -31,7 +31,7 @@ class UserActor(out: ActorRef, board: ActorRef) extends Actor {
     board ! NewConnection(out)
   }
 
-  override def receive = Actor.emptyBehavior
+  def receive = Actor.emptyBehavior
 }
 object UserActor {
   def props(board: ActorRef)(out: ActorRef) = Props(new UserActor(out, board))

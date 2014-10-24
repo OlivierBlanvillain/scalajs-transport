@@ -28,14 +28,14 @@ case class SockJSServer(implicit ec: ExecutionContext, app: Application)
     BridgeActor.actionHandle(promise)
   }
   
-  override def listen(): Future[Promise[ConnectionListener]] =
+  def listen(): Future[Promise[ConnectionListener]] =
     Future.successful(promise)
   
-  override def connect(remote: SockJSUrl): Future[ConnectionHandle] =
+  def connect(remote: SockJSUrl): Future[ConnectionHandle] =
     Future.failed(new UnsupportedOperationException(
       "Servers cannot initiate SockJSs connections."))
   
-  override def shutdown(): Unit = ()
+  def shutdown(): Unit = ()
 }
 
 object SockJSServer {

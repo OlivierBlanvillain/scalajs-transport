@@ -28,14 +28,14 @@ case class WebSocketServer(implicit ec: ExecutionContext, app: Application)
     BridgeActor.actionHandle(promise)
   }
 
-  override def listen(): Future[Promise[ConnectionListener]] =
+  def listen(): Future[Promise[ConnectionListener]] =
     Future.successful(promise)
   
-  override def connect(remote: WebSocketUrl): Future[ConnectionHandle] =
+  def connect(remote: WebSocketUrl): Future[ConnectionHandle] =
     Future.failed(new UnsupportedOperationException(
       "Servers cannot initiate WebSockets connections."))
   
-  override def shutdown(): Unit = ()
+  def shutdown(): Unit = ()
 }
 
 object WebSocketServer {

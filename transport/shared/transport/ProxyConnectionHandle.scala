@@ -36,9 +36,9 @@ class ProxyConnectionHandle extends ConnectionHandle {
     }
   }
     
-  override def handlerPromise: Promise[MessageListener] = promise
-  override def write(outboundPayload: String): Unit = peer.notify(Payload(outboundPayload))
-  override def close(): Unit = peer.notify(Closed.asInstanceOf[Message])
+  def handlerPromise: Promise[MessageListener] = promise
+  def write(outboundPayload: String): Unit = peer.notify(Payload(outboundPayload))
+  def close(): Unit = peer.notify(Closed.asInstanceOf[Message])
   
 }
 object ProxyConnectionHandle {

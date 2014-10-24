@@ -79,10 +79,10 @@ class RTCDataChannel extends EventTarget {
   var readyState: js.String = ???
   var bufferedAmount: js.Number = ???
   var binaryType: js.String = ???
-  var onopen: js.Function1[Event, Unit] = ???
-  var onerror: js.Function1[Event, Unit] = ???
-  var onclose: js.Function1[Event, Unit] = ???
-  var onmessage: js.Function1[RTCMessageEvent, Unit] = ???
+  var onopen: js.Function1[Event, _] = ???
+  var onerror: js.Function1[Event, _] = ???
+  var onclose: js.Function1[Event, _] = ???
+  var onmessage: js.Function1[RTCMessageEvent, _] = ???
   def close(): Unit = ???
   def send(data: js.String): Unit = ???
 }
@@ -134,21 +134,21 @@ class webkitRTCPeerConnection protected () extends js.Object {
   def getLocalStreams(): js.Array[MediaStream] = ???
   def getRemoteStreams(): js.Array[MediaStream] = ???
   def createDataChannel(label: js.String = ???, dataChannelDict: RTCDataChannelInit = ???): RTCDataChannel = ???
-  var ondatachannel: js.Function1[Event, Unit] = ???
+  var ondatachannel: js.Function1[Event, _] = ???
   def addStream(stream: MediaStream, constraints: RTCMediaConstraints = ???): Unit = ???
   def removeStream(stream: MediaStream): Unit = ???
   def close(): Unit = ???
-  var onnegotiationneeded: js.Function1[Event, Unit] = ???
-  var onconnecting: js.Function1[Event, Unit] = ???
-  var onopen: js.Function1[Event, Unit] = ???
-  var onaddstream: js.Function1[RTCMediaStreamEvent, Unit] = ???
-  var onremovestream: js.Function1[RTCMediaStreamEvent, Unit] = ???
-  var onstatechange: js.Function1[Event, Unit] = ???
-  var onicechange: js.Function1[Event, Unit] = ???
-  var onicecandidate: js.Function1[RTCIceCandidateEvent, Unit] = ???
-  var onidentityresult: js.Function1[Event, Unit] = ???
-  var onsignalingstatechange: js.Function1[Event, Unit] = ???
-  var getStats: js.Function2[RTCStatsCallback, webkitRTCPeerConnectionErrorCallback, Unit] = ???
+  var onnegotiationneeded: js.Function1[Event, _] = ???
+  var onconnecting: js.Function1[Event, _] = ???
+  var onopen: js.Function1[Event, _] = ???
+  var onaddstream: js.Function1[RTCMediaStreamEvent, _] = ???
+  var onremovestream: js.Function1[RTCMediaStreamEvent, _] = ???
+  var onstatechange: js.Function1[Event, _] = ???
+  var onicechange: js.Function1[Event, _] = ???
+  var onicecandidate: js.Function1[RTCIceCandidateEvent, _] = ???
+  var onidentityresult: js.Function1[Event, _] = ???
+  var onsignalingstatechange: js.Function1[Event, _] = ???
+  var getStats: js.Function2[RTCStatsCallback, webkitRTCPeerConnectionErrorCallback, _] = ???
 }
 
 object webkitRTCPeerConnection extends js.Object {

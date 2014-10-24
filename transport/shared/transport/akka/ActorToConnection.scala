@@ -7,14 +7,13 @@ import akka.actor._
 
 import transport._
 
-// TODO: private
-class ActorToConnection(connectionPromise: Promise[ConnectionHandle])(
+private class ActorToConnection(connectionPromise: Promise[ConnectionHandle])(
       implicit ec: ExecutionContext) extends Actor {
   val messageListenerPromise = Promise[MessageListener]()
   var poorMansBuffer: Future[MessageListener] = messageListenerPromise.future
   val peerPromise = Promise[ActorRef]()
   
-  override def receive = {
+  def receive = {
     case peer: ActorRef =>
       context.watch(peer)
       peerPromise.success(peer)
@@ -37,13 +36,13 @@ class ActorToConnection(connectionPromise: Promise[ConnectionHandle])(
   peerPromise.future.map { peer =>
     connectionPromise.success(
       new ConnectionHandle {
-        override def handlerPromise: Promise[MessageListener] =
+        def handlerPromise: Promise[MessageListener] =
           messageListenerPromise
         
-        override def write(outboundPayload: String): Unit =
+        def write(outboundPayload: String): Unit =
           peer ! outboundPayload
         
-        override def close(): Unit =
+        def close(): Unit =
           context.stop(self)
       }
     )

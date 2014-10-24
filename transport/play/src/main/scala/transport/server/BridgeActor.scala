@@ -15,9 +15,9 @@ private class BridgeActor(listener: ConnectionListener, out: ActorRef)(
   
   override def preStart: Unit = {
     val connectionHandle = new ConnectionHandle {
-      override def handlerPromise: Promise[MessageListener] = promise
-      override def write(outboundPayload: String): Unit = out ! outboundPayload
-      override def close(): Unit = self ! PoisonPill
+      def handlerPromise: Promise[MessageListener] = promise
+      def write(outboundPayload: String): Unit = out ! outboundPayload
+      def close(): Unit = self ! PoisonPill
     }
     listener.notify(connectionHandle)
   }
@@ -28,7 +28,7 @@ private class BridgeActor(listener: ConnectionListener, out: ActorRef)(
     }
   }
   
-  override def receive = {
+  def receive = {
     case inboundPayload: String =>
       poorMansBuffer = poorMansBuffer.andThen {
         case Success(l) => l.notify(inboundPayload)
