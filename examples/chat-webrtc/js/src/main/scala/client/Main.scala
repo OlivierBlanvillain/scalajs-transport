@@ -6,7 +6,6 @@ import scala.scalajs.js
 import org.scalajs.jquery.{ jQuery => jQ, _ }
 
 import akka.actor._
-import akka.scalajs.p2p._
 
 import models._
 import transport._

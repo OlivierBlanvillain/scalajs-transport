@@ -1,13 +1,10 @@
 package actors
 
 import akka.actor._
-import akka.scalajs.common.RegisterWebRTCPicklers
 
 import models._
 
 class PeerMatcher extends Actor {
-  RegisterWebRTCPicklers.registerPicklers()
-  
   def receive: Receive = {
     case NewConnection(user) =>
       context.watch(user)

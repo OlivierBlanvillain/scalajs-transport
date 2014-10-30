@@ -27,7 +27,8 @@ class WebRTCTransport(implicit ec: ExecutionContext) extends Transport {
 
 private class WebRTCPeer(signalingChannel: ConnectionHandle, priority: Double)(
       implicit ec: ExecutionContext) {
-  RegisterWebRTCPicklers.registerPicklers()
+  import WebRTCPeer._
+  registerPicklers()
   
   private val webRTCConnection = new webkitRTCPeerConnection(null, DataChannelsConstraint)
   private val connectionPromise = Promise[ConnectionHandle]()
@@ -130,119 +131,29 @@ private class WebRTCPeer(signalingChannel: ConnectionHandle, priority: Double)(
     }
   }
 }
+private object WebRTCPeer {
+  case class Priority(value: Double)
+  case class IceCandidate(string: String)
+  case class SessionDescription(string: String)
 
-private object OptionalMediaConstraint extends RTCOptionalMediaConstraint {
-  override val DtlsSrtpKeyAgreement: js.Boolean = false
-  override val RtpDataChannels: js.Boolean = false
+  private lazy val _registerPicklers: Unit = {
+    import org.scalajs.spickling._
+    import PicklerRegistry.register
+    
+    register[Priority]
+    register[IceCandidate]
+    register[SessionDescription]
+  }
+
+  def registerPicklers(): Unit = _registerPicklers
+
+  object OptionalMediaConstraint extends RTCOptionalMediaConstraint {
+    override val DtlsSrtpKeyAgreement: js.Boolean = false
+    override val RtpDataChannels: js.Boolean = false
+  }
+
+  object DataChannelsConstraint extends RTCMediaConstraints {
+    override val mandatory: RTCMediaOfferConstraints = null
+    override val optional: js.Array[RTCOptionalMediaConstraint] = js.Array(OptionalMediaConstraint)
+  }
 }
-private object DataChannelsConstraint extends RTCMediaConstraints {
-  override val mandatory: RTCMediaOfferConstraints = null
-  override val optional: js.Array[RTCOptionalMediaConstraint] = js.Array(OptionalMediaConstraint)
-}
-
-// //////////////////////////////////////
-
-// private class WebRTCCalleeProxy(handlerProps: ActorRef => Props)
-//     extends WebRTCPeersssdsdsds(handlerProps) {
-//   var peer: ActorRef = _
-  
-//   def receivedSignalingChannel(signalingChannel: ActorRef): Unit = {
-//     peer = signalingChannel
-//     webRTCConnection.ondatachannel = { event: Event =>
-//       setDataChannel(event.asInstanceOf[RTCDataChannelEvent].channel) // WebRTC API typo?
-//     }
-//   }
-
-//   def receivedSessionDescription(remoteDescription: RTCSessionDescription): Unit = {
-//     webRTCConnection.setRemoteDescription(remoteDescription)
-//     webRTCConnection.createAnswer { localDescription: RTCSessionDescription =>
-//       webRTCConnection.setLocalDescription(localDescription)
-//       peer ! SessionDescription(js.JSON.stringify(localDescription))
-//     }
-//   }
-// }
-
-
-// //////////////////////////////////////
-
-// private class WebRTCCallerProxy(calleeRef: ActorRef, handlerProps: ActorRef => Props)
-//     extends WebRTCPeersssdsdsds(handlerProps) {
-//   override def preStart(): Unit = {
-//     super.preStart()
-//     self ! SignalingChannel(calleeRef)
-//     calleeRef ! SignalingChannel(self)
-//   }
-  
-//   def receivedSignalingChannel(peer: ActorRef): Unit = {
-//     setDataChannel(webRTCConnection.createDataChannel("sendDataChannel"))
-//     webRTCConnection.createOffer { description: RTCSessionDescription =>
-//       webRTCConnection.setLocalDescription(description)
-//       peer ! SessionDescription(js.JSON.stringify(description))
-//     }
-//   }
-  
-//   def receivedSessionDescription(remoteDescription: RTCSessionDescription): Unit = {
-//     webRTCConnection.setRemoteDescription(remoteDescription)
-//   }
-// }
-
-// /////////////////////////////////////7
-
-// private abstract class WebRTCPeersssdsdsds(handlerProps: ActorRef => Props) extends Actor {
-//   RegisterWebRTCPicklers.registerPicklers()
-//   var webRTCConnection: webkitRTCPeerConnection = _
-//   var dataChannel: Option[RTCDataChannel] = None
-//   var handlerActor: ActorRef = _
-
-//   override def preStart(): Unit = {
-//     webRTCConnection = new webkitRTCPeerConnection(null, DataChannelsConstraint)
-//   }
-  
-//   override def postStop(): Unit = {
-//     dataChannel.foreach(_.close())
-//     webRTCConnection.close()
-//   }
-
-//   def receive = {
-//     case SignalingChannel(peer: ActorRef) =>
-//       webRTCConnection.onicecandidate = { event: RTCIceCandidateEvent =>
-//         if(event.candidate != null) {
-//           peer ! IceCandidate(js.JSON.stringify(event.candidate))
-//         }
-//       }
-//       receivedSignalingChannel(peer)
-//     case SessionDescription(description) =>
-//       receivedSessionDescription(
-//         new RTCSessionDescription(js.JSON.parse(description).asInstanceOf[RTCSessionDescriptionInit])
-//       )
-//     case IceCandidate(candidate) =>
-//       webRTCConnection.addIceCandidate(new RTCIceCandidate(js.JSON.parse(candidate).asInstanceOf[RTCIceCandidate]))
-//     case Terminated(a) if a == handlerActor =>
-//       context.stop(self)
-//     case message =>
-//       val pickle = PicklerRegistry.pickle(message)
-//       dataChannel.foreach(_.send(js.JSON.stringify(pickle)))
-//   }
-  
-//   def setDataChannel(dc: RTCDataChannel) = {
-//     dc.onopen = { event: Event =>
-//       handlerActor = context.watch(context.actorOf(handlerProps(self)))
-//     }
-//     dc.onmessage = { event: RTCMessageEvent =>
-//       val pickle = js.JSON.parse(event.data.toString())
-//       val message = PicklerRegistry.unpickle(pickle.asInstanceOf[js.Any])
-//       handlerActor ! message
-//     }
-//     dc.onclose = { event: Event =>
-//       handlerActor ! PoisonPill
-//     }
-//     dc.onerror = { event: Event =>
-//       handlerActor ! PoisonPill
-//     }
-//     dataChannel = Some(dc)
-//   }
-
-//   def receivedSignalingChannel(peer: ActorRef): Unit
-
-//   def receivedSessionDescription(description: RTCSessionDescription): Unit
-// }
