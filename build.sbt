@@ -19,12 +19,16 @@ val commonSettings = Seq(
 //   .aggregate(actors)
 
 // lazy val examples = project.settings(commonSettings: _*).aggregate(
-//   webRTCExample,
-//   chatWebSocket,
-//   chatWebRTC,
-//   autowire)
+//     webRTCExample,
+//     chatWebSocket,
+//     chatWebRTC,
+//     autowire)
 
-lazy val transportJvm = project.in(file("transport/play"))
+lazy val transportPlay = project.in(file("transport/play"))
+  .settings(commonSettings: _*)
+  .settings(unmanagedSourceDirectories in Compile += baseDirectory.value / "../shared")
+
+lazy val transportJvm = project.in(file("transport/jvm"))
   .settings(commonSettings: _*)
   .settings(unmanagedSourceDirectories in Compile += baseDirectory.value / "../shared")
 
@@ -37,7 +41,7 @@ lazy val webRTCExample = project.in(file("examples/webrtc"))
 
 lazy val autowire = project.in(file("examples/autowire/jvm"))
   .enablePlugins(PlayScala)
-  .dependsOn(transportJvm)
+  .dependsOn(transportPlay)
   .settings(commonSettings: _*)
   .settings(unmanagedSourceDirectories in Compile += baseDirectory.value / "../shared")
   .settings(unmanagedResourceDirectories in Compile += baseDirectory.value / "../js/src")
@@ -60,7 +64,7 @@ lazy val autowireJs = project.in(file("examples/autowire/js"))
 
 lazy val chatWebSocket = project.in(file("examples/chat-websocket/jvm"))
   .enablePlugins(PlayScala)
-  .dependsOn(transportJvm)
+  .dependsOn(transportPlay)
   .settings(commonSettings: _*)
   .settings(unmanagedSourceDirectories in Compile += baseDirectory.value / "../shared")
   .settings(unmanagedResourceDirectories in Compile += baseDirectory.value / "../js/src")
@@ -84,7 +88,7 @@ lazy val chatWebSocketJs = project.in(file("examples/chat-websocket/js"))
 
 lazy val chatWebRTC = project.in(file("examples/chat-webrtc/jvm"))
   .enablePlugins(PlayScala)
-  .dependsOn(transportJvm)
+  .dependsOn(transportPlay)
   .settings(commonSettings: _*)
   .settings(unmanagedSourceDirectories in Compile += baseDirectory.value / "../shared")
   .settings(unmanagedResourceDirectories in Compile += baseDirectory.value / "../js/src")

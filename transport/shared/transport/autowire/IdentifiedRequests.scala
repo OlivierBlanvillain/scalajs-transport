@@ -5,7 +5,6 @@ import scala.concurrent._
 import scala.collection.mutable
 import transport._
 import _root_.autowire.Core.Request
-import scala.concurrent._
 
 /** Pool of pending promises identified by integers. Promises are removed upon completion. */
 class PendingPromises[T](implicit ec: ExecutionContext) {
