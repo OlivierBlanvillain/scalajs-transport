@@ -1,7 +1,3 @@
-import ScalaJSKeys._
-
-scalaJSSettings
-
-name := "Scala.js actors examples - WebRTC"
-
-normalizedName := "scalajs-actors-example-webrtc"
+libraryDependencies ++= Seq(
+  "org.scalajs" %%% "scalajs-actors" % "0.1-SNAPSHOT"
+)
