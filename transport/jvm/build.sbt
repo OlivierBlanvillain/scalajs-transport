@@ -5,11 +5,12 @@ resolvers ++= Seq(
 )
 
 libraryDependencies ++= Seq(
+//  "org.glassfish.tyrus" % "tyrus-server" % "1.8.3",
+//  "org.glassfish.tyrus" % "tyrus-container-grizzly-server" % "1.8.3",
+  "org.glassfish.tyrus.bundles" % "tyrus-standalone-client" % "1.8.3",
   "org.scalajs" %% "scalajs-pickling-play-json" % "0.3.1",
   "com.lihaoyi" %% "upickle" % "0.2.2",
   "com.lihaoyi" %% "autowire" % "0.2.1",
   "org.webjars" % "sockjs-client" % "0.3.4",
-  "com.github.fdimuccio" %% "play2-sockjs" % "0.3.0",
-  "com.typesafe.akka" %% "akka-actor" % "2.3.6",
-  "com.typesafe.play" %% "play" % "2.3.5"
+  "com.typesafe.akka" %% "akka-actor" % "2.3.6"
 )
