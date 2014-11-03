@@ -55,11 +55,6 @@ object WebSocketServerInitializer extends ChannelInitializer[SocketChannel] {
 
 
 class WebSocketServerHandler extends SimpleChannelInboundHandler[Object] {
-
-  val WEBSOCKET_PATH = "/websocket"
-
-  var handshaker: WebSocketServerHandshaker = _
-
   def channelRead0(ctx: ChannelHandlerContext, msg: Object): Unit = {
     msg match {
       case f: FullHttpRequest => handleHttpRequest(ctx, f)
@@ -67,47 +62,30 @@ class WebSocketServerHandler extends SimpleChannelInboundHandler[Object] {
     }
   }
 
-  override def channelReadComplete(ctx: ChannelHandlerContext): Unit = {
-    ctx.flush()
-  }
-
   def handleHttpRequest(ctx: ChannelHandlerContext, req: FullHttpRequest): Unit = {
     if (!req.getDecoderResult().isSuccess()) {
       sendHttpResponse(ctx, req, new DefaultFullHttpResponse(HTTP_1_1, BAD_REQUEST))
-      return
-    }
-
-    // Allow only GET methods.
-    if (req.getMethod() != GET) {
+    } else if (req.getMethod() != GET || !"/".equals(req.getUri()))
       sendHttpResponse(ctx, req, new DefaultFullHttpResponse(HTTP_1_1, FORBIDDEN))
-      return
-    }
-
-    // Send the demo page and favicon.ico
-    if ("/".equals(req.getUri())) {
-      val content: ByteBuf = WebSocketServerIndexPage.getContent(getWebSocketLocation(req))
-      val res = new DefaultFullHttpResponse(HTTP_1_1, OK, content)
-
-      res.headers().set(CONTENT_TYPE, "text/html charset=UTF-8")
-      HttpHeaders.setContentLength(res, content.readableBytes())
-
-      sendHttpResponse(ctx, req, res)
-      return
-    }
-    if ("/favicon.ico".equals(req.getUri())) {
-      val res = new DefaultFullHttpResponse(HTTP_1_1, NOT_FOUND)
-      sendHttpResponse(ctx, req, res)
-      return
-    }
-
-    // Handshake
-    val wsFactory = new WebSocketServerHandshakerFactory(getWebSocketLocation(req), null, true)
-    handshaker = wsFactory.newHandshaker(req)
-    if (handshaker == null) {
-      WebSocketServerHandshakerFactory.sendUnsupportedVersionResponse(ctx.channel())
     } else {
-      handshaker.handshake(ctx.channel(), req)
+      val location = "ws://" + req.headers().get(HOST)
+      val wsFactory = new WebSocketServerHandshakerFactory(location, null, true)
+      handshaker = wsFactory.newHandshaker(req)
+      if (handshaker == null) {
+        WebSocketServerHandshakerFactory.sendUnsupportedVersionResponse(ctx.channel())
+      } else {
+        handshaker.handshake(ctx.channel(), req)
+      }
     }
+    
+    // Serve HTML:
+    // val content: ByteBuf = Unpooled.copiedBuffer("Hello HTML!", CharsetUtil.US_ASCII)
+    // val res = new DefaultFullHttpResponse(HTTP_1_1, OK, content)
+
+    // res.headers().set(CONTENT_TYPE, "text/html charset=UTF-8")
+    // HttpHeaders.setContentLength(res, content.readableBytes())
+
+    // sendHttpResponse(ctx, req, res)
   }
 
   def handleWebSocketFrame(ctx: ChannelHandlerContext, frame: WebSocketFrame): Unit = {
@@ -118,86 +96,23 @@ class WebSocketServerHandler extends SimpleChannelInboundHandler[Object] {
       case _: PingWebSocketFrame => 
         ctx.channel().write(new PongWebSocketFrame(frame.content().retain()))
         
-      case _: TextWebSocketFrame => 
-        throw new UnsupportedOperationException(String.format("%s frame types not supported", frame.getClass().getName()))
-        
-      case _ =>
+      case f: TextWebSocketFrame => 
         // Send the uppercase string back.
-        val request = (frame.asInstanceOf[TextWebSocketFrame]).text()
+        val request = f.text()
         System.err.printf("%s received %s%n", ctx.channel(), request)
         ctx.channel().write(new TextWebSocketFrame(request.toUpperCase()))
+        
+      case _ =>
+        throw new UnsupportedOperationException(String.format("%s frame types not supported", frame.getClass().getName()))
     }
   }
 
-  def sendHttpResponse(ctx: ChannelHandlerContext, req: FullHttpRequest, res: FullHttpResponse): Unit = {
-    // Generate an error page if response getStatus code is not OK (200).
-    if (res.getStatus().code() != 200) {
-      val buf = Unpooled.copiedBuffer(res.getStatus().toString(), CharsetUtil.UTF_8)
-      res.content().writeBytes(buf)
-      buf.release()
-      HttpHeaders.setContentLength(res, res.content().readableBytes())
-    }
-
-    // Send the response and close the connection if necessary.
-    val f = ctx.channel().writeAndFlush(res)
-    if (!HttpHeaders.isKeepAlive(req) || res.getStatus().code() != 200) {
-      f.addListener(ChannelFutureListener.CLOSE)
-    }
+  override def channelReadComplete(ctx: ChannelHandlerContext): Unit = {
+    ctx.flush()
   }
 
   override def exceptionCaught(ctx: ChannelHandlerContext, cause: Throwable): Unit = {
     cause.printStackTrace()
     ctx.close()
   }
-
-  def getWebSocketLocation(req: FullHttpRequest): String = {
-    "ws://" + req.headers().get(HOST) + WEBSOCKET_PATH
-  }
-}
-
-object WebSocketServerIndexPage {
-
-  def getContent(webSocketLocation: String): ByteBuf = Unpooled.copiedBuffer(s"""
-    | <html><head><title>Web Socket Test</title></head>
-    | <body>
-    | <script type="text/javascript">
-    | var socket;
-    | if (!window.WebSocket) {
-    |   window.WebSocket = window.MozWebSocket;
-    | }
-    | if (window.WebSocket) {
-    |   socket = new WebSocket("$webSocketLocation");
-    |   socket.onmessage = function(event) {
-    |     var ta = document.getElementById('responseText');
-    |     ta.value = ta.value + '\\n' + event.data
-    |   };
-    |   socket.onopen = function(event) {
-    |     var ta = document.getElementById('responseText');
-    |     ta.value = "Web Socket opened!";
-    |   };
-    |   socket.onclose = function(event) {
-    |     var ta = document.getElementById('responseText');
-    |     ta.value = ta.value + "Web Socket closed"; 
-    |   };
-    | } else {
-    |   alert("Your browser does not support Web Socket.");
-    | }
-    | function send(message) {
-    |   if (!window.WebSocket) { return; }
-    |   if (socket.readyState == WebSocket.OPEN) {
-    |     socket.send(message);
-    |   } else {
-    |     alert("The socket is not open.");
-    |   }
-    | }
-    | </script>
-    | <form onsubmit="return false;">
-    | <input type="text" name="message" value="Hello, World!"/>
-    | <input type="button" value="Send Web Socket Data"
-    |        onclick="send(this.form.message.value)" />
-    | <h3>Output</h3>
-    | <textarea id="responseText" style="width:500px;height:300px;"></textarea>
-    | </form>
-    | </body>
-    | </html>""".stripMargin.trim , CharsetUtil.US_ASCII)
 }
