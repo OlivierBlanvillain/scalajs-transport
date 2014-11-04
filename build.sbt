@@ -23,9 +23,8 @@ val commonSettings = Seq(
 parallelExecution in Global := false
 
 lazy val examples = project.settings(commonSettings: _*).aggregate(
-    chatWebSocket,
-    chatWebRTC,
-    autowire)
+    chatWebSocket, chatWebSocketJs, chatWebRTC, chatWebRTCJs, transportJs,
+    transportJvm, transportPlay, autowire, autowireJs)
 
 lazy val transportPlay = project.in(file("transport/play"))
   .settings(commonSettings: _*)
