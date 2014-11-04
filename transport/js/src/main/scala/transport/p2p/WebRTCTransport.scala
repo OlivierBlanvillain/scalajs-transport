@@ -100,29 +100,19 @@ private class WebRTCPeer(signalingChannel: ConnectionHandle, priority: Double)(
   
   private def createConnectionHandle(dc: RTCDataChannel): Unit = {
     new ConnectionHandle {
-      private val promise = Promise[MessageListener]()
-      private var poorMansBuffer: Future[MessageListener] = promise.future
+      private val promise = QueueablePromise[MessageListener]()
       
       dc.onopen = { event: Event =>
         connectionPromise.success(this)
       }
       dc.onmessage = { event: RTCMessageEvent =>
-        poorMansBuffer = poorMansBuffer.andThen {
-          case Success(listener) =>
-            listener.notify(event.data.toString())
-        }
+        promise.queue(_.notify(event.data.toString))
       }
       dc.onclose = { event: Event =>
-        poorMansBuffer = poorMansBuffer.andThen {
-          case Success(listener) =>
-            listener.closed()
-        }
+        promise.queue(_.closed())
       }
       dc.onerror = { event: Event =>
-        poorMansBuffer = poorMansBuffer.andThen {
-          case Success(listener) =>
-            listener.closed()
-        }
+        promise.queue(_.closed())
       }
       
       def handlerPromise: Promise[MessageListener] = promise
