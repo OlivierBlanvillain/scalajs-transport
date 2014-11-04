@@ -15,30 +15,20 @@ class SockJSClient(implicit ec: ExecutionContext) extends SockJSTransport {
     
     new ConnectionHandle {
       private val sockJS = new SockJS(remote.url)
-      private val promise = Promise[MessageListener]()
-      private var poorMansBuffer: Future[MessageListener] = promise.future
+      private val promise = QueueablePromise[MessageListener]()
       
       sockJS.onopen = { event: Event =>
         connectionPromise.success(this)
       }
       sockJS.onmessage = { event: MessageEvent =>
-        poorMansBuffer = poorMansBuffer.andThen {
-          case Success(listener) =>
-            listener.notify(event.data.toString())
-        }
+        promise.queue(_.notify(event.data.toString))
       }
       sockJS.onclose = { event: Event =>
-        poorMansBuffer = poorMansBuffer.andThen {
-          case Success(listener) =>
-            listener.closed()
-        }
+        promise.queue(_.closed())
       }
       sockJS.onerror = { event: Event =>
         // TODO: transmit this error to the listener?
-        poorMansBuffer = poorMansBuffer.andThen {
-          case Success(listener) =>
-            listener.closed()
-        }
+        promise.queue(_.closed())
       }
       
       def handlerPromise: Promise[MessageListener] = promise

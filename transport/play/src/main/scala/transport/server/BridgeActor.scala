@@ -9,9 +9,7 @@ import transport._
 
 private class BridgeActor(listener: ConnectionListener, out: ActorRef)(
       implicit ec: ExecutionContext) extends Actor {
-  val promise = Promise[MessageListener]()
-  var poorMansBuffer: Future[MessageListener] = promise.future
-
+  val promise = QueueablePromise[MessageListener]()
   
   override def preStart: Unit = {
     val connectionHandle = new ConnectionHandle {
@@ -23,16 +21,12 @@ private class BridgeActor(listener: ConnectionListener, out: ActorRef)(
   }
   
   override def postStop: Unit = {
-    poorMansBuffer = poorMansBuffer.andThen {
-      case Success(l) => l.closed()
-    }
+    promise.queue(_.closed())
   }
   
   def receive = {
-    case inboundPayload: String =>
-      poorMansBuffer = poorMansBuffer.andThen {
-        case Success(l) => l.notify(inboundPayload)
-      }
+    case m: String =>
+      promise.queue(_.notify(m))
   }
 }
 

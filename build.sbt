@@ -18,11 +18,13 @@ val commonSettings = Seq(
 //   .settings(commonSettings: _*)
 //   .aggregate(actors)
 
-// lazy val examples = project.settings(commonSettings: _*).aggregate(
-//     webRTCExample,
-//     chatWebSocket,
-//     chatWebRTC,
-//     autowire)
+// Apparently this is the only way to run aggregated tests sequentially.
+// See https://github.com/sbt/sbt/issues/882.
+parallelExecution in Global := false
+
+lazy val examples = project.settings(commonSettings: _*).aggregate(
+    chatWebSocket, chatWebSocketJs, chatWebRTC, chatWebRTCJs, transportJs,
+    transportJvm, transportPlay, autowire, autowireJs)
 
 lazy val transportPlay = project.in(file("transport/play"))
   .settings(commonSettings: _*)
