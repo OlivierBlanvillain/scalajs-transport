@@ -14,8 +14,8 @@ class SockJSClient(implicit ec: ExecutionContext) extends SockJSTransport {
     val connectionPromise = Promise[ConnectionHandle]()
     
     new ConnectionHandle {
-      private val sockJS = new SockJS(remote.url)
-      private val promise = QueueablePromise[MessageListener]()
+      val sockJS = new SockJS(remote.url)
+      val promise = QueueablePromise[MessageListener]()
       
       sockJS.onopen = { event: Event =>
         connectionPromise.success(this)
@@ -44,5 +44,10 @@ class SockJSClient(implicit ec: ExecutionContext) extends SockJSTransport {
 object SockJSClient {
   /** Load the SockJSUrl defined in a play template. */
   def addressFromPlayRoute(): SockJSUrl =
-    SockJSUrl(scala.scalajs.js.Dynamic.global.sockJSUrl.asInstanceOf[String])
+    try {
+      SockJSUrl(scala.scalajs.js.Dynamic.global.sockJSUrl.asInstanceOf[String])
+    } catch {
+      case e: ClassCastException =>
+        throw new Exception("SockJSUrl not found. Make sure SockJSServer.javascriptRoute is included in the page template.")
+    }
 }

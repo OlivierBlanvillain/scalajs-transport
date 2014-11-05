@@ -134,7 +134,7 @@ trait streamURL extends js.Object {
 trait WebkitURL extends streamURL {
 }
 
-object webkitURL extends js.Object { // TODO: extends URL
+object webkitURL extends js.Object {
 /* ??? ConstructorMember(FunSignature(List(),List(),Some(TypeRef(TypeName(streamURL),List())))) */
   def createObjectURL(stream: MediaStream): js.String = ???
 }

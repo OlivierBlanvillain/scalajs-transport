@@ -45,7 +45,7 @@ class WebSocketServer(port: Int, path: String)(implicit ec: ExecutionContext)
   }
   
   def connect(remote: Address): Future[ConnectionHandle] = 
-    Future.failed(new UnsupportedOperationException("TODO"))
+    new client.WebSocketClient().connect(remote)
 
   def shutdown(): Unit = {
     bossGroup.shutdownGracefully()

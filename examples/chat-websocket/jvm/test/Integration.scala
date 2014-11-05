@@ -9,7 +9,7 @@ class Integration extends BrowserSpecification {
 
   "Two browsers" should {
 
-    "be able to chat" in new WithTwoBrowsers(Phantom, Phantom) {
+    "be able to chat via WebSocket" in new WithTwoBrowsers(Phantom, Phantom) {
       browser1 goTo "/"
       browser2 goTo "/"
       browser2 waitUntil browser2.pageSource.contains("display: block;")

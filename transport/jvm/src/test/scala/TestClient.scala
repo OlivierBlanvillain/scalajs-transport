@@ -11,7 +11,7 @@ import transport._
 
 class TestClient extends FlatSpec with Matchers {
   
-  "WebSocketClient" should "speek with echo server" in {
+  "WebSocketClient" should "speak with echo server" in {
     val sentMessage = "Hi!"
     val promise = Promise[String]()
 

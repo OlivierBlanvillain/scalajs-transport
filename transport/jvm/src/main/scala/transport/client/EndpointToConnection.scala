@@ -27,7 +27,7 @@ private class EndpointToConnection(connectionPromise: Promise[ConnectionHandle])
   override def onClose(session: Session, closeReason: CloseReason): Unit = {
   }
   override def onError(session: Session, thr: Throwable): Unit = {
-    // TODO: transmit this error to the listener.
+    // TODO: transmit this error to the listener?
     promise.queue(_.closed())
   }
 }

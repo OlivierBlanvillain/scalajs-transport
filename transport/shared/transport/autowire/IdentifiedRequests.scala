@@ -27,8 +27,9 @@ class PendingPromises[T](implicit ec: ExecutionContext) {
  *  with the returned future will be pending in the given PendingPromises.
  *  To be used with IdentifiedMessageListener and IdentifiedConnectionListener. */
 class IdentifiedCallOverConnection(
-      connection: ConnectionHandle, promises: PendingPromises[String])
-      extends (Request[String] => Future[String]) {
+    connection: ConnectionHandle,
+    promises: PendingPromises[String])
+  extends (Request[String] => Future[String]) {
         
   def apply(request: Request[String]): Future[String] = {
     val (id, future) = promises.next()
@@ -40,8 +41,10 @@ class IdentifiedCallOverConnection(
 
 /** Deserializes and identifies a response to complete the corresponding promise.
  *  To be used with IdentifiedCallOverConnection and IdentifiedConnectionListener. */
-class IdentifiedMessageListener(promises: PendingPromises[String])(
-      implicit ec: ExecutionContext) extends MessageListener {
+class IdentifiedMessageListener(
+    promises: PendingPromises[String])(
+    implicit ec: ExecutionContext)
+  extends MessageListener {
 
   def notify(inboundPayload: String): Unit = {
     val identifiedResponse = upickle.read[ResponseWithId](inboundPayload)
@@ -52,8 +55,10 @@ class IdentifiedMessageListener(promises: PendingPromises[String])(
 
 /** Unwrap the identified request, do the actualCall and write an identified response.
  *  To be used with IdentifiedCallOverConnection and IdentifiedConnectionListener. */
-class IdentifiedConnectionListener(actualCall: Request[String] => Future[String])(
-      implicit ec: ExecutionContext) extends ConnectionListener {
+class IdentifiedConnectionListener(
+    actualCall: Request[String] => Future[String])(
+    implicit ec: ExecutionContext)
+  extends ConnectionListener {
   
   def notify(connection: ConnectionHandle): Unit = connection.handlerPromise.success {
     new MessageListener {

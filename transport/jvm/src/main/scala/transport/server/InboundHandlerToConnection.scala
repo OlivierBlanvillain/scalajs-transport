@@ -83,7 +83,7 @@ class InboundHandlerToConnection(
 
   override def exceptionCaught(ctx: ChannelHandlerContext, cause: Throwable): Unit = {
     cause.printStackTrace()
-    // TODO send the exception...
+    // TODO: transmit this error to the listener?
     ctx.close()
   }
 }

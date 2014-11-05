@@ -27,7 +27,7 @@ class WebSocketClient(implicit ec: ExecutionContext) extends WebSocketTransport 
         promise.queue(_.closed())
       }
       webSocket.onerror = { event: Event =>
-        // TODO: transmit this error to the listener.
+        // TODO: transmit this error to the listener?
         promise.queue(_.closed())
       }
       
@@ -42,8 +42,13 @@ class WebSocketClient(implicit ec: ExecutionContext) extends WebSocketTransport 
   def shutdown(): Unit = ()
 }
 object WebSocketClient {
-  // TODO: Nice error message if the address is not here...
   /** Load the WebSocketUrl defined in a play template. */
-  def addressFromPlayRoute(): WebSocketUrl =
-    WebSocketUrl(scala.scalajs.js.Dynamic.global.webSocketUrl.asInstanceOf[String])
+  def addressFromPlayRoute(): WebSocketUrl = {
+    try {
+      WebSocketUrl(scala.scalajs.js.Dynamic.global.webSocketUrl.asInstanceOf[String])
+    } catch {
+      case e: ClassCastException =>
+        throw new Exception("WebSocketUrl not found. Make sure WebSocketServer.javascriptRoute is included in the page template.")
+    }
+  }
 }

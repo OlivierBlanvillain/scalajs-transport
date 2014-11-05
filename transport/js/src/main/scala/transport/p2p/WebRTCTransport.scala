@@ -16,7 +16,8 @@ class WebRTCTransport(implicit ec: ExecutionContext) extends Transport {
   type Address = ConnectionHandle
   
   def listen(): Future[Promise[ConnectionListener]] = 
-    Future.failed(new UnsupportedOperationException("TODO"))
+    Future.failed(new UnsupportedOperationException(
+      "WebRTCTransport cannot listen for incomming connections."))
 
   def connect(signalingChannel: ConnectionHandle): Future[ConnectionHandle] = {
     new WebRTCPeer(signalingChannel, js.Math.random()).future
@@ -35,12 +36,12 @@ private class WebRTCPeer(signalingChannel: ConnectionHandle, priority: Double)(
   private var isCaller: Boolean = _
 
   signalingChannel.handlerPromise.success(new MessageListener {
-    def notify(inboundPayload: String) = {
+    def notify(inboundPayload: String): Unit = {
       val parsedPayload : js.Any = js.JSON.parse(inboundPayload)
       val unpickledPayload: Any = PicklerRegistry.unpickle(parsedPayload)
       revievedViaSignaling(unpickledPayload)
     }
-    override def closed() = if(!future.isCompleted) {
+    override def closed(): Unit = if(!future.isCompleted) {
       connectionPromise.failure(new IllegalStateException(
         "Signaling channel closed before the end of connection establishment."))
     }

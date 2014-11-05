@@ -1,9 +1,6 @@
 package transport.akka
 
 import akka.actor._
-
-import org.scalajs.spickling._
-
 import transport._
 import scala.concurrent._
 
@@ -23,7 +20,7 @@ private class ConnectionToActor(connection: ConnectionHandle, handlerProps: Acto
     }
   }
 
-  override def postStop() = {
+  override def postStop(): Unit = {
     super.postStop()
     connection.close()
   }
@@ -35,12 +32,4 @@ private class ConnectionToActor(connection: ConnectionHandle, handlerProps: Acto
 object ConnectionToActor {
   def props(connection: ConnectionHandle, handlerProps: ActorRef => Props) =
     Props(new ConnectionToActor(connection, handlerProps))
-}
-
-trait AbstractSerializer {
-  type PickleType
-  implicit protected def pickleBuilder: PBuilder[PickleType]
-  implicit protected def pickleReader: PReader[PickleType]
-  def parse(s: String): PickleType
-  def stringify(p: PickleType): String
 }

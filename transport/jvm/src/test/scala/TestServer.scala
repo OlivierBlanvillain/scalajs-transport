@@ -12,7 +12,7 @@ import transport._
 
 class TestServer extends FlatSpec with Matchers {
   
-  "WebSocketServer" should "TODO" in {
+  "WebSocketServer" should "serve websocket" in {
     val message = "hello"
     
     val path = "/ws"
