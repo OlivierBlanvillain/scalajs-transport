@@ -40,6 +40,7 @@ lazy val transportJs = project.in(file("transport/js"))
 
 lazy val webRTCExample = project.in(file("examples/webrtc"))
   .settings((commonSettings ++ scalaJSSettings): _*)
+  .dependsOn(transportJs)
 
 lazy val autowire = project.in(file("examples/autowire/jvm"))
   .enablePlugins(PlayScala)

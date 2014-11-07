@@ -48,6 +48,6 @@ object SockJSClient {
       SockJSUrl(scala.scalajs.js.Dynamic.global.sockJSUrl.asInstanceOf[String])
     } catch {
       case e: ClassCastException =>
-        throw new Exception("SockJSUrl not found. Make sure SockJSServer.javascriptRoute is included in the page template.")
+        throw new RuntimeException("SockJSUrl not found. Make sure SockJSServer.javascriptRoute is included in the page template.")
     }
 }

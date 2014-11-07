@@ -9,7 +9,7 @@ object NettyToScalaFuture {
     
     def toScala: Future[Channel] = {
       val promise = Promise[Channel]()
-      channelFuture.addListener(new ChannelFutureListener: Unit {
+      channelFuture.addListener(new ChannelFutureListener {
         def operationComplete(cf: ChannelFuture) = {
           if (cf.isSuccess)
             promise.success(cf.channel)

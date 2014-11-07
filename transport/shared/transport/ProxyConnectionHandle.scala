@@ -1,12 +1,11 @@
 package transport
 
 import scala.concurrent._
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.{ Failure, Success }
 
 import scala.collection.mutable
 
-class ProxyConnectionHandle extends ConnectionHandle {
+class ProxyConnectionHandle(implicit ec: ExecutionContext) extends ConnectionHandle {
   import ProxyConnectionHandle._
   
   private var peer: ProxyConnectionHandle = _
@@ -46,7 +45,7 @@ object ProxyConnectionHandle {
   private case object Closed extends Message
   private case class Payload(payload: String) extends Message
   
-  def newPair(): (ConnectionHandle, ConnectionHandle) = {
+  def newPair()(implicit ec: ExecutionContext): (ConnectionHandle, ConnectionHandle) = {
     val c1 = new ProxyConnectionHandle()
     val c2 = new ProxyConnectionHandle()
     c1.peer = c2
@@ -54,7 +53,6 @@ object ProxyConnectionHandle {
     (c1, c2)
   }
 }
-
 
 case class ProxyId(id: Int)
 case class ProxyMessage(id: Int, message: String)
