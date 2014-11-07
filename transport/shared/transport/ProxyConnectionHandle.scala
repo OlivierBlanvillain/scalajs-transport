@@ -6,46 +6,17 @@ import scala.util.{ Failure, Success }
 import scala.collection.mutable
 
 class ProxyConnectionHandle(implicit ec: ExecutionContext) extends ConnectionHandle {
-  import ProxyConnectionHandle._
-  
   private var peer: ProxyConnectionHandle = _
-  private val promise: Promise[MessageListener] = Promise()
-  private val pendingMessages: mutable.Queue[Message] = new mutable.Queue[Message]
-  
-  promise.future.onSuccess {
-    case listener =>
-      pendingMessages.foreach { incoming(_, listener) }
-  }
-  
-  private def incoming(message: Message, listener: MessageListener): Unit = {
-    message match {
-      case Closed =>
-        listener.closed()
-      case Payload(payload) =>
-        listener.notify(payload)
-    }
-  }
-  
-  private def notify(message: Message): Unit = {
-    promise.future.value match {
-      case Some(Success(listener)) =>
-        incoming(message, listener)
-      case _ =>
-        pendingMessages.enqueue(message)
-    }
-  }
+  private val promise: QueueablePromise[MessageListener] = QueueablePromise()
+  private def closed(): Unit = promise.queue(_.closed())
+  private def notify(payload: String): Unit = promise.queue(_.notify(payload))
     
   def handlerPromise: Promise[MessageListener] = promise
-  def write(outboundPayload: String): Unit = peer.notify(Payload(outboundPayload))
-  def close(): Unit = peer.notify(Closed.asInstanceOf[Message])
-  
+  def write(outboundPayload: String): Unit = peer.notify(outboundPayload)
+  def close(): Unit = peer.closed()
 }
 object ProxyConnectionHandle {
-  private sealed trait Message
-  private case object Closed extends Message
-  private case class Payload(payload: String) extends Message
-  
-  def newPair()(implicit ec: ExecutionContext): (ConnectionHandle, ConnectionHandle) = {
+  def newConnectionsPair()(implicit ec: ExecutionContext): (ConnectionHandle, ConnectionHandle) = {
     val c1 = new ProxyConnectionHandle()
     val c2 = new ProxyConnectionHandle()
     c1.peer = c2
@@ -53,6 +24,3 @@ object ProxyConnectionHandle {
     (c1, c2)
   }
 }
-
-case class ProxyId(id: Int)
-case class ProxyMessage(id: Int, message: String)
