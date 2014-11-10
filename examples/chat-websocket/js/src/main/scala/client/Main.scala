@@ -7,7 +7,7 @@ import org.scalajs.jquery.{jQuery => jQ, _}
 import akka.actor._
 
 import models._
-import transport.client._
+import transport.javascript._
 import transport.akka._
 import SockJSClient.addressFromPlayRoute
 

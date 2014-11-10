@@ -23,35 +23,122 @@ val commonSettings = Seq(
 parallelExecution in Global := false
 
 lazy val examples = project.settings(commonSettings: _*).aggregate(
-    chatWebSocket, chatWebSocketJs, chatWebRTC, chatWebRTCJs, transportJs,
-    transportJvm, transportPlay, autowire, autowireJs)
+    transportTest, chatWebSocket, chatWebSocketJs, chatWebRTC, chatWebRTCJs, autowire, autowireJs)
+
+// Transport
+
+val transportShared = commonSettings ++ Seq(
+  unmanagedSourceDirectories in Compile += baseDirectory.value / "../shared",
+  libraryDependencies ++= Seq(
+    "org.webjars" % "sockjs-client" % "0.3.4"
+  ))
+
+lazy val transportJavascript = project.in(file("transport/javascript"))
+  .settings((transportShared ++ scalaJSSettings): _*)
+  .settings(libraryDependencies ++= Seq(
+    "org.scala-lang.modules.scalajs" %%% "scalajs-dom" % "0.6",
+    // TODO: These two should go away at some point.
+    "org.scalajs" %%% "scalajs-pickling" % "0.3.1",
+    "org.scalajs" %%% "scalajs-actors" % "0.1-SNAPSHOT"
+  ))
+
+lazy val transportNetty = project.in(file("transport/netty"))
+  .settings(transportShared: _*)
+  .settings(libraryDependencies ++= Seq(
+    "io.netty" % "netty-all" % "4.0.24.Final"
+  ))
 
 lazy val transportPlay = project.in(file("transport/play"))
-  .settings(commonSettings: _*)
-  .settings(unmanagedSourceDirectories in Compile += baseDirectory.value / "../shared")
+  .settings(transportShared: _*)
+  .settings(libraryDependencies ++= Seq(
+    "com.github.fdimuccio" %% "play2-sockjs" % "0.3.0",
+    "com.typesafe.akka" %% "akka-actor" % "2.3.6",
+    "com.typesafe.play" %% "play" % "2.3.5"
+  ))
 
-lazy val transportJvm = project.in(file("transport/jvm"))
-  .settings(commonSettings: _*)
-  .settings(unmanagedSourceDirectories in Compile += baseDirectory.value / "../shared")
+lazy val transportTyrus = project.in(file("transport/tyrus"))
+  .settings(transportShared: _*)
+  .settings(libraryDependencies ++= Seq(
+    "org.glassfish.tyrus.bundles" % "tyrus-standalone-client" % "1.8.3"
+  ))
 
-lazy val transportJs = project.in(file("transport/js"))
-  .settings((commonSettings ++ scalaJSSettings): _*)
-  .settings(unmanagedSourceDirectories in Compile += baseDirectory.value / "../shared")
+
+val akkaShared = transportShared ++ Seq(
+  unmanagedSourceDirectories in Compile += baseDirectory.value / "../akka")
+
+lazy val transportAkkaJs = project.in(file("transport/akkajs"))
+  .settings((akkaShared ++ scalaJSSettings): _*)
+  .settings(libraryDependencies ++= Seq(
+    "org.scalajs" %%% "scalajs-pickling" % "0.3.1",
+    "org.scalajs" %%% "scalajs-actors" % "0.1-SNAPSHOT"
+  ))
+
+lazy val transportAkkaJvm = project.in(file("transport/akkajvm"))
+  .settings(akkaShared: _*)
+  .settings(libraryDependencies ++= Seq(
+    "com.typesafe.akka" %% "akka-actor" % "2.3.6",
+    "org.scalajs" %% "scalajs-pickling-play-json" % "0.3.1"
+  ))
+
+
+val autowireShared = transportShared ++ Seq(
+  unmanagedSourceDirectories in Compile += baseDirectory.value / "../autowire",
+  libraryDependencies ++= Seq(
+    "com.lihaoyi" %%% "upickle" % "0.2.2",
+    "com.lihaoyi" %%% "autowire" % "0.2.1"
+  ))
+
+lazy val transportAutowireJs = project.in(file("transport/autowirejs"))
+  .settings((autowireShared ++ scalaJSSettings): _*)
+
+lazy val transportAutowireJvm = project.in(file("transport/autowirejvm"))
+  .settings(autowireShared: _*)
+
+
+lazy val transportTest = project.in(file("transport/test"))
+  .settings(commonSettings: _*)
+  .dependsOn(transportNetty)
+  .dependsOn(transportTyrus)
+  .settings(libraryDependencies ++= Seq(
+    "org.scalatest" % "scalatest_2.11" % "2.2.1" % "test"
+  ))
+
+// test
+// jsSerializer
+// jvmSerializer
+// playSerializer
+
+// lazy val transportPlay = project.in(file("transport/play"))
+//   .settings(commonSettings: _*)
+//   .settings(unmanagedSourceDirectories in Compile += baseDirectory.value / "../shared")
+
+// lazy val transportJvm = project.in(file("transport/jvm"))
+//   .settings(commonSettings: _*)
+//   .settings(unmanagedSourceDirectories in Compile += baseDirectory.value / "../shared")
+
+// lazy val transportJs = project.in(file("transport/js"))
+//   .settings((commonSettings ++ scalaJSSettings): _*)
+//   .settings(unmanagedSourceDirectories in Compile += baseDirectory.value / "../shared")
+
+
+// Examples
 
 lazy val webRTCExample = project.in(file("examples/webrtc"))
   .settings((commonSettings ++ scalaJSSettings): _*)
-  .dependsOn(transportJs)
+  .dependsOn(transportJavascript)
 
 lazy val autowire = project.in(file("examples/autowire/jvm"))
   .enablePlugins(PlayScala)
   .dependsOn(transportPlay)
+  .dependsOn(transportAutowireJvm)
   .settings(commonSettings: _*)
   .settings(unmanagedSourceDirectories in Compile += baseDirectory.value / "../shared")
   .settings(unmanagedResourceDirectories in Compile += baseDirectory.value / "../js/src")
 
 lazy val autowireJs = project.in(file("examples/autowire/js"))
   .settings((commonSettings ++ scalaJSSettings): _*)
-  .dependsOn(transportJs)
+  .dependsOn(transportJavascript)
+  .dependsOn(transportAutowireJs)
   .settings(
     unmanagedSourceDirectories in Compile +=
       (baseDirectory in autowire).value / "../shared",
@@ -68,14 +155,15 @@ lazy val autowireJs = project.in(file("examples/autowire/js"))
 lazy val chatWebSocket = project.in(file("examples/chat-websocket/jvm"))
   .enablePlugins(PlayScala)
   .dependsOn(transportPlay)
+  .dependsOn(transportAkkaJvm)
   .settings(commonSettings: _*)
   .settings(unmanagedSourceDirectories in Compile += baseDirectory.value / "../shared")
   .settings(unmanagedResourceDirectories in Compile += baseDirectory.value / "../js/src")
 
 lazy val chatWebSocketJs = project.in(file("examples/chat-websocket/js"))
   .settings((commonSettings ++ scalaJSSettings): _*)
-  // .dependsOn(actors)
-  .dependsOn(transportJs)
+  .dependsOn(transportJavascript)
+  .dependsOn(transportAkkaJs)
   .settings(
     unmanagedSourceDirectories in Compile +=
       (baseDirectory in chatWebSocket).value / "../shared",
@@ -92,14 +180,15 @@ lazy val chatWebSocketJs = project.in(file("examples/chat-websocket/js"))
 lazy val chatWebRTC = project.in(file("examples/chat-webrtc/jvm"))
   .enablePlugins(PlayScala)
   .dependsOn(transportPlay)
+  .dependsOn(transportAkkaJvm)
   .settings(commonSettings: _*)
   .settings(unmanagedSourceDirectories in Compile += baseDirectory.value / "../shared")
   .settings(unmanagedResourceDirectories in Compile += baseDirectory.value / "../js/src")
 
 lazy val chatWebRTCJs = project.in(file("examples/chat-webrtc/js"))
   .settings((commonSettings ++ scalaJSSettings): _*)
-  // .dependsOn(actors)
-  .dependsOn(transportJs)
+  .dependsOn(transportJavascript)
+  .dependsOn(transportAkkaJs)
   .settings(
     unmanagedSourceDirectories in Compile +=
       (baseDirectory in chatWebRTC).value / "../shared",

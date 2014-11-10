@@ -10,7 +10,7 @@ import upickle._
 import autowire._
 import shared.Api
 
-import transport.client._
+import transport.javascript._
 import transport.autowire._
 import scala.collection.mutable
 import SockJSClient.addressFromPlayRoute

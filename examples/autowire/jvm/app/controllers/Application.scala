@@ -13,7 +13,7 @@ import shared.Api
 import autowire.Core.Request
 
 import play.sockjs.api.SockJSRouter
-import transport.server._
+import transport.play._
 import transport.autowire._
 
 object Application extends Controller {

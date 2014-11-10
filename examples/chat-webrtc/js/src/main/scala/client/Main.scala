@@ -9,9 +9,8 @@ import akka.actor._
 
 import models._
 import transport._
-import transport.client._
+import transport.javascript._
 import transport.akka._
-import transport.p2p._
 import SockJSClient.addressFromPlayRoute
 
 import scalajs.concurrent.JSExecutionContext.Implicits.runNow
