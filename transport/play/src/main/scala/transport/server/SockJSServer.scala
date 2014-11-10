@@ -8,7 +8,7 @@ import play.twirl.api.Html
 
 import transport._
 
-case class SockJSServer(implicit ec: ExecutionContext, app: Application)
+class SockJSServer(implicit ec: ExecutionContext, app: Application)
     extends SockJSTransport {
   private val promise = Promise[ConnectionListener]()
   
@@ -39,6 +39,8 @@ case class SockJSServer(implicit ec: ExecutionContext, app: Application)
 }
 
 object SockJSServer {
+  def apply()(implicit ec: ExecutionContext, app: Application) = new SockJSServer()
+
   /** Generates a JavaScript route to a SockJSServer. Use SockJSClient.addressFromPlayRoute()
    *  to load the route as a SockJSUrl on the client side. */
   def javascriptRoute(router: SockJSRouter)(implicit request: play.api.mvc.RequestHeader) = Html {

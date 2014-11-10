@@ -8,7 +8,7 @@ import play.twirl.api.Html
 
 import transport._
 
-case class WebSocketServer(implicit ec: ExecutionContext, app: Application)
+class WebSocketServer(implicit ec: ExecutionContext, app: Application)
     extends WebSocketTransport {
   private val promise = Promise[ConnectionListener]()
   
@@ -39,6 +39,8 @@ case class WebSocketServer(implicit ec: ExecutionContext, app: Application)
 }
 
 object WebSocketServer {
+  def apply()(implicit ec: ExecutionContext, app: Application) = new WebSocketServer()
+
   /** Generates a JavaScript route to a WebSocketServer. Use WebSocketClient.addressFromPlayRoute()
    *  to load the route as a WebSocketUrl on the client side. */
   def javascriptRoute(socketRoute: Call)(implicit request: RequestHeader) = Html {

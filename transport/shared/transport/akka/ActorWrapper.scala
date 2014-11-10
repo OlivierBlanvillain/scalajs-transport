@@ -6,7 +6,7 @@ import transport._
 
 import scala.concurrent._
 
-case class ActorWrapper[T <: Transport](transport: T)(implicit ec: ExecutionContext, system: ActorSystem) {
+class ActorWrapper[T <: Transport](transport: T)(implicit ec: ExecutionContext, system: ActorSystem) {
   
   def connectWithActor(address: transport.Address)(handlerProps: ActorRef => Props) {
     transport.connect(address).foreach { connection =>
@@ -23,4 +23,9 @@ case class ActorWrapper[T <: Transport](transport: T)(implicit ec: ExecutionCont
       })
     }
   }
+}
+
+object ActorWrapper {
+  def apply[T <: Transport](transport: T)(implicit ec: ExecutionContext, system: ActorSystem) =
+    new ActorWrapper(transport)
 }
