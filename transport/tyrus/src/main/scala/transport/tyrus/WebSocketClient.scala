@@ -8,6 +8,7 @@ import java.net.URI
 import javax.websocket._
 import org.glassfish.tyrus.client.ClientManager
 
+/** WebSocket client for the JVM based on the [[https://tyrus.java.net/ Tyrus project]]. */
 class WebSocketClient(implicit ec: ExecutionContext) extends WebSocketTransport {
   def listen(): Future[Promise[ConnectionListener]] =
     Future.failed(new UnsupportedOperationException(

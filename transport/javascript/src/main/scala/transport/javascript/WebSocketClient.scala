@@ -5,6 +5,7 @@ import scala.concurrent._
 import scala.util.{ Success, Failure }
 import jsapi._
 
+/** TODOC */
 class WebSocketClient(implicit ec: ExecutionContext) extends WebSocketTransport {
   def listen(): Future[Promise[ConnectionListener]] =
     Future.failed(new UnsupportedOperationException(
@@ -41,6 +42,7 @@ class WebSocketClient(implicit ec: ExecutionContext) extends WebSocketTransport 
   
   def shutdown(): Unit = ()
 }
+
 object WebSocketClient {
   /** Load the WebSocketUrl defined in a play template. */
   def addressFromPlayRoute(): WebSocketUrl = {

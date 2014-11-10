@@ -5,6 +5,7 @@ import scala.concurrent._
 import scala.util.{ Success, Failure }
 import jsapi._
 
+/** TODOC */
 class SockJSClient(implicit ec: ExecutionContext) extends SockJSTransport {
   def listen(): Future[Promise[ConnectionListener]] =
     Future.failed(new UnsupportedOperationException(
@@ -41,13 +42,15 @@ class SockJSClient(implicit ec: ExecutionContext) extends SockJSTransport {
   
   def shutdown(): Unit = ()
 }
+
 object SockJSClient {
   /** Load the SockJSUrl defined in a play template. */
-  def addressFromPlayRoute(): SockJSUrl =
+  def addressFromPlayRoute(): SockJSUrl = {
     try {
       SockJSUrl(scala.scalajs.js.Dynamic.global.sockJSUrl.asInstanceOf[String])
     } catch {
       case e: ClassCastException =>
         throw new RuntimeException("SockJSUrl not found. Make sure SockJSServer.javascriptRoute is included in the page template.")
     }
+  }
 }
