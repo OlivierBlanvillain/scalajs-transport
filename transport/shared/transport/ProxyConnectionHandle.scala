@@ -5,7 +5,7 @@ import scala.util.{ Failure, Success }
 
 import scala.collection.mutable
 
-class ProxyConnectionHandle(implicit ec: ExecutionContext) extends ConnectionHandle {
+private class ProxyConnectionHandle(implicit ec: ExecutionContext) extends ConnectionHandle {
   private var peer: ProxyConnectionHandle = _
   private val promise: QueueablePromise[MessageListener] = QueueablePromise()
   private def closed(): Unit = promise.queue(_.closed())
@@ -15,7 +15,11 @@ class ProxyConnectionHandle(implicit ec: ExecutionContext) extends ConnectionHan
   def write(outboundPayload: String): Unit = peer.notify(outboundPayload)
   def close(): Unit = peer.closed()
 }
+
+/** TODOC */
 object ProxyConnectionHandle {
+  
+  /** TODOC */
   def newConnectionsPair()(implicit ec: ExecutionContext): (ConnectionHandle, ConnectionHandle) = {
     val c1 = new ProxyConnectionHandle()
     val c2 = new ProxyConnectionHandle()

@@ -3,7 +3,7 @@ package transport
 import scala.concurrent._
 import scala.util._
 
-class QueueablePromise[T] extends Promise[T] {
+private[transport] class QueueablePromise[T] extends Promise[T] {
   private val p = Promise[T]()
   private var poorMansBuffer: Future[T] = p.future
   
@@ -19,6 +19,6 @@ class QueueablePromise[T] extends Promise[T] {
   }
 }
 
-object QueueablePromise {
+private[transport] object QueueablePromise {
   def apply[T]() = new QueueablePromise[T]()
 }

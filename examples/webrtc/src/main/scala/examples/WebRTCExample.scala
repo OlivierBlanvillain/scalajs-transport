@@ -7,7 +7,7 @@ import js.annotation.JSExport
 
 import transport._
 import transport.akka._
-import transport.p2p._
+import transport.javascript._
 
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 

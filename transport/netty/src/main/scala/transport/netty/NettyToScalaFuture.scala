@@ -3,7 +3,7 @@ package transport.netty
 import io.netty.channel.{ Channel, ChannelFuture, ChannelFutureListener }
 import scala.concurrent.{ Future, Promise }
 
-object NettyToScalaFuture {
+private[netty] object NettyToScalaFuture {
   
   implicit class F(channelFuture: ChannelFuture) {
     

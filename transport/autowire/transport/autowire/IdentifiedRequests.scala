@@ -11,6 +11,7 @@ class PendingPromises[T](implicit ec: ExecutionContext) {
   private var id = 0
   private val map = mutable.Map.empty[Int, Promise[T]]
   
+  /** Creates a new Promise and returns the corresponding Future and id. */
   def next(): (Int, Future[T]) = {
     this.id = this.id + 1
     val newId = id
@@ -19,7 +20,8 @@ class PendingPromises[T](implicit ec: ExecutionContext) {
     map.update(newId, promise)
     (newId, promise.future)
   }
-
+  
+  /** Returns the Promise associated with an id. */
   def get(id: Int): Promise[T] = map(id)
 }
 

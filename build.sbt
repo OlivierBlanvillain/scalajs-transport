@@ -25,6 +25,10 @@ parallelExecution in Global := false
 lazy val examples = project.settings(commonSettings: _*).aggregate(
     transportTest, chatWebSocket, chatWebSocketJs, chatWebRTC, chatWebRTCJs, autowire, autowireJs)
 
+lazy val transport = project.settings(commonSettings: _*).aggregate(
+    transportJavascript, transportNetty, transportPlay, transportTyrus, transportAkkaJs,
+    transportAkkaJvm, transportAutowireJs, transportAutowireJvm)
+
 // Transport
 
 val transportShared = commonSettings ++ Seq(
@@ -126,6 +130,7 @@ lazy val transportTest = project.in(file("transport/test"))
 lazy val webRTCExample = project.in(file("examples/webrtc"))
   .settings((commonSettings ++ scalaJSSettings): _*)
   .dependsOn(transportJavascript)
+  .dependsOn(transportAkkaJs)
 
 lazy val autowire = project.in(file("examples/autowire/jvm"))
   .enablePlugins(PlayScala)

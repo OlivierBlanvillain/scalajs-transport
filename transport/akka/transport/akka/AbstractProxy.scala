@@ -6,7 +6,7 @@ import akka.actor._
 
 import org.scalajs.spickling._
 
-object AbstractProxy {
+private[transport] object AbstractProxy {
   // Messages sent across the network
   case class SendMessage(msg: Any, receiver: ActorRef, sender: ActorRef)
   case class MessageToHandler(msg: Any)
@@ -29,7 +29,7 @@ object AbstractProxy {
   private def registerPicklers(): Unit = _registerPicklers
 }
 
-abstract class AbstractProxy(handlerProps: ActorRef => Props) extends Actor {
+private[transport] abstract class AbstractProxy(handlerProps: ActorRef => Props) extends Actor {
   import AbstractProxy._
 
   type PickleType
@@ -98,7 +98,7 @@ abstract class AbstractProxy(handlerProps: ActorRef => Props) extends Actor {
 
   protected def sendPickleToPeer(pickle: PickleType): Unit
 
-  private[akka] def pickleActorRef[P](ref: ActorRef)(implicit builder: PBuilder[P]): P = {
+  private[transport] def pickleActorRef[P](ref: ActorRef)(implicit builder: PBuilder[P]): P = {
     
     val (side, id) = if(context.children.exists(_ == ref) && ref != this.handlerActor) {
       /* This is a proxy actor for an actor on the client.
@@ -123,7 +123,7 @@ abstract class AbstractProxy(handlerProps: ActorRef => Props) extends Actor {
         ("id", builder.makeString(id)))
   }
 
-  private[akka] def unpickleActorRef[P](pickle: P)(implicit reader: PReader[P]): ActorRef = {
+  private[transport] def unpickleActorRef[P](pickle: P)(implicit reader: PReader[P]): ActorRef = {
     val side = reader.readString(reader.readObjectField(pickle, "side"))
     val id = reader.readString(reader.readObjectField(pickle, "id"))
 

@@ -26,7 +26,7 @@ object Application extends Controller {
     Ok(views.html.index(devMode = false, SockJSServer.javascriptRoute(sockJS)))
   }
   
-  val sockJStransport = SockJSServer()
+  val sockJStransport = new SockJSServer()
   val sockJS = sockJStransport.action()
   
   ActorWrapper(sockJStransport).acceptWithActor(UserActor.props(peerMatcher))

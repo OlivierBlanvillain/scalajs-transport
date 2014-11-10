@@ -4,7 +4,8 @@ import akka.actor._
 import transport._
 import scala.concurrent._
 
-private class ConnectionToActor(connection: ConnectionHandle, handlerProps: ActorRef => Props)
+// TODO: Private.
+ class ConnectionToActor(connection: ConnectionHandle, handlerProps: ActorRef => Props)
       extends AbstractProxy(handlerProps) with Serializer {
   import AbstractProxy._
   
@@ -29,7 +30,9 @@ private class ConnectionToActor(connection: ConnectionHandle, handlerProps: Acto
     connection.write(stringify(pickle))
   }
 }
-object ConnectionToActor {
+
+// TODO: Private.
+ object ConnectionToActor {
   def props(connection: ConnectionHandle, handlerProps: ActorRef => Props) =
     Props(new ConnectionToActor(connection, handlerProps))
 }

@@ -5,7 +5,7 @@ import play.api.libs.json._
 import org.scalajs.spickling._
 import org.scalajs.spickling.playjson._
 
-trait Serializer {
+private[transport] trait Serializer {
   type PickleType = JsValue
   implicit protected def pickleBuilder: PBuilder[PickleType] = PlayJsonPBuilder
   implicit protected def pickleReader: PReader[PickleType] = PlayJsonPReader

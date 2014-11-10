@@ -12,7 +12,7 @@ import io.netty.handler.codec.http.HttpMethod._
 import io.netty.util.concurrent.GenericFutureListener
 import io.netty.util.concurrent.{ Future => NettyFuture }
 
-class InboundHandlerToConnection(
+private[netty] class InboundHandlerToConnection(
     path: String,
     connectionListener: Future[ConnectionListener],
     allChannels: DefaultChannelGroup)(

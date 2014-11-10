@@ -26,10 +26,10 @@ object Application extends Controller {
     Ok(views.html.index(devMode = false, SockJSServer.javascriptRoute(sockJS)))
   }
   
-  val webSocketTransport = WebSocketServer()
+  val webSocketTransport = new WebSocketServer()
   val webSocket = webSocketTransport.action()
 
-  val sockJStransport = SockJSServer()
+  val sockJStransport = new SockJSServer()
   val sockJS = sockJStransport.action()
   
   sockJStransport.listen().map { promise =>

@@ -7,7 +7,8 @@ import akka.actor._
 
 import transport._
 
-private class ActorToConnection(connectionPromise: Promise[ConnectionHandle])(
+// TODO Private.
+class ActorToConnection(connectionPromise: Promise[ConnectionHandle])(
       implicit ec: ExecutionContext) extends Actor {
   val promise = QueueablePromise[MessageListener]()
   val peerPromise = Promise[ActorRef]()
@@ -36,6 +37,8 @@ private class ActorToConnection(connectionPromise: Promise[ConnectionHandle])(
     )
   }
 }
+
+// TODO Private.
 object ActorToConnection {
   def apply(system: ActorSystem)(implicit ec: ExecutionContext):
       (ActorRef, Future[ConnectionHandle]) = {

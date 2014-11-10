@@ -12,6 +12,7 @@ import transport.jsapi._
 import org.scalajs.spickling._
 import org.scalajs.spickling.jsany._
 
+/** TODOC */
 class WebRTCTransport(implicit ec: ExecutionContext) extends Transport {
   type Address = ConnectionHandle
   

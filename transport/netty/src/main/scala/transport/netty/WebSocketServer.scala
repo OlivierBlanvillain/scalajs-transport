@@ -13,11 +13,12 @@ import io.netty.channel.group.DefaultChannelGroup
 import io.netty.handler.codec.http._
 import io.netty.util.concurrent.{ GlobalEventExecutor, GenericFutureListener }
 
+/** TODOC */
 class WebSocketServer(port: Int, path: String)(implicit ec: ExecutionContext)
      extends WebSocketTransport {
-  val bossGroup = new NioEventLoopGroup(1)
-  val workerGroup = new NioEventLoopGroup()
-  val allChannels = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE)
+  private val bossGroup = new NioEventLoopGroup(1)
+  private val workerGroup = new NioEventLoopGroup()
+  private val allChannels = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE)
          
   def listen(): Future[Promise[ConnectionListener]] = {
     val listenerPromise = Promise[ConnectionListener]()
