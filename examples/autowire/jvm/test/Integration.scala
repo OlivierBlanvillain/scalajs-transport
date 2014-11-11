@@ -11,7 +11,7 @@ class Integration extends BrowserSpecification {
 
     "Handle concurrent requests" in new WithBrowser(Phantom) {
       browser goTo "/"
-      browser waitUntil browser.pageSource.contains("build.sbt")
+      browser waitUntil browser.pageSource.contains("README")
       browser.pageSource must contain("42")
     }
 

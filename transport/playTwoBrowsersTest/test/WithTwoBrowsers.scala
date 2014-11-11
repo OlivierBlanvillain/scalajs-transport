@@ -6,12 +6,18 @@ import org.specs2.specification.Scope
 import org.openqa.selenium.WebDriver
 import org.specs2.execute.{ AsResult, Result }
 
-/** Used to run specs within the context of a running server, and using two web browsers. */
+/** Used to run specs within the context of a running server, and using two web browsers.
+ *
+ *  @param webDriver1 The driver for the first web browser 
+ *  @param webDriver2 The driver for the second web browser
+ *  @param app The fake application
+ *  @param port The port to run the server on */
 abstract class WithTwoBrowsers[WEBDRIVER <: WebDriver](
-        val webDriver1: WebDriver = WebDriverFactory(Helpers.HTMLUNIT),
-        val webDriver2: WebDriver = WebDriverFactory(Helpers.HTMLUNIT),
-        val app: FakeApplication = FakeApplication(),
-        val port: Int = Helpers.testServerPort) extends Around with Scope {
+    val webDriver1: WebDriver,
+    val webDriver2: WebDriver,
+    val app: FakeApplication = FakeApplication(),
+    val port: Int = Helpers.testServerPort)
+  extends Around with Scope {
   
   implicit def implicitApp = app
   implicit def implicitPort: Port = port
@@ -27,4 +33,5 @@ abstract class WithTwoBrowsers[WEBDRIVER <: WebDriver](
       browser2.quit()
     }
   }
+
 }

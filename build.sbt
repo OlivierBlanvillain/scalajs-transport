@@ -97,6 +97,13 @@ lazy val transportTest = project.in(file("transport/test"))
     "org.scalatest" % "scalatest_2.11" % "2.2.1" % "test"
   ))
 
+lazy val playTwoBrowsersTest = project.in(file("transport/playTwoBrowsersTest"))
+  .settings(commonSettings: _*)
+  .enablePlugins(PlayScala)
+  .settings(libraryDependencies ++= Seq(
+    "org.seleniumhq.selenium" % "selenium-java" % "2.43.1",
+    "com.github.detro.ghostdriver" % "phantomjsdriver" % "1.0.4" % "test"))
+  
 
 // Examples
 
@@ -109,12 +116,11 @@ lazy val autowire = project.in(file("examples/autowire/jvm"))
   .enablePlugins(PlayScala)
   .dependsOn(transportPlay)
   .dependsOn(transportAutowireJvm)
+  .dependsOn(playTwoBrowsersTest % "test->test")
   .settings(commonSettings: _*)
   .settings(unmanagedSourceDirectories in Compile += baseDirectory.value / "../shared")
   .settings(unmanagedResourceDirectories in Compile += baseDirectory.value / "../js/src")
   .settings(libraryDependencies ++= Seq(
-    "org.seleniumhq.selenium" % "selenium-java" % "2.43.1",
-    "com.github.detro.ghostdriver" % "phantomjsdriver" % "1.0.4" % "test",
     "org.webjars" % "bootstrap" % "3.2.0"
   ))
 
@@ -138,9 +144,12 @@ lazy val chatWebSocket = project.in(file("examples/chat-websocket/jvm"))
   .enablePlugins(PlayScala)
   .dependsOn(transportPlay)
   .dependsOn(transportAkkaJvm)
+  .dependsOn(playTwoBrowsersTest % "test->test")
   .settings(commonSettings: _*)
   .settings(unmanagedSourceDirectories in Compile += baseDirectory.value / "../shared")
   .settings(unmanagedResourceDirectories in Compile += baseDirectory.value / "../js/src")
+  .settings(libraryDependencies ++= Seq(
+    "org.webjars" % "jquery" % "2.1.1"))
 
 lazy val chatWebSocketJs = project.in(file("examples/chat-websocket/js"))
   .settings((commonSettings ++ scalaJSSettings): _*)
@@ -155,14 +164,19 @@ lazy val chatWebSocketJs = project.in(file("examples/chat-websocket/js"))
         crossTarget in (Compile, packageJSKey) :=
           (baseDirectory in chatWebSocket).value / "public/javascripts"
     }: _*)
+  .settings(libraryDependencies ++= Seq(
+    "org.scala-lang.modules.scalajs" %%% "scalajs-jquery" % "0.6"))
 
 lazy val chatWebRTC = project.in(file("examples/chat-webrtc/jvm"))
   .enablePlugins(PlayScala)
   .dependsOn(transportPlay)
   .dependsOn(transportAkkaJvm)
+  .dependsOn(playTwoBrowsersTest % "test->test")
   .settings(commonSettings: _*)
   .settings(unmanagedSourceDirectories in Compile += baseDirectory.value / "../shared")
   .settings(unmanagedResourceDirectories in Compile += baseDirectory.value / "../js/src")
+  .settings(libraryDependencies ++= Seq(
+    "org.webjars" % "jquery" % "2.1.1"))
 
 lazy val chatWebRTCJs = project.in(file("examples/chat-webrtc/js"))
   .settings((commonSettings ++ scalaJSSettings): _*)
@@ -177,6 +191,8 @@ lazy val chatWebRTCJs = project.in(file("examples/chat-webrtc/js"))
         crossTarget in (Compile, packageJSKey) :=
           (baseDirectory in chatWebRTC).value / "public/javascripts"
     }: _*)
+  .settings(libraryDependencies ++= Seq(
+    "org.scala-lang.modules.scalajs" %%% "scalajs-jquery" % "0.6"))
 
 // Apparently this is the only way to run aggregated tests sequentially.
 // See https://github.com/sbt/sbt/issues/882.
