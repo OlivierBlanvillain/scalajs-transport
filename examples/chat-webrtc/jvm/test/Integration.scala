@@ -10,7 +10,7 @@ class Integration extends BrowserSpecification {
 
   "Two browsers" should {
 
-    "be able to chat via WebRTC" in new WithTwoBrowsers(Chrome, Chrome) {
+    "be able to chat via WebRTC" in new WithTwoBrowsers(ChromeHeadless) {
     // "be able to chat via WebRTC" in new WithTwoBrowsers(Phantom, Phantom) {
     // "be able to chat via WebRTC" in new WithTwoBrowsers(Firefox, Firefox) {
       browser1 goTo "/"

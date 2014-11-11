@@ -14,28 +14,16 @@ val commonSettings = Seq(
   )
 )
 
-// lazy val root = project.in(file("."))
-//   .settings(commonSettings: _*)
-//   .aggregate(actors)
+lazy val root = project.in(file("."))
+  .settings(commonSettings: _*)
+  .aggregate(transportJavascript, transportNetty, transportPlay, transportTyrus,
+    transportAkkaJs, transportAkkaJvm, transportAutowireJs, transportAutowireJvm)
 
-// Apparently this is the only way to run aggregated tests sequentially.
-// See https://github.com/sbt/sbt/issues/882.
-parallelExecution in Global := false
-
-lazy val examples = project.settings(commonSettings: _*).aggregate(
-    transportTest, chatWebSocket, chatWebSocketJs, chatWebRTC, chatWebRTCJs, autowire, autowireJs)
-
-lazy val transport = project.settings(commonSettings: _*).aggregate(
-    transportJavascript, transportNetty, transportPlay, transportTyrus, transportAkkaJs,
-    transportAkkaJvm, transportAutowireJs, transportAutowireJvm)
 
 // Transport
 
 val transportShared = commonSettings ++ Seq(
-  unmanagedSourceDirectories in Compile += baseDirectory.value / "../shared",
-  libraryDependencies ++= Seq(
-    "org.webjars" % "sockjs-client" % "0.3.4"
-  ))
+  unmanagedSourceDirectories in Compile += baseDirectory.value / "../shared")
 
 lazy val transportJavascript = project.in(file("transport/javascript"))
   .settings((transportShared ++ scalaJSSettings): _*)
@@ -55,6 +43,8 @@ lazy val transportNetty = project.in(file("transport/netty"))
 lazy val transportPlay = project.in(file("transport/play"))
   .settings(transportShared: _*)
   .settings(libraryDependencies ++= Seq(
+    "org.webjars" % "sockjs-client" % "0.3.4",
+    "org.webjars" %% "webjars-play" % "2.3.0",
     "com.github.fdimuccio" %% "play2-sockjs" % "0.3.0",
     "com.typesafe.akka" %% "akka-actor" % "2.3.6",
     "com.typesafe.play" %% "play" % "2.3.5"
@@ -107,23 +97,6 @@ lazy val transportTest = project.in(file("transport/test"))
     "org.scalatest" % "scalatest_2.11" % "2.2.1" % "test"
   ))
 
-// test
-// jsSerializer
-// jvmSerializer
-// playSerializer
-
-// lazy val transportPlay = project.in(file("transport/play"))
-//   .settings(commonSettings: _*)
-//   .settings(unmanagedSourceDirectories in Compile += baseDirectory.value / "../shared")
-
-// lazy val transportJvm = project.in(file("transport/jvm"))
-//   .settings(commonSettings: _*)
-//   .settings(unmanagedSourceDirectories in Compile += baseDirectory.value / "../shared")
-
-// lazy val transportJs = project.in(file("transport/js"))
-//   .settings((commonSettings ++ scalaJSSettings): _*)
-//   .settings(unmanagedSourceDirectories in Compile += baseDirectory.value / "../shared")
-
 
 // Examples
 
@@ -139,23 +112,27 @@ lazy val autowire = project.in(file("examples/autowire/jvm"))
   .settings(commonSettings: _*)
   .settings(unmanagedSourceDirectories in Compile += baseDirectory.value / "../shared")
   .settings(unmanagedResourceDirectories in Compile += baseDirectory.value / "../js/src")
+  .settings(libraryDependencies ++= Seq(
+    "org.seleniumhq.selenium" % "selenium-java" % "2.43.1",
+    "com.github.detro.ghostdriver" % "phantomjsdriver" % "1.0.4" % "test",
+    "org.webjars" % "bootstrap" % "3.2.0"
+  ))
 
 lazy val autowireJs = project.in(file("examples/autowire/js"))
   .settings((commonSettings ++ scalaJSSettings): _*)
   .dependsOn(transportJavascript)
   .dependsOn(transportAutowireJs)
   .settings(
-    unmanagedSourceDirectories in Compile +=
-      (baseDirectory in autowire).value / "../shared",
-    fastOptJS in Compile <<= (fastOptJS in Compile) triggeredBy (compile in (autowire, Compile))
-  )
+    unmanagedSourceDirectories in Compile += (baseDirectory in autowire).value / "../shared",
+    fastOptJS in Compile <<= (fastOptJS in Compile) triggeredBy (compile in (autowire, Compile)))
   .settings(
     Seq(fastOptJS, fullOptJS) map {
       packageJSKey =>
         crossTarget in (Compile, packageJSKey) :=
           (baseDirectory in autowire).value / "public/javascripts"
-    }: _*
-  )
+    }: _*)
+  .settings(libraryDependencies ++= Seq(
+    "com.scalatags" %%% "scalatags" % "0.4.0"))
 
 lazy val chatWebSocket = project.in(file("examples/chat-websocket/jvm"))
   .enablePlugins(PlayScala)
@@ -170,17 +147,14 @@ lazy val chatWebSocketJs = project.in(file("examples/chat-websocket/js"))
   .dependsOn(transportJavascript)
   .dependsOn(transportAkkaJs)
   .settings(
-    unmanagedSourceDirectories in Compile +=
-      (baseDirectory in chatWebSocket).value / "../shared",
-    fastOptJS in Compile <<= (fastOptJS in Compile) triggeredBy (compile in (chatWebSocket, Compile))
-  )
+    unmanagedSourceDirectories in Compile += (baseDirectory in chatWebSocket).value / "../shared",
+    fastOptJS in Compile <<= (fastOptJS in Compile) triggeredBy (compile in (chatWebSocket, Compile)))
   .settings(
     Seq(fastOptJS, fullOptJS) map {
       packageJSKey =>
         crossTarget in (Compile, packageJSKey) :=
           (baseDirectory in chatWebSocket).value / "public/javascripts"
-    }: _*
-  )
+    }: _*)
 
 lazy val chatWebRTC = project.in(file("examples/chat-webrtc/jvm"))
   .enablePlugins(PlayScala)
@@ -195,14 +169,19 @@ lazy val chatWebRTCJs = project.in(file("examples/chat-webrtc/js"))
   .dependsOn(transportJavascript)
   .dependsOn(transportAkkaJs)
   .settings(
-    unmanagedSourceDirectories in Compile +=
-      (baseDirectory in chatWebRTC).value / "../shared",
-    fastOptJS in Compile <<= (fastOptJS in Compile) triggeredBy (compile in (chatWebRTC, Compile))
-  )
+    unmanagedSourceDirectories in Compile += (baseDirectory in chatWebRTC).value / "../shared",
+    fastOptJS in Compile <<= (fastOptJS in Compile) triggeredBy (compile in (chatWebRTC, Compile)))
   .settings(
     Seq(fastOptJS, fullOptJS) map {
       packageJSKey =>
         crossTarget in (Compile, packageJSKey) :=
           (baseDirectory in chatWebRTC).value / "public/javascripts"
-    }: _*
-  )
+    }: _*)
+
+// Apparently this is the only way to run aggregated tests sequentially.
+// See https://github.com/sbt/sbt/issues/882.
+parallelExecution in Global := false
+
+lazy val examples = project.settings(commonSettings: _*).aggregate(
+    transportTest, chatWebSocket, chatWebSocketJs, chatWebRTC, chatWebRTCJs, autowire, autowireJs)
+
