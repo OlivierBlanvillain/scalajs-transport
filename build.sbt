@@ -41,8 +41,6 @@ lazy val transportNetty = project.in(file("transport/netty"))
 lazy val transportPlay = project.in(file("transport/play"))
   .settings(transportShared: _*)
   .settings(libraryDependencies ++= Seq(
-    "org.webjars" % "sockjs-client" % "0.3.4",
-    "org.webjars" %% "webjars-play" % "2.3.0",
     "com.github.fdimuccio" %% "play2-sockjs" % "0.3.0",
     "com.typesafe.akka" %% "akka-actor" % "2.3.6",
     "com.typesafe.play" %% "play" % "2.3.5"))
@@ -125,6 +123,8 @@ lazy val autowire = project.in(file("examples/autowire/jvm"))
   .settings((commonSettings ++ playWithScalaJs): _*)
   .dependsOn(transportPlay, transportAutowireJvm, playTwoBrowsersTest % "test->test")
   .settings(libraryDependencies ++= Seq(
+    "org.webjars" % "sockjs-client" % "0.3.4",
+    "org.webjars" %% "webjars-play" % "2.3.0",
     "org.webjars" % "bootstrap" % "3.2.0"))
 
 lazy val autowireJs = project.in(file("examples/autowire/js"))
@@ -139,6 +139,8 @@ lazy val chatWebSocket = project.in(file("examples/chat-websocket/jvm"))
   .settings((commonSettings ++ playWithScalaJs): _*)
   .dependsOn(transportPlay, transportAkkaJvm, playTwoBrowsersTest % "test->test")
   .settings(libraryDependencies ++= Seq(
+    "org.webjars" %% "webjars-play" % "2.3.0",
+    "org.webjars" % "sockjs-client" % "0.3.4",
     "org.webjars" % "jquery" % "2.1.1"))
 
 lazy val chatWebSocketJs = project.in(file("examples/chat-websocket/js"))
@@ -154,6 +156,8 @@ lazy val chatWebRTC = project.in(file("examples/chat-webrtc/jvm"))
   .dependsOn(transportPlay, transportAkkaJvm, playTwoBrowsersTest % "test->test")
   .settings((commonSettings ++ playWithScalaJs): _*)
   .settings(libraryDependencies ++= Seq(
+    "org.webjars" %% "webjars-play" % "2.3.0",
+    "org.webjars" % "sockjs-client" % "0.3.4",
     "org.webjars" % "jquery" % "2.1.1"))
 
 lazy val chatWebRTCJs = project.in(file("examples/chat-webrtc/js"))
