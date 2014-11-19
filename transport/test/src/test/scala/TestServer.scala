@@ -21,23 +21,19 @@ class TestServer extends FlatSpec with Matchers {
     
     try {
       
-      server.listen().foreach(_.success(new ConnectionListener {
-        def notify(connection: ConnectionHandle): Unit = {
-          connection.handlerPromise.success(new MessageListener {
-            def notify(m: String): Unit = {
-              connection.write(m.toUpperCase)
-            }
-          })
+      server.listen().foreach(_.success { connection =>
+        connection.handlerPromise.success { m =>
+          connection.write(m.toUpperCase)
         }
-      }))
+      })
       
       val promise = Promise[String]()
 
       val client = new WebSocketClient()
       val connection = client.connect(WebSocketUrl(s"ws://localhost:$port$path"))
-      connection.foreach { _.handlerPromise.success(new MessageListener {
-        def notify(s: String): Unit = promise.success(s)
-      })}
+      connection.foreach { _.handlerPromise.success { s =>
+        promise.success(s)
+      }}
       connection.foreach { _.write(message) }
       
       val reviedMessage = Await.result(promise.future, 2.seconds)

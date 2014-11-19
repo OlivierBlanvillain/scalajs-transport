@@ -19,6 +19,7 @@ private[netty] class InboundHandlerToConnection(
     implicit ec: ExecutionContext)
   extends SimpleChannelInboundHandler[Object] {
 
+  val closePromise = Promise[Unit]()
   val queueablePromise = QueueablePromise[MessageListener]()
   var handshaker: Option[WebSocketServerHandshaker] = None
 
@@ -55,7 +56,7 @@ private[netty] class InboundHandlerToConnection(
       case textFrame: TextWebSocketFrame =>
         val retainedText = textFrame.text()
         println(retainedText)
-        queueablePromise.queue(_.notify(retainedText))
+        queueablePromise.queue(_(retainedText))
         
       case _ =>
         throw new UnsupportedOperationException(String.format(
@@ -66,15 +67,16 @@ private[netty] class InboundHandlerToConnection(
   override def channelActive(ctx: ChannelHandlerContext): Unit = {
     allChannels.add(ctx.channel())
     val connection = new ConnectionHandle {
+      def closed: Future[Unit] = closePromise.future
       def handlerPromise: Promise[MessageListener] = queueablePromise
       def write(m: String): Unit = ctx.channel().writeAndFlush(new TextWebSocketFrame(m))
       def close(): Unit = ctx.close()
     }
-    connectionListener.foreach(_.notify(connection))
+    connectionListener.foreach(_(connection))
   }
 
   override def channelInactive(ctx: ChannelHandlerContext): Unit = {
-    queueablePromise.queue(_.closed())
+    closePromise.success(())
   }
   
   override def channelReadComplete(ctx: ChannelHandlerContext): Unit = {
@@ -84,6 +86,6 @@ private[netty] class InboundHandlerToConnection(
   override def exceptionCaught(ctx: ChannelHandlerContext, cause: Throwable): Unit = {
     cause.printStackTrace()
     // TODO: transmit this error to the listener?
-    ctx.close()
+    closePromise.success(())
   }
 }

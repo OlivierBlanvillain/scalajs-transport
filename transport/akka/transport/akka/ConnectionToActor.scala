@@ -5,19 +5,23 @@ import transport._
 import scala.concurrent._
 
 // TODO: Private.
- class ConnectionToActor(connection: ConnectionHandle, handlerProps: ActorRef => Props)
-      extends AbstractProxy(handlerProps) with Serializer {
+ class ConnectionToActor(
+      connection: ConnectionHandle,
+      handlerProps: ActorRef => Props)(
+      implicit ec: ExecutionContext)
+    extends AbstractProxy(handlerProps) with Serializer {
   import AbstractProxy._
   
   override def preStart(): Unit = {
     super.preStart()
     self ! ConnectionOpened
     
-    connection.handlerPromise.success {
-      new MessageListener {
-        def notify(inboundPayload: String): Unit = self ! parse(inboundPayload)
-        override def closed(): Unit = self ! ConnectionClosed
-      }
+    connection.handlerPromise.success { inboundPayload =>
+      self ! parse(inboundPayload)
+    }
+    
+    connection.closed.onComplete { _ =>
+      self ! ConnectionClosed
     }
   }
 
@@ -33,6 +37,5 @@ import scala.concurrent._
 
 // TODO: Private.
  object ConnectionToActor {
-  def props(connection: ConnectionHandle, handlerProps: ActorRef => Props) =
-    Props(new ConnectionToActor(connection, handlerProps))
+  def props(connection: ConnectionHandle, handlerProps: ActorRef => Props)(implicit ec: ExecutionContext) = Props(new ConnectionToActor(connection, handlerProps))
 }

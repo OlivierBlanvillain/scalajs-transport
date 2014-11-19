@@ -17,22 +17,24 @@ class SockJSClient(implicit ec: ExecutionContext) extends SockJSTransport {
     new ConnectionHandle {
       val sockJS = new SockJS(remote.url)
       val promise = QueueablePromise[MessageListener]()
+      val closePromise = Promise[Unit]()
       
       sockJS.onopen = { event: Event =>
         connectionPromise.success(this)
       }
       sockJS.onmessage = { event: MessageEvent =>
-        promise.queue(_.notify(event.data.toString))
+        promise.queue(_(event.data.toString))
       }
       sockJS.onclose = { event: Event =>
-        promise.queue(_.closed())
+        closePromise.success(())
       }
       sockJS.onerror = { event: Event =>
         // TODO: transmit this error to the listener?
-        promise.queue(_.closed())
+        closePromise.success(())
       }
       
       def handlerPromise: Promise[MessageListener] = promise
+      def closed: Future[Unit] = closePromise.future
       def write(outboundPayload: String): Unit = sockJS.send(outboundPayload)
       def close(): Unit = sockJS.close()
     }

@@ -48,7 +48,7 @@ class IdentifiedMessageListener(
     implicit ec: ExecutionContext)
   extends MessageListener {
 
-  def notify(inboundPayload: String): Unit = {
+  def apply(inboundPayload: String): Unit = {
     val identifiedResponse = upickle.read[ResponseWithId](inboundPayload)
     promises.get(identifiedResponse.id).success(identifiedResponse.res)
   }
@@ -62,15 +62,11 @@ class IdentifiedConnectionListener(
     implicit ec: ExecutionContext)
   extends ConnectionListener {
   
-  def notify(connection: ConnectionHandle): Unit = connection.handlerPromise.success {
-    new MessageListener {
-      def notify(pickle: String): Unit = {
-        val identifiedRequest = upickle.read[RequestWithId](pickle)
-        val result: Future[String] = actualCall(identifiedRequest.req)
-        result.foreach { response =>
-          connection.write(upickle.write(ResponseWithId(response, identifiedRequest.id)))
-        }
-      }
+  def apply(connection: ConnectionHandle): Unit = connection.handlerPromise.success { pickle =>
+    val identifiedRequest = upickle.read[RequestWithId](pickle)
+    val result: Future[String] = actualCall(identifiedRequest.req)
+    result.foreach { response =>
+      connection.write(upickle.write(ResponseWithId(response, identifiedRequest.id)))
     }
   }
   

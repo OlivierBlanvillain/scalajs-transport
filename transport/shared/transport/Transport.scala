@@ -9,7 +9,7 @@ trait Transport {
   type Address
   
   /** Asynchronously attempts to listen and accept incoming connection. In case of successful
-   *  attempt, returns a Promise of a ConnectionListener. By completing this Promise, thelistener
+   *  attempt, returns a Promise of a ConnectionListener. By completing this Promise, the listener
    *  becomes responsible for handling incoming connection. While the Promise is not completed no
    *  incoming connections are accepted. */
   def listen(): Future[Promise[ConnectionListener]]
@@ -21,33 +21,18 @@ trait Transport {
   def shutdown(): Unit
 }
 
-/** An interface to be implemented by the user of Transport to listen to inbound connections. */
-trait ConnectionListener {
-
-  /** Called by the Transport to notify an inbound ConnectionHandle. */
-  def notify(inboundConnection: ConnectionHandle): Unit
-}
-
 /** SPI for duplex connections created by a Transports. */
 trait ConnectionHandle {
   /** Returns a Promise to be completed to listen for incoming payload. Incoming messages should be
    *  buffered until the listener is registered. */
   def handlerPromise: Promise[MessageListener]
-
+  
+  /** ConnectionHandle asynchronous signals the end connection by completing the closed future. */
+  def closed: Future[Unit]
+  
   /** Asynchronously sends a payload to the remote endpoint. */
   def write(outboundPayload: String): Unit
 
   /** Closes connection. */
   def close(): Unit
-}
-
-/** An interface to be implemented by the user of a ConnectionHandle to listen to inbound
- *  payloads. */
-trait MessageListener {
-  
-  /** Called by the ConnectionHandle to notify an inbound payload. */
-  def notify(inboundPayload: String): Unit
-  
-  /** Called by the ConnectionHandle when the connection is closed. */
-  def closed(): Unit = ()
 }

@@ -9,24 +9,26 @@ import transport._
 
 private class BridgeActor(listener: ConnectionListener, out: ActorRef)(
       implicit ec: ExecutionContext) extends Actor {
+  val closePromise = Promise[Unit]()
   val promise = QueueablePromise[MessageListener]()
   
   override def preStart: Unit = {
     val connectionHandle = new ConnectionHandle {
       def handlerPromise: Promise[MessageListener] = promise
+      def closed: Future[Unit] = closePromise.future
       def write(outboundPayload: String): Unit = out ! outboundPayload
       def close(): Unit = self ! PoisonPill
     }
-    listener.notify(connectionHandle)
+    listener(connectionHandle)
   }
   
   override def postStop: Unit = {
-    promise.queue(_.closed())
+    closePromise.success(())
   }
   
   def receive = {
     case m: String =>
-      promise.queue(_.notify(m))
+      promise.queue(_(m))
   }
 }
 

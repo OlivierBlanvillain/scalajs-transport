@@ -42,11 +42,9 @@ class ActorWrapper[T <: Transport](transport: T)(implicit ec: ExecutionContext, 
    *  }}} */
   def acceptWithActor(handlerProps: ActorRef => Props) {
     transport.listen().map { promise =>
-      promise.success(new ConnectionListener {
-        def notify(inboundConnection: ConnectionHandle): Unit = {
-          sys.actorOf(ConnectionToActor.props(inboundConnection, handlerProps))
-        }
-      })
+      promise.success { inboundConnection =>
+        sys.actorOf(ConnectionToActor.props(inboundConnection, handlerProps))
+      }
     }
   }
   

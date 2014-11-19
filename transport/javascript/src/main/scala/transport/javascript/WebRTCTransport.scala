@@ -36,17 +36,17 @@ private class WebRTCPeer(signalingChannel: ConnectionHandle, priority: Double)(
   private val connectionPromise = Promise[ConnectionHandle]()
   private var isCaller: Boolean = _
 
-  signalingChannel.handlerPromise.success(new MessageListener {
-    def notify(inboundPayload: String): Unit = {
-      val parsedPayload : js.Any = js.JSON.parse(inboundPayload)
-      val unpickledPayload: Any = PicklerRegistry.unpickle(parsedPayload)
-      revievedViaSignaling(unpickledPayload)
-    }
-    override def closed(): Unit = if(!future.isCompleted) {
+  signalingChannel.handlerPromise.success { inboundPayload  =>
+    val parsedPayload : js.Any = js.JSON.parse(inboundPayload)
+    val unpickledPayload: Any = PicklerRegistry.unpickle(parsedPayload)
+    revievedViaSignaling(unpickledPayload)
+  }
+  
+  signalingChannel.closed.onComplete { _ =>
+    if(!future.isCompleted)
       connectionPromise.failure(new IllegalStateException(
         "Signaling channel closed before the end of connection establishment."))
-    }
-  })
+  }
 
   webRTCConnection.onicecandidate = { event: RTCIceCandidateEvent =>
     if(event.candidate != null) {
@@ -103,21 +103,24 @@ private class WebRTCPeer(signalingChannel: ConnectionHandle, priority: Double)(
   private def createConnectionHandle(dc: RTCDataChannel): Unit = {
     new ConnectionHandle {
       private val promise = QueueablePromise[MessageListener]()
+      private val closePromise = Promise[Unit]()
       
       dc.onopen = { event: Event =>
         connectionPromise.success(this)
       }
       dc.onmessage = { event: RTCMessageEvent =>
-        promise.queue(_.notify(event.data.toString))
+        promise.queue(_(event.data.toString))
       }
       dc.onclose = { event: Event =>
-        promise.queue(_.closed())
+        closePromise.success(())
       }
       dc.onerror = { event: Event =>
-        promise.queue(_.closed())
+        // TODO
+        closePromise.success(())
       }
       
       def handlerPromise: Promise[MessageListener] = promise
+      def closed: Future[Unit] = closePromise.future
       def write(outboundPayload: String): Unit = dc.send(outboundPayload)
       def close(): Unit = dc.close()
     }
