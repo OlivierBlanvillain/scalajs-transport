@@ -19,9 +19,9 @@ class TestClient extends FlatSpec with Matchers {
     val connection = ws.connect(WebSocketUrl("ws://echo.websocket.org"))
     
     connection.foreach { _.write(sentMessage) }
-    connection.foreach { _.handlerPromise.success(new MessageListener {
-      def notify(s: String): Unit = promise.success(s)
-    })}
+    connection.foreach { _.handlerPromise.success { s =>
+      promise.success(s)
+    }}
     
     val reviedMessage = Await.result(promise.future, 2.seconds)
     

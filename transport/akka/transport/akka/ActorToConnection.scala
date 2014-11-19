@@ -11,6 +11,7 @@ import transport._
 class ActorToConnection(connectionPromise: Promise[ConnectionHandle])(
       implicit ec: ExecutionContext) extends Actor {
   val promise = QueueablePromise[MessageListener]()
+  val closePromise = Promise[Unit]()
   val peerPromise = Promise[ActorRef]()
   
   def receive = {
@@ -20,17 +21,18 @@ class ActorToConnection(connectionPromise: Promise[ConnectionHandle])(
     case Terminated(_) =>
       context.stop(self)
     case m: String =>
-      promise.queue(_.notify(m))
+      promise.queue(_(m))
   }
   
   override def postStop(): Unit = {
-    promise.queue(_.closed())
+    closePromise.success(())
   }
   
   peerPromise.future.map { peer =>
     connectionPromise.success(
       new ConnectionHandle {
         def handlerPromise: Promise[MessageListener] = promise
+        def closed: Future[Unit] = closePromise.future
         def write(outboundPayload: String): Unit = peer ! outboundPayload
         def close(): Unit = context.stop(self)
       }

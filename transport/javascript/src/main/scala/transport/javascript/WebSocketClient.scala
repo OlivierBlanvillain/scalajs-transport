@@ -16,23 +16,25 @@ class WebSocketClient(implicit ec: ExecutionContext) extends WebSocketTransport 
     
     new ConnectionHandle {
       val webSocket = new WebSocket(remote.url)
+      val closePromise = Promise[Unit]()
       val promise = QueueablePromise[MessageListener]()
       
       webSocket.onopen = { event: Event =>
         connectionPromise.success(this)
       }
       webSocket.onmessage = { event: MessageEvent =>
-        promise.queue(_.notify(event.data.toString))
+        promise.queue(_(event.data.toString))
       }
       webSocket.onclose = { event: Event =>
-        promise.queue(_.closed())
+        closePromise.success(())
       }
       webSocket.onerror = { event: Event =>
         // TODO: transmit this error to the listener?
-        promise.queue(_.closed())
+        closePromise.success(())
       }
       
       def handlerPromise: Promise[MessageListener] = promise
+      def closed: Future[Unit] = closePromise.future
       def write(outboundPayload: String): Unit = webSocket.send(outboundPayload)
       def close(): Unit = webSocket.close()
     }

@@ -7,13 +7,14 @@ import scala.collection.mutable
 
 private class ProxyConnectionHandle(implicit ec: ExecutionContext) extends ConnectionHandle {
   private var peer: ProxyConnectionHandle = _
-  private val promise: QueueablePromise[MessageListener] = QueueablePromise()
-  private def closed(): Unit = promise.queue(_.closed())
-  private def notify(payload: String): Unit = promise.queue(_.notify(payload))
+  private val promise = QueueablePromise[MessageListener]()
+  private val closePromise = Promise[Unit]()
+  private def notify(payload: String): Unit = promise.queue(_(payload))
     
+  def closed: Future[Unit] = closePromise.future
   def handlerPromise: Promise[MessageListener] = promise
   def write(outboundPayload: String): Unit = peer.notify(outboundPayload)
-  def close(): Unit = peer.closed()
+  def close(): Unit = peer.closePromise.success(())
 }
 
 /** TODOC */
