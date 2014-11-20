@@ -23,7 +23,7 @@ class ActorWrapper[T <: Transport](transport: T)(implicit ec: ExecutionContext, 
    *    myHandlerActor.props(out)
    *  }
    *  }}} */
-  def connectWithActor(address: transport.Address)(handlerProps: ActorRef => Props) {
+  def connectWithActor(address: transport.Address)(handlerProps: ActorRef => Props): Unit = {
     transport.connect(address).foreach { connection =>
       sys.actorOf(ConnectionToActor.props(connection, handlerProps))
     }
@@ -40,7 +40,7 @@ class ActorWrapper[T <: Transport](transport: T)(implicit ec: ExecutionContext, 
    *    myHandlerActor.props(out)
    *  }
    *  }}} */
-  def acceptWithActor(handlerProps: ActorRef => Props) {
+  def acceptWithActor(handlerProps: ActorRef => Props): Unit = {
     transport.listen().map { promise =>
       promise.success { inboundConnection =>
         sys.actorOf(ConnectionToActor.props(inboundConnection, handlerProps))

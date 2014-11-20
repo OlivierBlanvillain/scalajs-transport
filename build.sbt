@@ -6,11 +6,16 @@ val commonSettings = Seq(
   scalaVersion := "2.11.2",
   normalizedName ~= { _.replace("scala-js", "scalajs") },
   scalacOptions ++= Seq(
-    "-language:reflectiveCalls",
-    "-deprecation",
+    "-deprecation",           
+    "-encoding", "UTF-8",
+    "-feature",                
     "-unchecked",
-    "-feature",
-    "-encoding", "utf8"
+    "-language:reflectiveCalls",
+    "-Yno-adapted-args",       
+    "-Ywarn-numeric-widen",   
+    "-Xfuture",
+    "-Xlint",
+    "-Ywarn-unused-import"
   )
 )
 

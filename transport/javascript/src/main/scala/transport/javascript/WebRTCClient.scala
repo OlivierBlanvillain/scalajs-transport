@@ -4,8 +4,6 @@ import scala.concurrent._
 import scala.util.{ Success, Failure }
 import scala.scalajs.js
 
-import akka.actor._
-
 import transport._
 import transport.jsapi._
 

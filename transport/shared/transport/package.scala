@@ -5,6 +5,9 @@ package object transport {
   /** Listener provided by the user of a ConnectionHandle to listen to inbound payloads. */
   type MessageListener = String => Unit
 
+}
+
+package transport {
   case class SockJSUrl(url: String)
   case class WebSocketUrl(url: String)
 

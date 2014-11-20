@@ -1,12 +1,10 @@
 package controllers
 
-import scala.concurrent._
 import scala.util.Success
 
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.mvc._
 import play.api.Play.current
-import akka.actor._
 
 import upickle._
 import shared.Api
