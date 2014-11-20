@@ -14,8 +14,7 @@ val commonSettings = Seq(
     "-Yno-adapted-args",       
     "-Ywarn-numeric-widen",   
     "-Xfuture",
-    "-Xlint",
-    "-Ywarn-unused-import"
+    "-Xlint"
   )
 )
 

@@ -11,6 +11,7 @@ import io.netty.handler.codec.http.HttpHeaders.Names.HOST
 import io.netty.handler.codec.http.HttpMethod._
 import io.netty.util.concurrent.GenericFutureListener
 import io.netty.util.concurrent.{ Future => NettyFuture }
+import transport.netty.NettyToScalaFuture._
 
 private[netty] class InboundHandlerToConnection(
     path: String,
@@ -40,7 +41,18 @@ private[netty] class InboundHandlerToConnection(
         case None =>
           WebSocketServerHandshakerFactory.sendUnsupportedVersionResponse(ctx.channel())
         case Some(hs) =>
-          hs.handshake(ctx.channel(), req)
+          val handshakeFuture = hs.handshake(ctx.channel(), req)
+          handshakeFuture.toScala.onSuccess { case _ =>
+            val connection = new ConnectionHandle {
+              def closedFuture: Future[Unit] = closePromise.future
+              def handlerPromise: Promise[MessageListener] = queueablePromise
+              def write(m: String): Unit = {
+                ctx.channel().writeAndFlush(new TextWebSocketFrame(m))
+              }
+              def close(): Unit = ctx.close()
+            }
+            connectionListener.foreach(_(connection))
+          }
       }
     }
   }
@@ -55,7 +67,6 @@ private[netty] class InboundHandlerToConnection(
         
       case textFrame: TextWebSocketFrame =>
         val retainedText = textFrame.text()
-        println(retainedText)
         queueablePromise.queue(_(retainedText))
         
       case _ =>
@@ -66,13 +77,6 @@ private[netty] class InboundHandlerToConnection(
   
   override def channelActive(ctx: ChannelHandlerContext): Unit = {
     allChannels.add(ctx.channel())
-    val connection = new ConnectionHandle {
-      def closedFuture: Future[Unit] = closePromise.future
-      def handlerPromise: Promise[MessageListener] = queueablePromise
-      def write(m: String): Unit = ctx.channel().writeAndFlush(new TextWebSocketFrame(m))
-      def close(): Unit = ctx.close()
-    }
-    connectionListener.foreach(_(connection))
   }
 
   override def channelInactive(ctx: ChannelHandlerContext): Unit = {
