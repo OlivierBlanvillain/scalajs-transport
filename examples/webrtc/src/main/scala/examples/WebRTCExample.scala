@@ -40,11 +40,11 @@ object WebRTCExample {
   def createConnection(): Unit = {
     val (connection1, connection2) = ProxyConnectionHandle.newConnectionsPair()
     
-    ActorWrapper(new WebRTCTransport()).connectWithActor(connection1) { out =>
+    ActorWrapper(new WebRTCClient()).connectWithActor(connection1) { out =>
       Props(new Local(out))
     }
 
-    ActorWrapper(new WebRTCTransport()).connectWithActor(connection2) { out =>
+    ActorWrapper(new WebRTCClient()).connectWithActor(connection2) { out =>
       Props(new Remote(out))
     }
 

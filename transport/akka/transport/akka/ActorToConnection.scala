@@ -32,7 +32,7 @@ class ActorToConnection(connectionPromise: Promise[ConnectionHandle])(
     connectionPromise.success(
       new ConnectionHandle {
         def handlerPromise: Promise[MessageListener] = promise
-        def closed: Future[Unit] = closePromise.future
+        def closedFuture: Future[Unit] = closePromise.future
         def write(outboundPayload: String): Unit = peer ! outboundPayload
         def close(): Unit = context.stop(self)
       }

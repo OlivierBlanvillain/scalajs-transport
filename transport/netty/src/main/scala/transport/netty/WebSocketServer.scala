@@ -13,7 +13,24 @@ import io.netty.channel.group.DefaultChannelGroup
 import io.netty.handler.codec.http._
 import io.netty.util.concurrent.{ GlobalEventExecutor, GenericFutureListener }
 
-/** TODOC */
+/** Netty WebSocket server.
+ *  
+ *  Usage example:
+ *  {{{
+ *  val capsLockEchoServer = new WebSocketServer(8080, "/websocket")
+ *  
+ *  capsLockEchoServer.listen().foreach(_.success { inboundConnection =>
+ *    connection.handlerPromise.success { message =>
+ *      connection.write(message.toUpperCase)
+ *    }
+ *  })
+ *  
+ *  println("Press enter to interrupt")
+ *  System.in.read()
+ *  
+ *  capsLockEchoServer.shutdown()
+ *  }}}
+ */
 class WebSocketServer(port: Int, path: String)(implicit ec: ExecutionContext)
      extends WebSocketTransport {
   private val bossGroup = new NioEventLoopGroup(1)

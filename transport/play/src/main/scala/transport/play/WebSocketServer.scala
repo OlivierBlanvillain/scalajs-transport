@@ -8,7 +8,7 @@ import play.twirl.api.Html
 
 import transport._
 
-/** WebSocket server based on the native Play WebSocket support..
+/** WebSocket server based on the native Play WebSocket support.
  *  
  *  Incomming connections have to be passed to WebSocketServer using its .action() method.
  *

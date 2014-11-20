@@ -3,9 +3,24 @@ package transport.javascript
 import transport._
 import scala.concurrent._
 import scala.util.{ Success, Failure }
+import scala.scalajs.js
 import jsapi._
 
-/** TODOC */
+/** SockJS JavaScript client. 
+ *  
+ *  Usage example:
+ *  {{{
+ *  new SockJSClient().connect(url).foreach { connection =>
+ *    connection.handlerPromise.success { string => println("Recived: " + string) }
+ *    connection.write("Hello SockJS!")
+ *  }
+ *  }}}
+ *  
+ *  If using the Scala.js sbt plugin to manage JavaScript dependencies, add your in build.sbt:
+ *  {{{
+ *  jsDependencies += "org.webjars" % "sockjs-client" % "0.3.4" / "sockjs.min.js"
+ *  }}}
+ */
 class SockJSClient(implicit ec: ExecutionContext) extends SockJSTransport {
   def listen(): Future[Promise[ConnectionListener]] =
     Future.failed(new UnsupportedOperationException(
@@ -25,16 +40,16 @@ class SockJSClient(implicit ec: ExecutionContext) extends SockJSTransport {
       sockJS.onmessage = { event: MessageEvent =>
         promise.queue(_(event.data.toString))
       }
-      sockJS.onclose = { event: Event =>
-        closePromise.success(())
+      sockJS.onclose = { event: CloseEvent =>
+        closePromise.trySuccess(())
       }
-      sockJS.onerror = { event: Event =>
-        // TODO: transmit this error to the listener?
-        closePromise.success(())
+      sockJS.onerror = { event: ErrorEvent =>
+        val message = try { event.message.toString } catch { case e: ClassCastException => "" }
+        closePromise.tryFailure(SockJSException(message))
       }
       
       def handlerPromise: Promise[MessageListener] = promise
-      def closed: Future[Unit] = closePromise.future
+      def closedFuture: Future[Unit] = closePromise.future
       def write(outboundPayload: String): Unit = sockJS.send(outboundPayload)
       def close(): Unit = sockJS.close()
     }

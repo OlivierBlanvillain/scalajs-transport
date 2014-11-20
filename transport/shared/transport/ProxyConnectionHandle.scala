@@ -11,7 +11,7 @@ private class ProxyConnectionHandle(implicit ec: ExecutionContext) extends Conne
   private val closePromise = Promise[Unit]()
   private def notify(payload: String): Unit = promise.queue(_(payload))
     
-  def closed: Future[Unit] = closePromise.future
+  def closedFuture: Future[Unit] = closePromise.future
   def handlerPromise: Promise[MessageListener] = promise
   def write(outboundPayload: String): Unit = peer.notify(outboundPayload)
   def close(): Unit = peer.closePromise.success(())

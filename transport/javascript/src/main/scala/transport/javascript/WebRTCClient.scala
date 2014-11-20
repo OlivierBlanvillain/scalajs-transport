@@ -12,13 +12,22 @@ import transport.jsapi._
 import org.scalajs.spickling._
 import org.scalajs.spickling.jsany._
 
-/** TODOC */
-class WebRTCTransport(implicit ec: ExecutionContext) extends Transport {
+/** WebRTC JavaScript client. (Chrome and Firefox only) 
+ *  
+ *  Usage example:
+ *  {{{
+ *  new WebRTCClient().connect(signalingChannel).foreach { connection =>
+ *    connection.handlerPromise.success { string => println("Recived: " + string) }
+ *    connection.write("Hello WebRTC!")
+ *  }
+ *  }}}
+ */
+class WebRTCClient(implicit ec: ExecutionContext) extends Transport {
   type Address = ConnectionHandle
   
   def listen(): Future[Promise[ConnectionListener]] = 
     Future.failed(new UnsupportedOperationException(
-      "WebRTCTransport cannot listen for incomming connections."))
+      "WebRTCClient cannot listen for incomming connections."))
 
   def connect(signalingChannel: ConnectionHandle): Future[ConnectionHandle] = {
     new WebRTCPeer(signalingChannel, js.Math.random()).future
@@ -42,10 +51,9 @@ private class WebRTCPeer(signalingChannel: ConnectionHandle, priority: Double)(
     revievedViaSignaling(unpickledPayload)
   }
   
-  signalingChannel.closed.onComplete { _ =>
-    if(!future.isCompleted)
-      connectionPromise.failure(new IllegalStateException(
-        "Signaling channel closed before the end of connection establishment."))
+  signalingChannel.closedFuture.onComplete { _ =>
+    connectionPromise.tryFailure(new IllegalStateException(
+      "Signaling channel closed before the end of connection establishment."))
   }
 
   webRTCConnection.onicecandidate = { event: RTCIceCandidateEvent =>
@@ -76,7 +84,8 @@ private class WebRTCPeer(signalingChannel: ConnectionHandle, priority: Double)(
           }
         } else {
           webRTCConnection.ondatachannel = { event: Event =>
-            createConnectionHandle(event.asInstanceOf[RTCDataChannelEvent].channel) // WebRTC API typo?
+            // WebRTC API typo?
+            createConnectionHandle(event.asInstanceOf[RTCDataChannelEvent].channel)
           }
         }
       
@@ -112,15 +121,15 @@ private class WebRTCPeer(signalingChannel: ConnectionHandle, priority: Double)(
         promise.queue(_(event.data.toString))
       }
       dc.onclose = { event: Event =>
-        closePromise.success(())
+        closePromise.trySuccess(())
       }
       dc.onerror = { event: Event =>
-        // TODO
-        closePromise.success(())
+        val message = try { event.toString } catch { case e: ClassCastException => "" }
+        closePromise.tryFailure(WebRTCException(message))
       }
       
       def handlerPromise: Promise[MessageListener] = promise
-      def closed: Future[Unit] = closePromise.future
+      def closedFuture: Future[Unit] = closePromise.future
       def write(outboundPayload: String): Unit = dc.send(outboundPayload)
       def close(): Unit = dc.close()
     }

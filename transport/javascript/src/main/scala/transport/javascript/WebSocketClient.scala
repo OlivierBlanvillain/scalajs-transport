@@ -3,9 +3,19 @@ package transport.javascript
 import transport._
 import scala.concurrent._
 import scala.util.{ Success, Failure }
+import scala.scalajs.js
 import jsapi._
 
-/** TODOC */
+/** WebSocket JavaScript client using the native browser implementation.
+ *  
+ *  Usage example:
+ *  {{{
+ *  new WebSocketClient().connect(url).foreach { connection =>
+ *    connection.handlerPromise.success { string => println("Recived: " + string) }
+ *    connection.write("Hello WebSocket!")
+ *  }
+ *  }}}
+ */
 class WebSocketClient(implicit ec: ExecutionContext) extends WebSocketTransport {
   def listen(): Future[Promise[ConnectionListener]] =
     Future.failed(new UnsupportedOperationException(
@@ -25,16 +35,16 @@ class WebSocketClient(implicit ec: ExecutionContext) extends WebSocketTransport 
       webSocket.onmessage = { event: MessageEvent =>
         promise.queue(_(event.data.toString))
       }
-      webSocket.onclose = { event: Event =>
-        closePromise.success(())
+      webSocket.onclose = { event: CloseEvent =>
+        closePromise.trySuccess(())
       }
-      webSocket.onerror = { event: Event =>
-        // TODO: transmit this error to the listener?
-        closePromise.success(())
+      webSocket.onerror = { event: ErrorEvent =>
+        val message = try { event.message.toString } catch { case e: ClassCastException => "" }
+        closePromise.tryFailure(WebSocketException(message))
       }
       
       def handlerPromise: Promise[MessageListener] = promise
-      def closed: Future[Unit] = closePromise.future
+      def closedFuture: Future[Unit] = closePromise.future
       def write(outboundPayload: String): Unit = webSocket.send(outboundPayload)
       def close(): Unit = webSocket.close()
     }

@@ -15,7 +15,7 @@ private class BridgeActor(listener: ConnectionListener, out: ActorRef)(
   override def preStart: Unit = {
     val connectionHandle = new ConnectionHandle {
       def handlerPromise: Promise[MessageListener] = promise
-      def closed: Future[Unit] = closePromise.future
+      def closedFuture: Future[Unit] = closePromise.future
       def write(outboundPayload: String): Unit = out ! outboundPayload
       def close(): Unit = self ! PoisonPill
     }

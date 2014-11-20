@@ -19,7 +19,7 @@ private class EndpointToConnection(connectionPromise: Promise[ConnectionHandle])
     })
     connectionPromise.success(
       new ConnectionHandle {
-        def closed: Future[Unit] = closePromise.future
+        def closedFuture: Future[Unit] = closePromise.future
         def handlerPromise: Promise[MessageListener] = promise
         def write(m: String): Unit = session.getBasicRemote().sendText(m)
         def close(): Unit = session.close()
@@ -27,11 +27,10 @@ private class EndpointToConnection(connectionPromise: Promise[ConnectionHandle])
     )
   }
   override def onClose(session: Session, closeReason: CloseReason): Unit = {
-    closePromise.success(())
+    closePromise.trySuccess(())
   }
   override def onError(session: Session, thr: Throwable): Unit = {
-    // TODO: transmit this error to the listener?
-    closePromise.success(())
+    closePromise.tryFailure(thr)
   }
 }
 object EndpointToConnection {

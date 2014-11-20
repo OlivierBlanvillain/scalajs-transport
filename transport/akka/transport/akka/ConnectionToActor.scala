@@ -20,7 +20,7 @@ import scala.concurrent._
       self ! parse(inboundPayload)
     }
     
-    connection.closed.onComplete { _ =>
+    connection.closedFuture.onComplete { _ =>
       self ! ConnectionClosed
     }
   }

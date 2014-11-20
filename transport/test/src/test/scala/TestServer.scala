@@ -22,8 +22,8 @@ class TestServer extends FlatSpec with Matchers {
     try {
       
       server.listen().foreach(_.success { connection =>
-        connection.handlerPromise.success { m =>
-          connection.write(m.toUpperCase)
+        connection.handlerPromise.success { message =>
+          connection.write(message.toUpperCase)
         }
       })
       

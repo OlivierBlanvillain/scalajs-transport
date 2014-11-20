@@ -27,8 +27,8 @@ trait ConnectionHandle {
    *  buffered until the listener is registered. */
   def handlerPromise: Promise[MessageListener]
   
-  /** ConnectionHandle asynchronous signals the end connection by completing the closed future. */
-  def closed: Future[Unit]
+  /** ConnectionHandle asynchronous signals the end connection by completing the closedFuture. */
+  def closedFuture: Future[Unit]
   
   /** Asynchronously sends a payload to the remote endpoint. */
   def write(outboundPayload: String): Unit

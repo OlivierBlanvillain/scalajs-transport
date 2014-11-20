@@ -67,7 +67,7 @@ private[netty] class InboundHandlerToConnection(
   override def channelActive(ctx: ChannelHandlerContext): Unit = {
     allChannels.add(ctx.channel())
     val connection = new ConnectionHandle {
-      def closed: Future[Unit] = closePromise.future
+      def closedFuture: Future[Unit] = closePromise.future
       def handlerPromise: Promise[MessageListener] = queueablePromise
       def write(m: String): Unit = ctx.channel().writeAndFlush(new TextWebSocketFrame(m))
       def close(): Unit = ctx.close()
@@ -76,7 +76,7 @@ private[netty] class InboundHandlerToConnection(
   }
 
   override def channelInactive(ctx: ChannelHandlerContext): Unit = {
-    closePromise.success(())
+    closePromise.trySuccess(())
   }
   
   override def channelReadComplete(ctx: ChannelHandlerContext): Unit = {
@@ -85,7 +85,6 @@ private[netty] class InboundHandlerToConnection(
 
   override def exceptionCaught(ctx: ChannelHandlerContext, cause: Throwable): Unit = {
     cause.printStackTrace()
-    // TODO: transmit this error to the listener?
-    closePromise.success(())
+    closePromise.tryFailure(cause)
   }
 }
