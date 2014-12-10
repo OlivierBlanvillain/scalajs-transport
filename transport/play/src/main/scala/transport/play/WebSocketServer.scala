@@ -38,7 +38,7 @@ class WebSocketServer(implicit ec: ExecutionContext, app: Application)
     Future.failed(new UnsupportedOperationException(
       "Servers cannot initiate WebSockets connections."))
   
-  def shutdown(): Unit = ()
+  def shutdown(): Future[Unit] = Future.successful(Unit)
 }
 
 object WebSocketServer {

@@ -18,21 +18,21 @@ trait Transport {
   def connect(remote: Address): Future[ConnectionHandle]
   
   /** Shuts down the Transport and releases all corresponding resources. */
-  def shutdown(): Unit
+  def shutdown(): Future[Unit]
 }
 
 /** SPI for duplex connections created by a Transports. */
 trait ConnectionHandle {
-  /** Returns a Promise to be completed to listen for incoming payload. Incoming messages should be
+  /** Returns a Promise to be completed to listen for incoming messages. Incoming messages are
    *  buffered until the listener is registered. */
   def handlerPromise: Promise[MessageListener]
   
   /** ConnectionHandle asynchronous signals the end connection by completing the closedFuture. */
   def closedFuture: Future[Unit]
   
-  /** Asynchronously sends a payload to the remote endpoint. */
-  def write(outboundPayload: String): Unit
-
+  /** Asynchronously sends a message to the remote endpoint. */
+  def write(message: String): Unit
+  
   /** Closes connection. */
   def close(): Unit
 }

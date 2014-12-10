@@ -57,7 +57,7 @@ class SockJSClient(implicit ec: ExecutionContext) extends SockJSTransport {
     connectionPromise.future
   }
   
-  def shutdown(): Unit = ()
+  def shutdown(): Future[Unit] = Future.successful(Unit)
 }
 
 object SockJSClient {

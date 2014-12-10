@@ -66,9 +66,11 @@ class WebSocketServer(port: Int, path: String)(implicit ec: ExecutionContext)
     Future.failed(new UnsupportedOperationException(
       "Netty WebSocketServer cannot act as a client. Use tyrus.WebSocketClient instead."))
 
-  def shutdown(): Unit = {
+  def shutdown(): Future[Unit] = {
     bossGroup.shutdownGracefully()
     workerGroup.shutdownGracefully()
     allChannels.close().awaitUninterruptibly()
+    // TODO: joins and return these futures
+    Future.successful(Unit)
   }
 }

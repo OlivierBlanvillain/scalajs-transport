@@ -58,7 +58,7 @@ class SockJSServer(implicit ec: ExecutionContext, app: Application)
     Future.failed(new UnsupportedOperationException(
       "Servers cannot initiate SockJSs connections."))
   
-  def shutdown(): Unit = ()
+  def shutdown(): Future[Unit] = Future.successful(Unit)
 }
 
 object SockJSServer {

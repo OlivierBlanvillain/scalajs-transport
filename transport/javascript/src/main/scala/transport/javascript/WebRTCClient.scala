@@ -31,7 +31,7 @@ class WebRTCClient(implicit ec: ExecutionContext) extends Transport {
     new WebRTCPeer(signalingChannel, js.Math.random()).future
   }
 
-  def shutdown(): Unit = ()
+  def shutdown(): Future[Unit] = Future.successful(Unit)
 }
 
 private class WebRTCPeer(signalingChannel: ConnectionHandle, priority: Double)(

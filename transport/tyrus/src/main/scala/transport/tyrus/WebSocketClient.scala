@@ -23,5 +23,5 @@ class WebSocketClient(implicit ec: ExecutionContext) extends WebSocketTransport 
     futureConnection
   }
   
-  def shutdown(): Unit = ()
+  def shutdown(): Future[Unit] = Future.successful(Unit)
 }
