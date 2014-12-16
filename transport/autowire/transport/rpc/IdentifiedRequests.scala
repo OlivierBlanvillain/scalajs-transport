@@ -1,10 +1,10 @@
-package transport.autowire
+package transport.rpc
 
 import upickle._
 import scala.concurrent._
 import scala.collection.mutable
 import transport._
-import _root_.autowire.Core.Request
+import autowire.Core.Request
 
 /** Pool of pending promises identified by integers. Promises are removed upon completion. */
 class PendingPromises[T](implicit ec: ExecutionContext) {

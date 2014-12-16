@@ -121,6 +121,10 @@ lazy val webRTCExample = project.in(file("examples/webrtc"))
   .settings((commonSettings ++ scalaJSSettings): _*)
   .dependsOn(transportJavascript, transportAkkaJs)
 
+lazy val reportListings = project.in(file("examples/report-listings"))
+  .settings((commonSettings): _*)
+  .dependsOn(transportAutowireJvm, transportAkkaJvm, transportTyrus, transportNetty)
+
 
 lazy val autowire = project.in(file("examples/autowire/jvm"))
   .enablePlugins(PlayScala)

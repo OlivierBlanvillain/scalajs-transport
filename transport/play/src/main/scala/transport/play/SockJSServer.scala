@@ -62,6 +62,7 @@ class SockJSServer(implicit ec: ExecutionContext, app: Application)
 }
 
 object SockJSServer {
+  // TODO: Pool this out into something like PlayUtils
   /** Generates a JavaScript route to a SockJSServer. Use SockJSClient.addressFromPlayRoute()
    *  to load the route as a SockJSUrl on the client side. */
   def javascriptRoute(router: SockJSRouter)(implicit request: RequestHeader) = Html {

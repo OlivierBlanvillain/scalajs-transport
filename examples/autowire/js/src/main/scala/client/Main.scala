@@ -6,38 +6,27 @@ import scala.util.Random
 import scala.concurrent._
 import scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import scalatags.JsDom.all._
-import upickle._
-import autowire._
 import shared.Api
 
 import transport.javascript._
-import transport.autowire._
+import transport.rpc._
+import autowire._
+import upickle._
+
 import scala.collection.mutable
 import SockJSClient.addressFromPlayRoute
-
-object Client extends autowire.Client[String, upickle.Reader, upickle.Writer] {
-  val pendingPromises = new PendingPromises[String]()
-  
-  val futureConnection = new SockJSClient().connect(addressFromPlayRoute())
-  
-  futureConnection.foreach { _.handlerPromise.success(
-    new IdentifiedMessageListener(pendingPromises)
-  )}
-  
-  def doCall(request: Request): Future[String] = futureConnection.flatMap {
-    new IdentifiedCallOverConnection(_, pendingPromises)(request)
-  }
-  
-  def read[Result: upickle.Reader](p: String) = upickle.read[Result](p)
-  def write[Result: upickle.Writer](r: Result) = upickle.write(r)
-}
 
 @JSExport
 object ScalaJSExample {
   @JSExport
   def main(): Unit = {
     
+    val transport = new SockJSClient()
+    val address = addressFromPlayRoute()
+    val Client = new RpcWrapper(transport).connect(address)
+    
     Client[Api].double(21).call() onSuccess {
+    
       case result: Int => dom.document.body.appendChild(h2(result).render)
     }
     

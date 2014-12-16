@@ -5,14 +5,11 @@ import scala.util.Success
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.mvc._
 import play.api.Play.current
-
-import upickle._
 import shared.Api
-import autowire.Core.Request
 
 import play.sockjs.api.SockJSRouter
 import transport.play._
-import transport.autowire._
+import transport.rpc._
 
 object Application extends Controller {
   
@@ -24,15 +21,10 @@ object Application extends Controller {
     Ok(views.html.index(devMode = false, SockJSServer.javascriptRoute(sockJS)))
   }
   
-  val webSocketTransport = new WebSocketServer()
-  val webSocket = webSocketTransport.action()
-
-  val sockJStransport = new SockJSServer()
-  val sockJS = sockJStransport.action()
+  val transport = new SockJSServer()
+  val sockJS = transport.action()
   
-  sockJStransport.listen().map { promise =>
-    promise.success(new IdentifiedConnectionListener(AutowireServer.route[Api](Server)))
-  }
+  new RpcWrapper(transport).serve(_.route[Api](Server))
 }
 
 object Server extends Api { 
@@ -43,9 +35,4 @@ object Server extends Api {
     files.filter(_.startsWith(chunks.last))
   }
   def double(i: Int) = 2 * i
-}
-
-object AutowireServer extends autowire.Server[String, upickle.Reader, upickle.Writer]{
-  def read[Result: upickle.Reader](p: String) = upickle.read[Result](p)
-  def write[Result: upickle.Writer](r: Result) = upickle.write(r)
 }
