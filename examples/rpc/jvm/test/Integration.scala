@@ -7,7 +7,7 @@ import play.api.test.Helpers._
 
 class Integration extends BrowserSpecification {
 
-  "Autowire helper" should {
+  "RPC helper" should {
 
     "Handle concurrent requests" in new WithBrowser(Phantom) {
       browser goTo "/"

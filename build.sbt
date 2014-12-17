@@ -21,7 +21,7 @@ val commonSettings = Seq(
 lazy val root = project.in(file("."))
   .settings(commonSettings: _*)
   .aggregate(transportJavascript, transportNetty, transportPlay, transportTyrus,
-    transportAkkaJs, transportAkkaJvm, transportAutowireJs, transportAutowireJvm)
+    transportAkkaJs, transportAkkaJvm, transportRpcJs, transportRpcJvm)
 
 
 // Transport
@@ -71,17 +71,17 @@ lazy val transportAkkaJvm = project.in(file("transport/akkajvm"))
     "org.scalajs" %% "scalajs-pickling-play-json" % "0.3.1"))
 
 
-val autowireShared = transportShared ++ Seq(
-  unmanagedSourceDirectories in Compile += baseDirectory.value / "../autowire",
+val rpcShared = transportShared ++ Seq(
+  unmanagedSourceDirectories in Compile += baseDirectory.value / "../rpc",
   libraryDependencies ++= Seq(
     "com.lihaoyi" %%% "upickle" % "0.2.2",
     "com.lihaoyi" %%% "autowire" % "0.2.1"))
 
-lazy val transportAutowireJs = project.in(file("transport/autowirejs"))
-  .settings((autowireShared ++ scalaJSSettings): _*)
+lazy val transportRpcJs = project.in(file("transport/rpcjs"))
+  .settings((rpcShared ++ scalaJSSettings): _*)
 
-lazy val transportAutowireJvm = project.in(file("transport/autowirejvm"))
-  .settings(autowireShared: _*)
+lazy val transportRpcJvm = project.in(file("transport/rpcjvm"))
+  .settings(rpcShared: _*)
 
 
 lazy val playTwoBrowsersTest = project.in(file("transport/playTwoBrowsersTest"))
@@ -102,7 +102,7 @@ lazy val transportTest = project.in(file("transport/test"))
 // Examples
 
 lazy val examples = project.settings(commonSettings: _*).aggregate(
-    transportTest, chatWebSocket, chatWebSocketJs, chatWebRTC, chatWebRTCJs, autowire, autowireJs)
+    transportTest, chatWebSocket, chatWebSocketJs, chatWebRTC, chatWebRTCJs, rpc, rpcJs)
 
 parallelExecution in Global := false
 
@@ -123,21 +123,21 @@ lazy val webRTCExample = project.in(file("examples/webrtc"))
 
 lazy val reportListings = project.in(file("examples/report-listings"))
   .settings((commonSettings): _*)
-  .dependsOn(transportAutowireJvm, transportAkkaJvm, transportTyrus, transportNetty)
+  .dependsOn(transportRpcJvm, transportAkkaJvm, transportTyrus, transportNetty)
 
 
-lazy val autowire = project.in(file("examples/autowire/jvm"))
+lazy val rpc = project.in(file("examples/rpc/jvm"))
   .enablePlugins(PlayScala)
   .settings((commonSettings ++ playWithScalaJs): _*)
-  .dependsOn(transportPlay, transportAutowireJvm, playTwoBrowsersTest % "test->test")
+  .dependsOn(transportPlay, transportRpcJvm, playTwoBrowsersTest % "test->test")
   .settings(libraryDependencies ++= Seq(
     "org.webjars" % "sockjs-client" % "0.3.4",
     "org.webjars" %% "webjars-play" % "2.3.0",
     "org.webjars" % "bootstrap" % "3.2.0"))
 
-lazy val autowireJs = project.in(file("examples/autowire/js"))
-  .settings((commonSettings ++ scalaJSSettings ++ scalaJsOfPlayProject(autowire)): _*)
-  .dependsOn(transportJavascript, transportAutowireJs)
+lazy val rpcJs = project.in(file("examples/rpc/js"))
+  .settings((commonSettings ++ scalaJSSettings ++ scalaJsOfPlayProject(rpc)): _*)
+  .dependsOn(transportJavascript, transportRpcJs)
   .settings(libraryDependencies ++= Seq(
     "com.scalatags" %%% "scalatags" % "0.4.0"))
 
