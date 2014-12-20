@@ -11,6 +11,7 @@ import transport.rpc._
 
 object ServerSide { /**/
 
+// Server Side
 object Server extends Api {
   def doThing(i: Int, s: String) = Seq.fill(i)(s)
 }

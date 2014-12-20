@@ -11,11 +11,12 @@ import transport.tyrus._
 import transport.rpc._
 
 object ClientSide { /**/
-  
-val url = WebSocketUrl("http://localhost:8080/ws")
-val client = new RpcWrapper(new WebSocketClient()).connect(url)
 
-val result: Future[Seq[String]] = client[Api].doThing(3, "ha").call()
-result.foreach(println)
+// Client Side
+val transport = new WebSocketClient()
+val url = WebSocketUrl("http://localhost:8080/ws")
+val client = new RpcWrapper(transport).connect(url)
+val result: Future[Seq[String]] =
+    client[Api].doThing(3, "ha").call()
 
 }/**/
