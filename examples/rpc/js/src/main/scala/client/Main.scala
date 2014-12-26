@@ -2,7 +2,7 @@ package client
 
 import scala.scalajs.js.annotation.JSExport
 import org.scalajs.dom
-import scala.util.Random
+import scala.util._
 import scala.concurrent._
 import scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import scalatags.JsDom.all._

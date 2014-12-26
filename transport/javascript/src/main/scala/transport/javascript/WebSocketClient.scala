@@ -2,7 +2,7 @@ package transport.javascript
 
 import transport._
 import scala.concurrent._
-import scala.util.{ Success, Failure }
+import scala.util._
 import scala.scalajs.js
 import jsapi._
 

@@ -1,7 +1,7 @@
 package transport.javascript
 
 import scala.concurrent._
-import scala.util.{ Success, Failure }
+import scala.util._
 import scala.scalajs.js
 
 import transport._
@@ -28,14 +28,17 @@ class WebRTCClient(implicit ec: ExecutionContext) extends Transport {
       "WebRTCClient cannot listen for incomming connections."))
 
   def connect(signalingChannel: ConnectionHandle): Future[ConnectionHandle] = {
-    new WebRTCPeer(signalingChannel, js.Math.random()).future
+    new WebRTCPeer(signalingChannel).future
   }
 
   def shutdown(): Future[Unit] = Future.successful(Unit)
 }
 
-private class WebRTCPeer(signalingChannel: ConnectionHandle, priority: Double)(
+private class WebRTCPeer(
+      signalingChannel: ConnectionHandle,
+      priority: Double=js.Math.random())(
       implicit ec: ExecutionContext) {
+
   import WebRTCPeer._
   registerPicklers()
   

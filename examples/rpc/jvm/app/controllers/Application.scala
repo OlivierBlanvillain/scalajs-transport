@@ -1,6 +1,6 @@
 package controllers
 
-import scala.util.Success
+import scala.util._
 
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.mvc._

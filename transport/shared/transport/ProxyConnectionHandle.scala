@@ -1,7 +1,7 @@
 package transport
 
 import scala.concurrent._
-import scala.util.{ Failure, Success }
+import scala.util._
 
 import scala.collection.mutable
 

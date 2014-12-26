@@ -1,7 +1,7 @@
 package transport.akka
 
 import scala.concurrent._
-import scala.util.{ Success, Failure }
+import scala.util._
 
 import akka.actor._
 

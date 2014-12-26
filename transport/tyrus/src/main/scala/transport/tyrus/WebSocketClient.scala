@@ -2,7 +2,7 @@ package transport.tyrus
 
 import transport._
 import scala.concurrent._
-import scala.util.{ Success, Failure }
+import scala.util._
 
 import java.net.URI
 import javax.websocket._
