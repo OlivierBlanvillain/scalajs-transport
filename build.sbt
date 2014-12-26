@@ -102,7 +102,7 @@ lazy val transportTest = project.in(file("transport/test"))
 // Examples
 
 lazy val examples = project.settings(commonSettings: _*).aggregate(
-    transportTest, chatWebSocket, chatWebSocketJs, chatWebRTC, chatWebRTCJs, rpc, rpcJs)
+    transportTest, chatWebSocket, chatWebSocketJs, chatWebRTC, chatWebRTCJs, chatWebRTCFallback, chatWebRTCFallbackJs, rpc, rpcJs)
 
 parallelExecution in Global := false
 
@@ -165,11 +165,25 @@ lazy val chatWebRTC = project.in(file("examples/chat-webrtc/jvm"))
   .settings((commonSettings ++ playWithScalaJs): _*)
   .settings(libraryDependencies ++= Seq(
     "org.webjars" %% "webjars-play" % "2.3.0",
-    "org.webjars" % "sockjs-client" % "0.3.4",
     "org.webjars" % "jquery" % "2.1.1"))
 
 lazy val chatWebRTCJs = project.in(file("examples/chat-webrtc/js"))
   .settings((commonSettings ++ scalaJSSettings ++ scalaJsOfPlayProject(chatWebRTC)): _*)
+  .dependsOn(transportJavascript, transportAkkaJs)
+  .settings(libraryDependencies ++= Seq(
+    "org.scala-lang.modules.scalajs" %%% "scalajs-jquery" % "0.6"))
+
+
+lazy val chatWebRTCFallback = project.in(file("examples/chat-webrtc-fallback/jvm"))
+  .enablePlugins(PlayScala)
+  .dependsOn(transportPlay, transportAkkaJvm, playTwoBrowsersTest % "test->test")
+  .settings((commonSettings ++ playWithScalaJs): _*)
+  .settings(libraryDependencies ++= Seq(
+    "org.webjars" %% "webjars-play" % "2.3.0",
+    "org.webjars" % "jquery" % "2.1.1"))
+
+lazy val chatWebRTCFallbackJs = project.in(file("examples/chat-webrtc-fallback/js"))
+  .settings((commonSettings ++ scalaJSSettings ++ scalaJsOfPlayProject(chatWebRTCFallback)): _*)
   .dependsOn(transportJavascript, transportAkkaJs)
   .settings(libraryDependencies ++= Seq(
     "org.scala-lang.modules.scalajs" %%% "scalajs-jquery" % "0.6"))

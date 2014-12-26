@@ -23,6 +23,14 @@ object Main {
 
   @JSExport
   def startup(): Unit = {
+    println("fuuuuuuuuuuu")
+    jQ("body").append(
+      if(WebRTCSignalingFallback.supportsWebRTC)
+        "<div>Supports WebRTC</div>"
+      else
+        "<div>Does not support WebRTC</div>"
+    )
+    
     ActorWrapper(new WebSocketClient()).connectWithActor(addressFromPlayRoute())(
       EstablishRtcActor.props)
   }
@@ -44,7 +52,7 @@ class EstablishRtcActor(out: ActorRef) extends Actor {
   
   def use(futureConnection: Future[ConnectionHandle]): Unit = {
     futureConnection.foreach { signalingChannel =>
-      val futureRTC = new WebRTCClient().connect(signalingChannel)
+      val futureRTC = new WebRTCSignalingFallback().connect(signalingChannel)
       futureRTC.foreach { connection =>
         context.actorOf(ConnectionToActor.props(connection, DemoActor.props))
       }
