@@ -16,9 +16,9 @@ import upickle._
 import scala.collection.mutable
 import SockJSClient.addressFromPlayRoute
 
-@JSExport
+@JSExport("ScalaJSExample")
 object ScalaJSExample {
-  @JSExport
+  @JSExport("main")
   def main(): Unit = {
     
     val transport = new SockJSClient()

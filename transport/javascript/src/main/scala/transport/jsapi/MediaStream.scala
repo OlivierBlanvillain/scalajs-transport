@@ -3,16 +3,16 @@ package transport.jsapi
 import scala.scalajs.js
 
 class MediaStreamConstraints extends js.Object {
-  val audio: js.Any = ???
-  val video: js.Any = ???
+  val audio: js.Any = js.native
+  val video: js.Any = js.native
 }
 
 object MediaStreamConstraints extends js.Object {
 }
 
 class MediaTrackConstraints extends js.Object {
-  val mandatory: MediaTrackConstraintSet = ???
-  val optional: js.Array[MediaTrackConstraint] = ???
+  val mandatory: MediaTrackConstraintSet = js.native
+  val optional: js.Array[MediaTrackConstraint] = js.native
 }
 
 object MediaTrackConstraints extends js.Object {
@@ -32,38 +32,38 @@ object MediaTrackConstraint extends js.Object {
 }
 
 trait Navigator extends js.Object {
-  def getUserMedia(constraints: MediaStreamConstraints, successCallback: js.Function1[js.Any, Unit], errorCallback: js.Function1[Error, Unit]): Unit = ???
-  def webkitGetUserMedia(constraints: MediaStreamConstraints, successCallback: js.Function1[js.Any, Unit], errorCallback: js.Function1[Error, Unit]): Unit = ???
+  def getUserMedia(constraints: MediaStreamConstraints, successCallback: js.Function1[js.Any, Unit], errorCallback: js.Function1[Error, Unit]): Unit = js.native
+  def webkitGetUserMedia(constraints: MediaStreamConstraints, successCallback: js.Function1[js.Any, Unit], errorCallback: js.Function1[Error, Unit]): Unit = js.native
 }
 
 trait EventHandler extends js.Object {
-  def apply(event: Event): Unit = ???
+  def apply(event: Event): Unit = js.native
 }
 
 trait NavigatorUserMediaSuccessCallback extends js.Object {
-  def apply(stream: LocalMediaStream): Unit = ???
+  def apply(stream: LocalMediaStream): Unit = js.native
 }
 
 class NavigatorUserMediaError extends js.Object {
-  val PERMISSION_DENIED: js.Number = ???
-  val code: js.Number = ???
+  val PERMISSION_DENIED: Integer = js.native
+  val code: Integer = js.native
 }
 
 object NavigatorUserMediaError extends js.Object {
-  val PERMISSION_DENIED: js.Number = ???
+  val PERMISSION_DENIED: Integer = js.native
 }
 
 trait NavigatorUserMediaErrorCallback extends js.Object {
-  def apply(error: NavigatorUserMediaError): Unit = ???
+  def apply(error: NavigatorUserMediaError): Unit = js.native
 }
 
 class MediaStreamTrackList extends js.Object {
-  val length: js.Number = ???
-  val item: MediaStreamTrack = ???
-  def add(track: MediaStreamTrack): Unit = ???
-  def remove(track: MediaStreamTrack): Unit = ???
-  val onaddtrack: js.Function1[Event, Unit] = ???
-  val onremovetrack: js.Function1[Event, Unit] = ???
+  val length: Integer = js.native
+  val item: MediaStreamTrack = js.native
+  def add(track: MediaStreamTrack): Unit = js.native
+  def remove(track: MediaStreamTrack): Unit = js.native
+  val onaddtrack: js.Function1[Event, Unit] = js.native
+  val onremovetrack: js.Function1[Event, Unit] = js.native
 }
 
 object MediaStreamTrackList extends js.Object {
@@ -75,12 +75,12 @@ object webkitMediaStreamTrackList extends js.Object {
 
 class MediaStream extends js.Object {
   def this(trackContainers: js.Array[MediaStream]) = this()
-  val label: js.String = ???
-  val id: js.String = ???
-  def getAudioTracks(): MediaStreamTrackList = ???
-  def getVideoTracks(): MediaStreamTrackList = ???
-  val ended: js.Boolean = ???
-  val onended: js.Function1[Event, Unit] = ???
+  val label: String = js.native
+  val id: String = js.native
+  def getAudioTracks(): MediaStreamTrackList = js.native
+  def getVideoTracks(): MediaStreamTrackList = js.native
+  val ended: Boolean = js.native
+  val onended: js.Function1[Event, Unit] = js.native
 }
 
 object MediaStream extends js.Object {
@@ -94,41 +94,41 @@ object webkitMediaStream extends js.Object {
 }
 
 trait SourceInfo extends js.Object {
-  val label: js.String = ???
-  val id: js.String = ???
-  val kind: js.String = ???
-  val facing: js.String = ???
+  val label: String = js.native
+  val id: String = js.native
+  val kind: String = js.native
+  val facing: String = js.native
 }
 
 object SourceInfo extends js.Object {
 }
 
 trait LocalMediaStream extends MediaStream {
-  def stop(): Unit = ???
+  def stop(): Unit = js.native
 }
 
 class MediaStreamTrack extends js.Object {
-  val kind: js.String = ???
-  val label: js.String = ???
-  val enabled: js.Boolean = ???
-  val LIVE: js.Number = ???
-  val MUTED: js.Number = ???
-  val ENDED: js.Number = ???
-  val readyState: js.Number = ???
-  val onmute: js.Function1[Event, Unit] = ???
-  val onunmute: js.Function1[Event, Unit] = ???
-  val onended: js.Function1[Event, Unit] = ???
+  val kind: String = js.native
+  val label: String = js.native
+  val enabled: Boolean = js.native
+  val LIVE: Integer = js.native
+  val MUTED: Integer = js.native
+  val ENDED: Integer = js.native
+  val readyState: Integer = js.native
+  val onmute: js.Function1[Event, Unit] = js.native
+  val onunmute: js.Function1[Event, Unit] = js.native
+  val onended: js.Function1[Event, Unit] = js.native
 }
 
 object MediaStreamTrack extends js.Object {
-  val LIVE: js.Number = ???
-  val MUTED: js.Number = ???
-  val ENDED: js.Number = ???
-  val getSources: js.Function1[js.Function1[js.Array[SourceInfo], Unit], Unit] = ???
+  val LIVE: Integer = js.native
+  val MUTED: Integer = js.native
+  val ENDED: Integer = js.native
+  val getSources: js.Function1[js.Function1[js.Array[SourceInfo], Unit], Unit] = js.native
 }
 
 trait streamURL extends js.Object {
-  def createObjectURL(stream: MediaStream): js.String = ???
+  def createObjectURL(stream: MediaStream): String = js.native
 }
 
 trait WebkitURL extends streamURL {
@@ -136,5 +136,5 @@ trait WebkitURL extends streamURL {
 
 object webkitURL extends js.Object {
 /* ??? ConstructorMember(FunSignature(List(),List(),Some(TypeRef(TypeName(streamURL),List())))) */
-  def createObjectURL(stream: MediaStream): js.String = ???
+  def createObjectURL(stream: MediaStream): String = js.native
 }

@@ -21,9 +21,9 @@ object Page {
 }
 import Page._
 
-@JSExport
+@JSExport("WebRTCExample")
 object WebRTCExample {
-  @JSExport
+  @JSExport("main")
   def main(): Unit = {
     startButton.disabled = false
     sendButton.disabled = true

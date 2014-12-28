@@ -153,8 +153,8 @@ private object WebRTCPeer {
   def registerPicklers(): Unit = _registerPicklers
 
   object OptionalMediaConstraint extends RTCOptionalMediaConstraint {
-    override val DtlsSrtpKeyAgreement: js.Boolean = false
-    override val RtpDataChannels: js.Boolean = false
+    override val DtlsSrtpKeyAgreement: Boolean = false
+    override val RtpDataChannels: Boolean = false
   }
 
   object DataChannelsConstraint extends RTCMediaConstraints {

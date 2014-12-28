@@ -21,9 +21,8 @@ object Main {
 
   implicit val system = ActorSystem("chat-client")
 
-  @JSExport
+  @JSExport("startup")
   def startup(): Unit = {
-    println("fuuuuuuuuuuu")
     jQ("body").append(
       if(WebRTCSignalingFallback.supportsWebRTC)
         "<div>Supports WebRTC</div>"

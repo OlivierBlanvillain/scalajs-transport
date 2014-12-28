@@ -4,7 +4,7 @@ import akka.actor._
 import transport.akka
 import transport._
 
-abstract /* */
+abstract
 class ActorWrapper[T <: Transport](t: T) {
   type Handler = ActorRef => Props
   def acceptWithActor(handler: Handler): Unit

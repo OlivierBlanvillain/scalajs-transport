@@ -21,7 +21,7 @@ object Main {
 
   implicit val system = ActorSystem("chat-client")
 
-  @JSExport
+  @JSExport("startup")
   def startup(): Unit = {
     ActorWrapper(new WebSocketClient()).connectWithActor(addressFromPlayRoute())(
       EstablishRtcActor.props)
