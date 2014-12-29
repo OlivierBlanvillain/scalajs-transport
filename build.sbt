@@ -2,7 +2,6 @@ val commonSettings = Seq(
   organization := "org.scalajs",
   version := "0.1-SNAPSHOT",
   scalaVersion := "2.11.4",
-  normalizedName ~= { _.replace("scala-js", "scalajs") },
   scalacOptions ++= Seq(
     "-deprecation",           
     "-encoding", "UTF-8",
@@ -18,190 +17,249 @@ val commonSettings = Seq(
 
 parallelExecution in Global := false
 
-lazy val root = project.in(file("."))
+lazy val root = project
+  .in(file("."))
   .settings(commonSettings: _*)
-  .aggregate(transportJavascript, transportNetty, transportPlay, transportTyrus,
-    transportAkkaJs, transportAkkaJvm, transportRpcJs, transportRpcJvm)
+  .aggregate(
+    transportCoreJS,
+    transportCoreJVM,
+    transportJavaScriptJS,
+    transportJavaScriptJVM,
+    transportNettyJS,
+    transportNettyJVM,
+    transportPlayJS,
+    transportPlayJVM,
+    transportTyrusJS,
+    transportTyrusJVM,
+    transportAkkaJS,
+    transportAkkaJVM,
+    transportRPCJS,
+    transportRPCJVM)
 
-lazy val examples = project.settings(commonSettings: _*).aggregate(
-  transportTest, chatWebSocket, chatWebRTC, chatWebRTCFallback, rpc)
-
-
-// lazy val transportCore = crossProject.
-//   settings(commonSettings: _*).
-//   jvmSettings().
-//   jsSettings(libraryDependencies ++= Seq(
-//     "org.scala-js" %%% "scalajs-dom" % "0.7.0",
-//     // TODO: These two should go away at some point.
-//     "org.scalajs" %%% "scalajs-pickling" % "0.4-SNAPSHOT",
-//     "org.scalajs" %%% "scalajs-actors" % "0.1-SNAPSHOT"))
-
-// lazy val transportCoreJVM = transportCore.jvm
-// lazy val transportCoreJS = transportCore.js
+lazy val examples = project
+  .in(file("examples"))
+  .settings(commonSettings: _*)
+  .aggregate(
+    transportTestJVM,
+    transportTestPlayJVM,
+    reportListingsJVM,
+    exampleRPCJVM,
+    chatWebSocketJVM,
+    chatWebRTCJVM,
+    chatWebRTCFallbackJVM)
 
 // Transport
 
-val transportShared = commonSettings ++ Seq(
-  unmanagedSourceDirectories in Compile += baseDirectory.value / "../shared")
+lazy val transportCore = crossProject
+  .crossType(CrossType.Pure)
+  .in(file("transport/core"))
+  .settings(commonSettings: _*)
+  .settings(name := "transport-core")
+lazy val transportCoreJVM = transportCore.jvm
+lazy val transportCoreJS = transportCore.js
 
-lazy val transportJavascript = project.in(file("transport/javascript"))
-  .settings(transportShared: _*)
-  .enablePlugins(ScalaJSPlugin)
-  .settings(libraryDependencies ++= Seq(
+lazy val transportJavaScript = crossProject
+  .crossType(CrossType.Dummy)
+  .in(file("transport/javascript"))
+  .settings(commonSettings: _*)
+  .settings(name := "transport-javascript")
+  .dependsOn(transportCore)
+  .jsSettings(libraryDependencies ++= Seq(
     "org.scala-js" %%% "scalajs-dom" % "0.7.0",
     // TODO: These two should go away at some point.
     "org.scalajs" %%% "scalajs-pickling" % "0.4-SNAPSHOT",
     "org.scalajs" %%% "scalajs-actors" % "0.1-SNAPSHOT"))
+lazy val transportJavaScriptJVM = transportJavaScript.jvm
+lazy val transportJavaScriptJS = transportJavaScript.js
 
-lazy val transportNetty = project.in(file("transport/netty"))
-  .settings(transportShared: _*)
-  .settings(libraryDependencies ++= Seq(
-    "io.netty" % "netty-all" % "4.0.24.Final"))
+lazy val transportNetty = crossProject
+  .crossType(CrossType.Dummy)
+  .in(file("transport/netty"))
+  .settings(commonSettings: _*)
+  .settings(name := "transport-netty")
+  .dependsOn(transportCore)
+  .jvmSettings(libraryDependencies +=
+    "io.netty" % "netty-all" % "4.0.24.Final")
+lazy val transportNettyJVM = transportNetty.jvm
+lazy val transportNettyJS = transportNetty.js
 
-lazy val transportPlay = project.in(file("transport/play"))
-  .settings(transportShared: _*)
-  .settings(libraryDependencies ++= Seq(
+lazy val transportPlay = crossProject
+  .crossType(CrossType.Dummy)
+  .in(file("transport/play"))
+  .settings(commonSettings: _*)
+  .settings(name := "transport-play")
+  .dependsOn(transportCore)
+  .jvmSettings(libraryDependencies ++= Seq(
     "com.github.fdimuccio" %% "play2-sockjs" % "0.3.0",
     "com.typesafe.akka" %% "akka-actor" % "2.3.6",
     "com.typesafe.play" %% "play" % "2.3.5"))
+lazy val transportPlayJVM = transportPlay.jvm
+lazy val transportPlayJS = transportPlay.js
 
-lazy val transportTyrus = project.in(file("transport/tyrus"))
-  .settings(transportShared: _*)
-  .settings(libraryDependencies ++= Seq(
-    "org.glassfish.tyrus.bundles" % "tyrus-standalone-client" % "1.8.3"))
+lazy val transportTyrus = crossProject
+  .crossType(CrossType.Dummy)
+  .in(file("transport/tyrus"))
+  .settings(commonSettings: _*)
+  .settings(name := "transport-tyrus")
+  .dependsOn(transportCore)
+  .jvmSettings(libraryDependencies +=
+    "org.glassfish.tyrus.bundles" % "tyrus-standalone-client" % "1.8.3")
+lazy val transportTyrusJVM = transportTyrus.jvm
+lazy val transportTyrusJS = transportTyrus.js
 
-
-val akkaShared = transportShared ++ Seq(
-  unmanagedSourceDirectories in Compile += baseDirectory.value / "../akka")
-
-lazy val transportAkkaJs = project.in(file("transport/akkajs"))
-  .settings(akkaShared: _*)
-  .enablePlugins(ScalaJSPlugin)
-  .settings(libraryDependencies ++= Seq(
-    "org.scalajs" %%% "scalajs-pickling" % "0.4-SNAPSHOT",
-    "org.scalajs" %%% "scalajs-actors" % "0.1-SNAPSHOT"))
-
-lazy val transportAkkaJvm = project.in(file("transport/akkajvm"))
-  .settings(akkaShared: _*)
-  .settings(libraryDependencies ++= Seq(
+lazy val transportAkka = crossProject
+  .crossType(CrossType.Full)
+  .in(file("transport/akka"))
+  .settings(commonSettings: _*)
+  .settings(name := "transport-akka")
+  .dependsOn(transportCore)
+  .jvmSettings(libraryDependencies ++= Seq(
     "com.typesafe.akka" %% "akka-actor" % "2.3.6",
     "org.scalajs" %% "scalajs-pickling-play-json" % "0.4-SNAPSHOT"))
+  .jsSettings(libraryDependencies ++= Seq(
+    "org.scalajs" %%% "scalajs-pickling" % "0.4-SNAPSHOT",
+    "org.scalajs" %%% "scalajs-actors" % "0.1-SNAPSHOT"))
+lazy val transportAkkaJVM = transportAkka.jvm
+lazy val transportAkkaJS = transportAkka.js
 
-
-val rpcShared = transportShared ++ Seq(
-  unmanagedSourceDirectories in Compile += baseDirectory.value / "../rpc",
-  libraryDependencies ++= Seq(
+lazy val transportRPC = crossProject
+  .crossType(CrossType.Pure)
+  .in(file("transport/rpc"))  
+  .settings(commonSettings: _*)
+  .settings(name := "transport-rpc")
+  .dependsOn(transportCore)
+  .settings(libraryDependencies ++= Seq(
     "com.lihaoyi" %%% "upickle" % "0.2.6-M3",
     "com.lihaoyi" %%% "autowire" % "0.2.4-M3"))
+lazy val transportRPCJVM = transportRPC.jvm
+lazy val transportRPCJS = transportRPC.js
 
-lazy val transportRpcJs = project.in(file("transport/rpcjs"))
-  .settings(rpcShared: _*)
-  .enablePlugins(ScalaJSPlugin)
-
-lazy val transportRpcJvm = project.in(file("transport/rpcjvm"))
-  .settings(rpcShared: _*)
-
-
-lazy val playTwoBrowsersTest = project.in(file("transport/playTwoBrowsersTest"))
+lazy val transportTestPlayJVM = project.in(file("transport/test-play"))
   .settings(commonSettings: _*)
   .enablePlugins(PlayScala)
   .settings(libraryDependencies ++= Seq(
     "org.seleniumhq.selenium" % "selenium-java" % "2.43.1",
     "com.github.detro.ghostdriver" % "phantomjsdriver" % "1.0.4" % "test"))
   
-lazy val transportTest = project.in(file("transport/test"))
+lazy val transportTestJVM = project.in(file("transport/test"))
   .settings(commonSettings: _*)
-  .dependsOn(transportNetty)
-  .dependsOn(transportTyrus)
+  .dependsOn(transportNettyJVM)
+  .dependsOn(transportTyrusJVM)
   .settings(libraryDependencies ++= Seq(
     "org.scalatest" % "scalatest_2.11" % "2.2.1" % "test"))
+  
+
+// Cross Play/Scala.JS settings
+
+lazy val sharedPlayScalaJS = Seq(
+  unmanagedSourceDirectories in Compile += baseDirectory.value / "../shared/src/main/scala",
+  unmanagedSourceDirectories in Test += baseDirectory.value / "../shared/src/test/scala",
+  unmanagedResourceDirectories in Compile += baseDirectory.value / "../shared/src/main/resources",
+  unmanagedResourceDirectories in Test += baseDirectory.value / "../shared/src/test/resources")
+
+lazy val UK = new com.typesafe.sbt.packager.universal.UniversalKeys{}
+
+def playWithScalaJS(scalaJSProject: Project) = Seq(
+  UK.dist <<= UK.dist dependsOn (fullOptJS in (scalaJSProject, Compile)),
+  UK.stage <<= UK.stage dependsOn (fullOptJS in (scalaJSProject, Compile)),
+  compile in Compile <<= (compile in Compile) dependsOn (fastOptJS in (scalaJSProject, Compile))
+) ++ sharedPlayScalaJS
+
+lazy val scalaJSWithPlay = Seq(
+  crossTarget in (Compile, packageScalaJSLauncher) := baseDirectory.value / "../jvm/public/javascripts",
+  crossTarget in (Compile, fastOptJS) := baseDirectory.value / "../jvm/public/javascripts",
+  crossTarget in (Compile, fullOptJS) := baseDirectory.value / "../jvm/public/javascripts"
+) ++ sharedPlayScalaJS
 
 
 // Examples
 
-val playWithScalaJs = Seq(
-  unmanagedSourceDirectories in Compile += baseDirectory.value / "../shared",
-  unmanagedResourceDirectories in Compile += baseDirectory.value / "../js/src")
-
-def scalaJsOfPlayProject(p: Project) = Seq(
-  unmanagedSourceDirectories in Compile += (baseDirectory in p).value / "../shared",
-  fastOptJS in Compile <<= (fastOptJS in Compile) triggeredBy (compile in (p, Compile)),
-  crossTarget in (Compile, fastOptJS) := (baseDirectory in p).value / "public/javascripts",
-  crossTarget in (Compile, fullOptJS) := (baseDirectory in p).value / "public/javascripts")
-
-
-lazy val webRTCExample = project.in(file("examples/webrtc"))
+lazy val reportListings = crossProject
+  .crossType(CrossType.Dummy)
+  .in(file("examples/report-listings"))
   .settings(commonSettings: _*)
+  .dependsOn(transportRPC, transportAkka, transportTyrus, transportNetty)
+lazy val reportListingsJVM = reportListings.jvm
+lazy val reportListingsJS = reportListings.js
+
+lazy val rawWebRTC = crossProject
+  .crossType(CrossType.Dummy)
+  .in(file("examples/raw-webrtc"))
+  .settings(commonSettings: _*)
+  .dependsOn(transportJavaScript, transportAkka)
+lazy val rawWebRTCJVM = rawWebRTC.jvm
+lazy val rawWebRTCJS = rawWebRTC.js
+
+lazy val exampleRPCJS = project
+  .in(file("examples/rpc/js"))
   .enablePlugins(ScalaJSPlugin)
-  .dependsOn(transportJavascript, transportAkkaJs)
-
-lazy val reportListings = project.in(file("examples/report-listings"))
   .settings(commonSettings: _*)
-  .dependsOn(transportRpcJvm, transportAkkaJvm, transportTyrus, transportNetty)
-
-
-lazy val rpc = project.in(file("examples/rpc/jvm"))
+  .settings(scalaJSWithPlay: _*)
+  .dependsOn(transportJavaScriptJS, transportRPCJS)
+  .settings(libraryDependencies ++= Seq(
+    "com.scalatags" %%% "scalatags" % "0.4.3-M3"))
+lazy val exampleRPCJVM = project
+  .in(file("examples/rpc/jvm"))
   .enablePlugins(PlayScala)
-  .settings((commonSettings ++ playWithScalaJs): _*)
-  .dependsOn(transportPlay, transportRpcJvm, playTwoBrowsersTest % "test->test")
+  .settings(commonSettings: _*)
+  .settings(playWithScalaJS(exampleRPCJS): _*)
+  .dependsOn(transportPlayJVM, transportRPCJVM, transportTestPlayJVM % "test->test")
   .settings(libraryDependencies ++= Seq(
     "org.webjars" % "sockjs-client" % "0.3.4",
     "org.webjars" %% "webjars-play" % "2.3.0",
     "org.webjars" % "bootstrap" % "3.2.0"))
 
-lazy val rpcJs = project.in(file("examples/rpc/js"))
-  .settings((commonSettings ++ scalaJsOfPlayProject(rpc)): _*)
+lazy val chatWebSocketJS = project
+  .in(file("examples/chat-websocket/js"))
   .enablePlugins(ScalaJSPlugin)
-  .dependsOn(transportJavascript, transportRpcJs)
+  .settings(commonSettings: _*)
+  .settings(scalaJSWithPlay: _*)
+  .dependsOn(transportJavaScriptJS, transportAkkaJS)
   .settings(libraryDependencies ++= Seq(
-    "com.scalatags" %%% "scalatags" % "0.4.3-M3"))
-
-
-lazy val chatWebSocket = project.in(file("examples/chat-websocket/jvm"))
+    "be.doeraene" %%% "scalajs-jquery" % "0.7.1-SNAPSHOT"))
+lazy val chatWebSocketJVM = project
+  .in(file("examples/chat-websocket/jvm"))
   .enablePlugins(PlayScala)
-  .settings((commonSettings ++ playWithScalaJs): _*)
-  .dependsOn(transportPlay, transportAkkaJvm, playTwoBrowsersTest % "test->test")
+  .settings(commonSettings: _*)
+  .settings(playWithScalaJS(chatWebSocketJS): _*)
+  .dependsOn(transportPlayJVM, transportAkkaJVM, transportTestPlayJVM % "test->test")
   .settings(libraryDependencies ++= Seq(
     "org.webjars" %% "webjars-play" % "2.3.0",
     "org.webjars" % "sockjs-client" % "0.3.4",
     "org.webjars" % "jquery" % "2.1.1"))
 
-lazy val chatWebSocketJs = project.in(file("examples/chat-websocket/js"))
-  .settings((commonSettings ++ scalaJsOfPlayProject(chatWebSocket)): _*)
+lazy val chatWebRTCJS = project
+  .in(file("examples/chat-webrtc/js"))
   .enablePlugins(ScalaJSPlugin)
-  .dependsOn(transportJavascript)
-  .dependsOn(transportAkkaJs)
+  .settings(commonSettings: _*)
+  .settings(scalaJSWithPlay: _*)
+  .dependsOn(transportJavaScriptJS, transportAkkaJS)
   .settings(libraryDependencies ++= Seq(
     "be.doeraene" %%% "scalajs-jquery" % "0.7.1-SNAPSHOT"))
-
-
-lazy val chatWebRTC = project.in(file("examples/chat-webrtc/jvm"))
+lazy val chatWebRTCJVM = project
+  .in(file("examples/chat-webrtc/jvm"))
   .enablePlugins(PlayScala)
-  .dependsOn(transportPlay, transportAkkaJvm, playTwoBrowsersTest % "test->test")
-  .settings((commonSettings ++ playWithScalaJs): _*)
+  .settings(commonSettings: _*)
+  .settings(playWithScalaJS(chatWebRTCJS): _*)
+  .dependsOn(transportPlayJVM, transportAkkaJVM, transportTestPlayJVM % "test->test")
   .settings(libraryDependencies ++= Seq(
     "org.webjars" %% "webjars-play" % "2.3.0",
     "org.webjars" % "jquery" % "2.1.1"))
 
-lazy val chatWebRTCJs = project.in(file("examples/chat-webrtc/js"))
-  .settings((commonSettings ++ scalaJsOfPlayProject(chatWebRTC)): _*)
+lazy val chatWebRTCFallbackJS = project
+  .in(file("examples/chat-webrtc-fallback/js"))
   .enablePlugins(ScalaJSPlugin)
-  .dependsOn(transportJavascript, transportAkkaJs)
+  .settings(commonSettings: _*)
+  .settings(scalaJSWithPlay: _*)
+  .dependsOn(transportJavaScriptJS, transportAkkaJS)
   .settings(libraryDependencies ++= Seq(
     "be.doeraene" %%% "scalajs-jquery" % "0.7.1-SNAPSHOT"))
-
-
-lazy val chatWebRTCFallback = project.in(file("examples/chat-webrtc-fallback/jvm"))
+lazy val chatWebRTCFallbackJVM = project
+  .in(file("examples/chat-webrtc-fallback/jvm"))
   .enablePlugins(PlayScala)
-  .dependsOn(transportPlay, transportAkkaJvm, playTwoBrowsersTest % "test->test")
-  .settings((commonSettings ++ playWithScalaJs): _*)
+  .settings(commonSettings: _*)
+  .settings(playWithScalaJS(chatWebRTCFallbackJS): _*)
+  .dependsOn(transportPlayJVM, transportAkkaJVM, transportTestPlayJVM % "test->test")
   .settings(libraryDependencies ++= Seq(
     "org.webjars" %% "webjars-play" % "2.3.0",
     "org.webjars" % "jquery" % "2.1.1"))
-
-lazy val chatWebRTCFallbackJs = project.in(file("examples/chat-webrtc-fallback/js"))
-  .settings((commonSettings ++ scalaJsOfPlayProject(chatWebRTCFallback)): _*)
-  .enablePlugins(ScalaJSPlugin)
-  .dependsOn(transportJavascript, transportAkkaJs)
-  .settings(libraryDependencies ++= Seq(
-    "be.doeraene" %%% "scalajs-jquery" % "0.7.1-SNAPSHOT"))

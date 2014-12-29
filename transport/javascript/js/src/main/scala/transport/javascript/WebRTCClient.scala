@@ -161,4 +161,16 @@ private object WebRTCPeer {
     override val mandatory: RTCMediaOfferConstraints = null
     override val optional: js.Array[RTCOptionalMediaConstraint] = js.Array(OptionalMediaConstraint)
   }
+  
+  // val DataChannelsConstraint = js.Dynamic.literal(
+  //     mandatory = js.Dynamic.literal(
+  //       OfferToReceiveAudio = true,
+  //       OfferToReceiveVideo = true
+  //     ),
+  //     optional = js.Array(
+  //       js.Dynamic.literal(DtlsSrtpKeyAgreement = false),
+  //       js.Dynamic.literal(RtpDataChannels = false)
+  //     )
+  //   ).asInstanceOf[RTCMediaConstraints]
+
 }
