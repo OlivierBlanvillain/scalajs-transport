@@ -1,4 +1,4 @@
-package transport.javascript
+package transport.webrtc
 
 import scala.concurrent._
 import scala.util._
@@ -36,13 +36,13 @@ class WebRTCClient(implicit ec: ExecutionContext) extends Transport {
 
 private class WebRTCPeer(
       signalingChannel: ConnectionHandle,
-      priority: Double=js.Math.random())(
+      priority: Double=Random.nextDouble)(
       implicit ec: ExecutionContext) {
 
   import WebRTCPeer._
   registerPicklers()
   
-  private val webRTCConnection = new webkitRTCPeerConnection(null, DataChannelsConstraint)
+  private val webRTCConnection = new webkitRTCPeerConnection(null, null)
   private val connectionPromise = Promise[ConnectionHandle]()
   private var isCaller: Boolean = _
 
@@ -151,26 +151,4 @@ private object WebRTCPeer {
   }
 
   def registerPicklers(): Unit = _registerPicklers
-
-  object OptionalMediaConstraint extends RTCOptionalMediaConstraint {
-    override val DtlsSrtpKeyAgreement: Boolean = false
-    override val RtpDataChannels: Boolean = false
-  }
-
-  object DataChannelsConstraint extends RTCMediaConstraints {
-    override val mandatory: RTCMediaOfferConstraints = null
-    override val optional: js.Array[RTCOptionalMediaConstraint] = js.Array(OptionalMediaConstraint)
-  }
-  
-  // val DataChannelsConstraint = js.Dynamic.literal(
-  //     mandatory = js.Dynamic.literal(
-  //       OfferToReceiveAudio = true,
-  //       OfferToReceiveVideo = true
-  //     ),
-  //     optional = js.Array(
-  //       js.Dynamic.literal(DtlsSrtpKeyAgreement = false),
-  //       js.Dynamic.literal(RtpDataChannels = false)
-  //     )
-  //   ).asInstanceOf[RTCMediaConstraints]
-
 }

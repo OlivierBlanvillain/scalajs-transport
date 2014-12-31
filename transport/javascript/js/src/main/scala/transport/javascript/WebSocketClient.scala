@@ -4,6 +4,7 @@ import transport._
 import scala.concurrent._
 import scala.util._
 import scala.scalajs.js
+import org.scalajs.dom._
 import jsapi._
 
 /** WebSocket JavaScript client using the native browser implementation.

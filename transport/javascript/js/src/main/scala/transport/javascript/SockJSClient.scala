@@ -4,7 +4,8 @@ import transport._
 import scala.concurrent._
 import scala.util._
 import scala.scalajs.js
-import jsapi._
+import org.scalajs.dom._
+import jsapi.SockJS
 
 /** SockJS JavaScript client. 
  *  

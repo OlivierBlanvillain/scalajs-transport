@@ -9,6 +9,7 @@ import akka.actor._
 
 import models._
 import transport._
+import transport.webrtc._
 import transport.javascript._
 import transport.akka._
 import WebSocketClient.addressFromPlayRoute
@@ -24,7 +25,7 @@ object Main {
   @JSExport("startup")
   def startup(): Unit = {
     jQ("body").append(
-      if(WebRTCSignalingFallback.supportsWebRTC)
+      if(TestFeatureSupport.webRTC())
         "<div>Supports WebRTC</div>"
       else
         "<div>Does not support WebRTC</div>"

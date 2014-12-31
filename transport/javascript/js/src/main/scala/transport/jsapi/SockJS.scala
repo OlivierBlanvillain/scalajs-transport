@@ -1,6 +1,7 @@
 package transport.jsapi
 
 import scala.scalajs.js
+import org.scalajs.dom._
 
 class SockJS(url: String, _reserved: js.Any, options: js.Any) extends EventTarget {
   def this(url: String) = this(url, null, null)

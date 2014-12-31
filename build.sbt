@@ -1,4 +1,4 @@
-val commonSettings = Seq(
+lazy val commonSettings = Seq(
   organization := "org.scalajs",
   version := "0.1-SNAPSHOT",
   scalaVersion := "2.11.4",
@@ -15,6 +15,8 @@ val commonSettings = Seq(
   )
 )
 
+lazy val buildSettings = Defaults.defaultSettings ++ Seq(javaOptions += "-Xmx1G")
+
 parallelExecution in Global := false
 
 lazy val root = project
@@ -25,6 +27,8 @@ lazy val root = project
     transportCoreJVM,
     transportJavaScriptJS,
     transportJavaScriptJVM,
+    transportWebRTCJS,
+    transportWebRTCJVM,
     transportNettyJS,
     transportNettyJVM,
     transportPlayJS,
@@ -64,13 +68,24 @@ lazy val transportJavaScript = crossProject
   .settings(commonSettings: _*)
   .settings(name := "transport-javascript")
   .dependsOn(transportCore)
+  .jsSettings(libraryDependencies +=
+    "org.scala-js" %%% "scalajs-dom" % "0.7.0")
+lazy val transportJavaScriptJVM = transportJavaScript.jvm
+lazy val transportJavaScriptJS = transportJavaScript.js
+
+lazy val transportWebRTC = crossProject
+  .crossType(CrossType.Full)
+  .in(file("transport/webrtc"))
+  .settings(commonSettings: _*)
+  .settings(name := "transport-webrtc")
+  .dependsOn(transportCore)
   .jsSettings(libraryDependencies ++= Seq(
     "org.scala-js" %%% "scalajs-dom" % "0.7.0",
     // TODO: These two should go away at some point.
     "org.scalajs" %%% "scalajs-pickling" % "0.4-SNAPSHOT",
     "org.scalajs" %%% "scalajs-actors" % "0.1-SNAPSHOT"))
-lazy val transportJavaScriptJVM = transportJavaScript.jvm
-lazy val transportJavaScriptJS = transportJavaScript.js
+lazy val transportWebRTCJVM = transportWebRTC.jvm
+lazy val transportWebRTCJS = transportWebRTC.js
 
 lazy val transportNetty = crossProject
   .crossType(CrossType.Dummy)
@@ -186,7 +201,7 @@ lazy val rawWebRTC = crossProject
   .crossType(CrossType.Dummy)
   .in(file("examples/raw-webrtc"))
   .settings(commonSettings: _*)
-  .dependsOn(transportJavaScript, transportAkka)
+  .dependsOn(transportJavaScript, transportAkka, transportWebRTC)
 lazy val rawWebRTCJVM = rawWebRTC.jvm
 lazy val rawWebRTCJS = rawWebRTC.js
 
@@ -233,7 +248,7 @@ lazy val chatWebRTCJS = project
   .enablePlugins(ScalaJSPlugin)
   .settings(commonSettings: _*)
   .settings(scalaJSWithPlay: _*)
-  .dependsOn(transportJavaScriptJS, transportAkkaJS)
+  .dependsOn(transportJavaScriptJS, transportAkkaJS, transportWebRTCJS)
   .settings(libraryDependencies ++= Seq(
     "be.doeraene" %%% "scalajs-jquery" % "0.7.1-SNAPSHOT"))
 lazy val chatWebRTCJVM = project
@@ -251,7 +266,7 @@ lazy val chatWebRTCFallbackJS = project
   .enablePlugins(ScalaJSPlugin)
   .settings(commonSettings: _*)
   .settings(scalaJSWithPlay: _*)
-  .dependsOn(transportJavaScriptJS, transportAkkaJS)
+  .dependsOn(transportJavaScriptJS, transportAkkaJS, transportWebRTCJS)
   .settings(libraryDependencies ++= Seq(
     "be.doeraene" %%% "scalajs-jquery" % "0.7.1-SNAPSHOT"))
 lazy val chatWebRTCFallbackJVM = project

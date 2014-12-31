@@ -1,17 +1,10 @@
-package transport.javascript
+package transport.webrtc
 
 import scala.concurrent._
-
-import scala.util._
-import scala.scalajs.js
-
 import transport._
-import transport.jsapi._
 
 /** TODOC */
 class WebRTCSignalingFallback(implicit ec: ExecutionContext) extends Transport {
-  import WebRTCSignalingFallback._
-  
   type Address = ConnectionHandle
   
   def listen(): Future[Promise[ConnectionListener]] = 
@@ -28,13 +21,13 @@ class WebRTCSignalingFallback(implicit ec: ExecutionContext) extends Transport {
       def close(): Unit = signalingChannel.close()
     }
 
-    val supports = supportsWebRTC()
+    val supports = TestFeatureSupport.webRTC()
     var first = true
-    signalingChannel.write(js.JSON.stringify(supports))
+    signalingChannel.write(if(supports) "T" else "F")
     signalingChannel.handlerPromise.success { string =>
       if(first) {
         first = false
-        val remoteSupports = js.JSON.parse(string).asInstanceOf[Boolean]
+        val remoteSupports = string == "T"
         if(supports && remoteSupports) {
           connectionPromise.completeWith(new WebRTCPeer(forwarderConnection).future)
         } else {
@@ -49,11 +42,4 @@ class WebRTCSignalingFallback(implicit ec: ExecutionContext) extends Transport {
   }
 
   def shutdown(): Future[Unit] = Future.successful(Unit)
-}
-
-object WebRTCSignalingFallback {
-  /** Chrome only ATM. */
-  def supportsWebRTC(): Boolean = {
-    Try(new webkitRTCPeerConnection(null).iceConnectionState).isSuccess
-  }
 }

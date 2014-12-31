@@ -9,6 +9,7 @@ import akka.actor._
 
 import models._
 import transport._
+import transport.webrtc._
 import transport.javascript._
 import transport.akka._
 import WebSocketClient.addressFromPlayRoute

@@ -8,6 +8,7 @@ import js.annotation.JSExport
 import transport._
 import transport.akka._
 import transport.javascript._
+import transport.webrtc._
 
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 
