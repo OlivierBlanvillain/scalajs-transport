@@ -2,7 +2,7 @@ package test
 
 import play.api.test._
 
-class WebRTCFallbackIntegration extends BrowserSpecification {
+class WebRTCClientFallbackIntegration extends BrowserSpecification {
   "Two browsers" should {
     "be able to chat via WebRTC" in new WithTwoBrowsers(Chrome, Phantom) {
       browser1 goTo "/"

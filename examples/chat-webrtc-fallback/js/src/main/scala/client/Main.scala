@@ -52,7 +52,7 @@ class EstablishRtcActor(out: ActorRef) extends Actor {
   
   def use(futureConnection: Future[ConnectionHandle]): Unit = {
     futureConnection.foreach { signalingChannel =>
-      val futureRTC = new WebRTCSignalingFallback().connect(signalingChannel)
+      val futureRTC = new WebRTCClientFallback().connect(signalingChannel)
       futureRTC.foreach { connection =>
         context.actorOf(ConnectionToActor.props(connection, DemoActor.props))
       }

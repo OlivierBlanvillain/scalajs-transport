@@ -4,12 +4,12 @@ import scala.concurrent._
 import transport._
 
 /** TODOC */
-class WebRTCSignalingFallback(implicit ec: ExecutionContext) extends Transport {
+class WebRTCClientFallback(implicit ec: ExecutionContext) extends Transport {
   type Address = ConnectionHandle
   
   def listen(): Future[Promise[ConnectionListener]] = 
     Future.failed(new UnsupportedOperationException(
-      "WebRTCSignalingFallback cannot listen for incomming connections."))
+      "WebRTCClientFallback cannot listen for incomming connections."))
 
   def connect(signalingChannel: ConnectionHandle): Future[ConnectionHandle] = {
     val connectionPromise = Promise[ConnectionHandle]()
