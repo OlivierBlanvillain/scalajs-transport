@@ -7,14 +7,20 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 object RawClient { /**/
 
-val client = new WebSocketClient()
+val transport = new WebSocketClient()
 val url = WebSocketUrl("ws://echo.websocket.org")
+val futureConnectionHandle = transport.connect(url)
   
-client.connect(url) foreach { connectionHandle =>
-  connectionHandle.handlerPromise.success { message =>
+futureConnectionHandle foreach { connection =>
+  connection.write("Hello WebSocket!")
+  connection.handlerPromise.success { message =>
     print("Recived: " + message)
+    connection.close()
   }
-  connectionHandle.write("Hello WebSocket!")
 }
   
+/*futureConnectionHandle onFailure { case exception =>*/
+/*  println("Something went wrong: " + exception)*/
+/*}*/
 } /**/
+
