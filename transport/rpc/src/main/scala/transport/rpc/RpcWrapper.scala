@@ -1,23 +1,26 @@
 package transport.rpc
 
-import upickle._
 import scala.concurrent._
 import transport._
 import autowire.Core.Request
+import autowire._
+import scala.language.higherKinds
 
 /** TODOC */
-class RpcWrapper[T <: Transport](
+abstract class RpcWrapper[T <: Transport, Reader[_], Writer[_]](
       transport: T)(
-      implicit ec: ExecutionContext) {
+      implicit ec: ExecutionContext) extends StringSerializers[Reader, Writer] {
+
+  self =>
   
-  type StringServer = autowire.Server[String, upickle.Reader, upickle.Writer]
-  type StringClient = autowire.Client[String, upickle.Reader, upickle.Writer]
+  type StringServer = autowire.Server[String, Reader, Writer]
+  type StringClient = autowire.Client[String, Reader, Writer]
   
   /** TODOC */
   def serve(routeMacro: StringServer => (Request[String] => Future[String])): Unit = {
     object AutowireServer extends StringServer {
-      def read[Result: upickle.Reader](p: String) = upickle.read[Result](p)
-      def write[Result: upickle.Writer](r: Result) = upickle.write(r)
+      def read[Result: Reader](p: String) = self.read[Result](p)
+      def write[Result: Writer](r: Result) = self.write(r)
     }
     
     transport.listen().map { promise =>
@@ -42,8 +45,13 @@ class RpcWrapper[T <: Transport](
         new IdentifiedCallOverConnection(_, pp)(request)
       }
       
-      def read[Result: upickle.Reader](p: String) = upickle.read[Result](p)
-      def write[Result: upickle.Writer](r: Result) = upickle.write(r)
+      def read[Result: Reader](p: String) = self.read[Result](p)
+      def write[Result: Writer](r: Result) = self.write(r)
     }
   }
+}
+
+trait StringSerializers[Reader[_], Writer[_]] {
+  def read[Result: Reader](p: String): Result
+  def write[Result: Writer](r: Result): String
 }

@@ -5,7 +5,7 @@ import scala.util._
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.mvc._
 import play.api.Play.current
-import shared.Api
+import shared.{ Api, MyRpcWrapper }
 
 import play.sockjs.api.SockJSRouter
 import transport.play._
@@ -24,7 +24,7 @@ object Application extends Controller {
   val transport = new SockJSServer()
   val sockJS = transport.action()
   
-  new RpcWrapper(transport).serve(_.route[Api](Server))
+  new MyRpcWrapper(transport).serve(_.route[Api](Server))
 }
 
 object Server extends Api { 

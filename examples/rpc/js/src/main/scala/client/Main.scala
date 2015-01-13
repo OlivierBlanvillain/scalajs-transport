@@ -6,12 +6,11 @@ import scala.util._
 import scala.concurrent._
 import scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import scalatags.JsDom.all._
-import shared.Api
+import shared.{ Api, MyRpcWrapper }
 
 import transport.javascript._
 import transport.rpc._
 import autowire._
-import upickle._
 
 import scala.collection.mutable
 import SockJSClient.addressFromPlayRoute
@@ -23,10 +22,9 @@ object ScalaJSExample {
     
     val transport = new SockJSClient()
     val address = addressFromPlayRoute()
-    val Client = new RpcWrapper(transport).connect(address)
+    val Client = new MyRpcWrapper(transport).connect(address)
     
     Client[Api].double(21).call() onSuccess {
-    
       case result: Int => dom.document.body.appendChild(h2(result).render)
     }
     

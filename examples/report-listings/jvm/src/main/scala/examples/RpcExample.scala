@@ -22,23 +22,27 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 object Demo { /**/
 
-  // Shared API
-  trait Api {
-    def doThing(i: Int, s: String): Seq[String]
-  }
-
-  // Server-side implementation
-  object Server extends Api {
-    def doThing(i: Int, s: String) = Seq.fill(i)(s)
-  }
-  val transport = new WebSocketServer(8080, "/ws")
-  new RpcWrapper(transport).serve(_.route[Api](Server))
-
-  // Client-side
-  val url = WebSocketUrl("http://localhost:8080/ws")
-  val client = new RpcWrapper(new WebSocketClient()).connect(url)
-
-  val result: Future[Seq[String]] = client[Api].doThing(3, "ha").call()
-  result.foreach(println) // List(ha, ha, ha)
+// Shared Source
+trait Api {
+  def doThing(i: Int, s: String): Seq[String]
+}
+class MyRpcWrapper[T <: Transport](t: T)(implicit ec: ExecutionContext)
+     extends RpcWrapper[T, upickle.Reader, upickle.Writer](t: T)(ec) {
+  def read[Result: upickle.Reader](p: String) = upickle.read[Result](p)
+  def write[Result: upickle.Writer](r: Result) = upickle.write(r)
+}
+  
+// Server Side
+object Server extends Api {
+  def doThing(i: Int, s: String) = Seq.fill(i)(s)
+}
+val transport = new WebSocketServer(8080, "/ws")
+new MyRpcWrapper(transport).serve(_.route[Api](Server))
+  
+// Client Side
+val abstracttransport = new WebSocketClient()
+val url = WebSocketUrl("http://localhost:8080/ws")
+val client = new MyRpcWrapper(abstracttransport).connect(url)
+val result: Future[Seq[String]] = client[Api].doThing(3, "ha").call()
 
 }/**/
