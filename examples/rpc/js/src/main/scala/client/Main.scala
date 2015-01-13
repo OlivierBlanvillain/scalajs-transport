@@ -18,7 +18,7 @@ import SockJSClient.addressFromPlayRoute
 
 @JSExport("ScalaJSExample")
 object ScalaJSExample {
-  @JSExport("main")
+  @JSExport
   def main(): Unit = {
     
     val transport = new SockJSClient()

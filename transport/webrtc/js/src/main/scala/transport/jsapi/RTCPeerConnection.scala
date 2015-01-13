@@ -62,11 +62,11 @@ object RTCSessionDescription extends js.Object {
 
 trait RTCDataChannelInit extends js.Object {
   var ordered: Boolean = js.native
-  var maxPacketLifeTime: Integer = js.native
-  var maxRetransmits: Integer = js.native
+  var maxPacketLifeTime: Int = js.native
+  var maxRetransmits: Int = js.native
   var protocol: String = js.native
   var negotiated: Boolean = js.native
-  var id: Integer = js.native
+  var id: Int = js.native
 }
 
 trait RTCMessageEvent extends js.Object {
@@ -77,7 +77,7 @@ class RTCDataChannel extends EventTarget {
   var label: String = js.native
   var reliable: Boolean = js.native
   var readyState: String = js.native
-  var bufferedAmount: Integer = js.native
+  var bufferedAmount: Int = js.native
   var binaryType: String = js.native
   var onopen: js.Function1[Event, _] = js.native
   var onerror: js.Function1[Event, _] = js.native
@@ -158,7 +158,7 @@ class RTCIceCandidate protected () extends js.Object {
   def this(candidateInitDict: RTCIceCandidate = js.native) = this()
   var candidate: String = js.native
   var sdpMid: String = js.native
-  var sdpMLineIndex: Integer = js.native
+  var sdpMLineIndex: Int = js.native
 }
 
 object RTCIceCandidate extends js.Object {
@@ -167,7 +167,7 @@ object RTCIceCandidate extends js.Object {
 class RTCIceCandidateInit extends js.Object {
   var candidate: String = js.native
   var sdpMid: String = js.native
-  var sdpMLineIndex: Integer = js.native
+  var sdpMLineIndex: Int = js.native
 }
 
 object RTCIceCandidateInit extends js.Object {

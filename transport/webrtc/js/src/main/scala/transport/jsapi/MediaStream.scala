@@ -45,12 +45,12 @@ trait NavigatorUserMediaSuccessCallback extends js.Object {
 }
 
 class NavigatorUserMediaError extends js.Object {
-  val PERMISSION_DENIED: Integer = js.native
-  val code: Integer = js.native
+  val PERMISSION_DENIED: Int = js.native
+  val code: Int = js.native
 }
 
 object NavigatorUserMediaError extends js.Object {
-  val PERMISSION_DENIED: Integer = js.native
+  val PERMISSION_DENIED: Int = js.native
 }
 
 trait NavigatorUserMediaErrorCallback extends js.Object {
@@ -58,7 +58,7 @@ trait NavigatorUserMediaErrorCallback extends js.Object {
 }
 
 class MediaStreamTrackList extends js.Object {
-  val length: Integer = js.native
+  val length: Int = js.native
   val item: MediaStreamTrack = js.native
   def add(track: MediaStreamTrack): Unit = js.native
   def remove(track: MediaStreamTrack): Unit = js.native
@@ -111,19 +111,19 @@ class MediaStreamTrack extends js.Object {
   val kind: String = js.native
   val label: String = js.native
   val enabled: Boolean = js.native
-  val LIVE: Integer = js.native
-  val MUTED: Integer = js.native
-  val ENDED: Integer = js.native
-  val readyState: Integer = js.native
+  val LIVE: Int = js.native
+  val MUTED: Int = js.native
+  val ENDED: Int = js.native
+  val readyState: Int = js.native
   val onmute: js.Function1[Event, Unit] = js.native
   val onunmute: js.Function1[Event, Unit] = js.native
   val onended: js.Function1[Event, Unit] = js.native
 }
 
 object MediaStreamTrack extends js.Object {
-  val LIVE: Integer = js.native
-  val MUTED: Integer = js.native
-  val ENDED: Integer = js.native
+  val LIVE: Int = js.native
+  val MUTED: Int = js.native
+  val ENDED: Int = js.native
   val getSources: js.Function1[js.Function1[js.Array[SourceInfo], Unit], Unit] = js.native
 }
 
