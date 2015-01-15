@@ -22,7 +22,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 object Demo { /**/
 
-// Shared Source
+// Shared
 trait Api {
   def doThing(i: Int, s: String): Seq[String]
 }

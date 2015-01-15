@@ -193,7 +193,7 @@ lazy val reportListings = crossProject
   .crossType(CrossType.Dummy)
   .in(file("examples/report-listings"))
   .settings(commonSettings: _*)
-  .dependsOn(transportRPC, transportAkka, transportTyrus, transportNetty)
+  .dependsOn(transportRPC, transportAkka, transportTyrus, transportNetty, transportWebRTC)
 lazy val reportListingsJVM = reportListings.jvm
 lazy val reportListingsJS = reportListings.js
 
