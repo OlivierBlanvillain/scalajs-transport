@@ -11,10 +11,10 @@ val transport = new WebSocketClient()
 val url = WebSocketUrl("ws://echo.websocket.org")
 val futureConnectionHandle = transport.connect(url)
   
-futureConnectionHandle foreach { connection =>
+futureConnectionHandle.foreach { connection =>
   connection.write("Hello WebSocket!")
   connection.handlerPromise.success { message =>
-    print("Recived: " + message)
+    print("Received: " + message)
     connection.close()
   }
 }

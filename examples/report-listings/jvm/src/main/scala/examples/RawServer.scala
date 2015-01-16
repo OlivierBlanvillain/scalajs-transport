@@ -9,7 +9,7 @@ object RawServer { /**/
 
 val transport = new WebSocketServer(8080, "/ws")
 try {
-  transport.listen() foreach { _.success { connection =>
+  transport.listen().foreach { _.success { connection =>
     connection.handlerPromise.success { message =>
       connection.write(message)
     }

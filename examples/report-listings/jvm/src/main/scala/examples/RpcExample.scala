@@ -41,7 +41,7 @@ new MyRpcWrapper(transport).serve(_.route[Api](Server))
   
 // Client Side
 val abstracttransport = new WebSocketClient()
-val url = WebSocketUrl("http://localhost:8080/ws")
+val url = WebSocketUrl("ws://localhost:8080/ws")
 val client = new MyRpcWrapper(abstracttransport).connect(url)
 val result: Future[Seq[String]] = client[Api].doThing(3, "ha").call()
 
