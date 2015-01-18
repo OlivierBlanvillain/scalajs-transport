@@ -17,10 +17,10 @@ private class ProxyConnectionHandle(implicit ec: ExecutionContext) extends Conne
   def close(): Unit = peer.closePromise.success(())
 }
 
-/** TODOC */
+/** TODoC */
 object ProxyConnectionHandle {
   
-  /** TODOC */
+  /** TODoC */
   def newConnectionsPair()(implicit ec: ExecutionContext): (ConnectionHandle, ConnectionHandle) = {
     val c1 = new ProxyConnectionHandle()
     val c2 = new ProxyConnectionHandle()

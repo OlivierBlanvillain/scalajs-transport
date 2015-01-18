@@ -6,7 +6,7 @@ import autowire.Core.Request
 import autowire._
 import scala.language.higherKinds
 
-/** TODOC */
+/** TODoC */
 abstract class RpcWrapper[T <: Transport, Reader[_], Writer[_]](
       transport: T)(
       implicit ec: ExecutionContext) extends StringSerializers[Reader, Writer] {
@@ -16,7 +16,7 @@ abstract class RpcWrapper[T <: Transport, Reader[_], Writer[_]](
   type StringServer = autowire.Server[String, Reader, Writer]
   type StringClient = autowire.Client[String, Reader, Writer]
   
-  /** TODOC */
+  /** TODoC */
   def serve(routeMacro: StringServer => (Request[String] => Future[String])): Unit = {
     object AutowireServer extends StringServer {
       def read[Result: Reader](p: String) = self.read[Result](p)
@@ -28,7 +28,7 @@ abstract class RpcWrapper[T <: Transport, Reader[_], Writer[_]](
     }
   }
   
-  /** TODOC */
+  /** TODoC */
   def connect(
         address: transport.Address,
         pp: PendingPromises[String] = new PendingPromises[String]())
