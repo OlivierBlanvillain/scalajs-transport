@@ -13,7 +13,7 @@ import transport.rpc._
 import autowire._
 
 import scala.collection.mutable
-import SockJSClient.addressFromPlayRoute
+import transport.play.PlayUtils.sockJSFromPlayRoute
 
 @JSExport("ScalaJSExample")
 object ScalaJSExample {
@@ -21,7 +21,7 @@ object ScalaJSExample {
   def main(): Unit = {
     
     val transport = new SockJSClient()
-    val address = addressFromPlayRoute()
+    val address = sockJSFromPlayRoute()
     val Client = new MyRpcWrapper(transport).connect(address)
     
     Client[Api].double(21).call() onSuccess {

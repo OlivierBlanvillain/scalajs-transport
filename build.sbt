@@ -210,7 +210,7 @@ lazy val exampleRPCJS = project
   .enablePlugins(ScalaJSPlugin)
   .settings(commonSettings: _*)
   .settings(scalaJSWithPlay: _*)
-  .dependsOn(transportJavaScriptJS, transportRPCJS)
+  .dependsOn(transportJavaScriptJS, transportPlayJS, transportRPCJS)
   .settings(libraryDependencies ++= Seq(
     "com.scalatags" %%% "scalatags" % "0.4.3-M3"))
 lazy val exampleRPCJVM = project
@@ -229,7 +229,7 @@ lazy val chatWebSocketJS = project
   .enablePlugins(ScalaJSPlugin)
   .settings(commonSettings: _*)
   .settings(scalaJSWithPlay: _*)
-  .dependsOn(transportJavaScriptJS, transportAkkaJS)
+  .dependsOn(transportJavaScriptJS, transportPlayJS, transportAkkaJS)
   .settings(libraryDependencies ++= Seq(
     "be.doeraene" %%% "scalajs-jquery" % "0.7.1-SNAPSHOT"))
 lazy val chatWebSocketJVM = project
@@ -248,7 +248,7 @@ lazy val chatWebRTCJS = project
   .enablePlugins(ScalaJSPlugin)
   .settings(commonSettings: _*)
   .settings(scalaJSWithPlay: _*)
-  .dependsOn(transportJavaScriptJS, transportAkkaJS, transportWebRTCJS)
+  .dependsOn(transportJavaScriptJS, transportPlayJS, transportAkkaJS, transportWebRTCJS)
   .settings(libraryDependencies ++= Seq(
     "be.doeraene" %%% "scalajs-jquery" % "0.7.1-SNAPSHOT"))
 lazy val chatWebRTCJVM = project
@@ -266,7 +266,7 @@ lazy val chatWebRTCClientFallbackJS = project
   .enablePlugins(ScalaJSPlugin)
   .settings(commonSettings: _*)
   .settings(scalaJSWithPlay: _*)
-  .dependsOn(transportJavaScriptJS, transportAkkaJS, transportWebRTCJS)
+  .dependsOn(transportJavaScriptJS, transportPlayJS, transportAkkaJS, transportWebRTCJS)
   .settings(libraryDependencies ++= Seq(
     "be.doeraene" %%% "scalajs-jquery" % "0.7.1-SNAPSHOT"))
 lazy val chatWebRTCClientFallbackJVM = project

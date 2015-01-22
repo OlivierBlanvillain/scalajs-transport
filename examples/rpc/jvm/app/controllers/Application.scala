@@ -14,11 +14,11 @@ import transport.rpc._
 object Application extends Controller {
   
   def indexDev = Action { implicit request =>
-    Ok(views.html.index(devMode = true, SockJSServer.javascriptRoute(sockJS)))
+    Ok(views.html.index(devMode = true, PlayUtils.sockJSRoute(sockJS)))
   }
 
   def indexOpt = Action { implicit request =>
-    Ok(views.html.index(devMode = false, SockJSServer.javascriptRoute(sockJS)))
+    Ok(views.html.index(devMode = false, PlayUtils.sockJSRoute(sockJS)))
   }
   
   val transport = new SockJSServer()

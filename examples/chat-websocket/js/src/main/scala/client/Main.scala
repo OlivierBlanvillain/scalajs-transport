@@ -9,7 +9,7 @@ import akka.actor._
 import models._
 import transport.javascript._
 import transport.akka._
-import SockJSClient.addressFromPlayRoute
+import transport.play.PlayUtils.sockJSFromPlayRoute
 
 import scalajs.concurrent.JSExecutionContext.Implicits.runNow
 
@@ -21,7 +21,7 @@ object Main {
 
   @JSExport
   def startup(): Unit = {
-    ActorWrapper(new SockJSClient()).connectWithActor(addressFromPlayRoute())(DemoActor.props)
+    ActorWrapper(new SockJSClient()).connectWithActor(sockJSFromPlayRoute())(DemoActor.props)
   }
 }
 

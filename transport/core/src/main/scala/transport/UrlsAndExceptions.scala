@@ -1,8 +1,18 @@
 package transport
 
-case class SockJSUrl(url: String)
-// TODO: Error Failed to construct 'WebSocket': The URL's scheme must be either 'ws' or 'wss'. 'wws' is not allowed.
-case class WebSocketUrl(url: String)
+case class SockJSUrl(url: String) {
+  val prefix = url.takeWhile(_ != '/')
+  if(prefix != "http:" && prefix != "https:") {
+    throw new IllegalArgumentException(s"""The URL's scheme must be either "ws:" or "wss:". "$prefix" is not allowed.""")
+  }
+}
+
+case class WebSocketUrl(url: String) {
+  val prefix = url.takeWhile(_ != '/')
+  if(prefix != "ws:" && prefix != "wss:") {
+    throw new IllegalArgumentException(s"""The URL's scheme must be either "ws:" or "wss:". "$prefix" is not allowed.""")
+  }
+}
 
 case class SockJSException(message: String) extends Exception
 case class WebSocketException(message: String) extends Exception

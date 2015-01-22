@@ -3,8 +3,7 @@ package transport.play
 import scala.concurrent._
 
 import play.api.Application
-import play.api.mvc._
-import play.twirl.api.Html
+import play.api.mvc.WebSocket
 
 import transport._
 
@@ -39,12 +38,4 @@ class WebSocketServer(implicit ec: ExecutionContext, app: Application)
       "Servers cannot initiate WebSockets connections."))
   
   def shutdown(): Future[Unit] = Future.successful(Unit)
-}
-
-object WebSocketServer {
-  /** Generates a JavaScript route to a WebSocketServer. Use WebSocketClient.addressFromPlayRoute()
-   *  to load the route as a WebSocketUrl on the client side. */
-  def javascriptRoute(socketRoute: Call)(implicit request: RequestHeader) = Html {
-    s"""var webSocketUrl = '${socketRoute.webSocketURL()}';"""
-  }
 }

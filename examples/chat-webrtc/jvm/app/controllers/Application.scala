@@ -19,11 +19,11 @@ object Application extends Controller {
   val peerMatcher = system.actorOf(PeerMatcher.props)
 
   def indexDev = Action { implicit request =>
-    Ok(views.html.index(devMode = true, WebSocketServer.javascriptRoute(routes.Application.webSocket)))
+    Ok(views.html.index(devMode = true, PlayUtils.webSocketRoute(routes.Application.webSocket)))
   }
 
   def indexOpt = Action { implicit request =>
-    Ok(views.html.index(devMode = false, WebSocketServer.javascriptRoute(routes.Application.webSocket)))
+    Ok(views.html.index(devMode = false, PlayUtils.webSocketRoute(routes.Application.webSocket)))
   }
   
   val webSocketTransport = new WebSocketServer()

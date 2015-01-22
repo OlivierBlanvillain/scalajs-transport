@@ -12,7 +12,7 @@ import transport._
 import transport.webrtc._
 import transport.javascript._
 import transport.akka._
-import WebSocketClient.addressFromPlayRoute
+import transport.play.PlayUtils.webSocketFromPlayRoute
 
 import scalajs.concurrent.JSExecutionContext.Implicits.runNow
 
@@ -24,7 +24,7 @@ object Main {
 
   @JSExport
   def startup(): Unit = {
-    ActorWrapper(new WebSocketClient()).connectWithActor(addressFromPlayRoute())(
+    ActorWrapper(new WebSocketClient()).connectWithActor(webSocketFromPlayRoute())(
       EstablishRtcActor.props)
   }
 }

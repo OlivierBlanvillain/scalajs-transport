@@ -4,8 +4,6 @@ import scala.concurrent._
 
 import play.api.Application
 import play.sockjs.api._
-import play.twirl.api.Html
-import play.api.mvc.{ Call, RequestHeader }
 
 import transport._
 
@@ -59,13 +57,4 @@ class SockJSServer(implicit ec: ExecutionContext, app: Application)
       "Servers cannot initiate SockJSs connections."))
   
   def shutdown(): Future[Unit] = Future.successful(Unit)
-}
-
-object SockJSServer {
-  // TODO: Pool this out into something like PlayUtils
-  /** Generates a JavaScript route to a SockJSServer. Use SockJSClient.addressFromPlayRoute()
-   *  to load the route as a SockJSUrl on the client side. */
-  def javascriptRoute(router: SockJSRouter)(implicit request: RequestHeader) = Html {
-    s"""var sockJSUrl = '${Call("GET", router.prefix).absoluteURL()}';"""
-  }
 }

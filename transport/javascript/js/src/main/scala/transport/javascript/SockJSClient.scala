@@ -60,15 +60,3 @@ class SockJSClient(implicit ec: ExecutionContext) extends SockJSTransport {
   
   def shutdown(): Future[Unit] = Future.successful(Unit)
 }
-
-object SockJSClient {
-  /** Load the SockJSUrl defined in a play template. */
-  def addressFromPlayRoute(): SockJSUrl = {
-    try {
-      SockJSUrl(scala.scalajs.js.Dynamic.global.sockJSUrl.asInstanceOf[String])
-    } catch {
-      case e: ClassCastException =>
-        throw new RuntimeException("SockJSUrl not found. Make sure SockJSServer.javascriptRoute is included in the page template.")
-    }
-  }
-}
