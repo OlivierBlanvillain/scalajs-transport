@@ -55,7 +55,7 @@ lazy val examples = project
 // Transport
 
 lazy val transportCore = crossProject
-  .crossType(CrossType.Pure)
+  .crossType(CrossType.Full)
   .in(file("transport/core"))
   .settings(commonSettings: _*)
   .settings(name := "transport-core")

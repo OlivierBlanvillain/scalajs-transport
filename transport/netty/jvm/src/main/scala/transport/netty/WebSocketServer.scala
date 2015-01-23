@@ -57,7 +57,7 @@ class WebSocketServer(port: Int, path: String)(implicit ec: ExecutionContext)
 
     b.bind(port).toScala.map { channel =>
       allChannels.add(channel)
-      println(s"Serving WebSocket on ws://localhost:$port$path ...")
+      println(s"Serving WebSocket at ws://localhost:$port$path ...")
       listenerPromise
     }
   }
@@ -67,10 +67,12 @@ class WebSocketServer(port: Int, path: String)(implicit ec: ExecutionContext)
       "Netty WebSocketServer cannot act as a client. Use tyrus.WebSocketClient instead."))
 
   def shutdown(): Future[Unit] = {
+    import scala.collection.JavaConversions._
+
     bossGroup.shutdownGracefully()
     workerGroup.shutdownGracefully()
-    allChannels.close().awaitUninterruptibly()
-    // TODO: joins and return these futures
-    Future.successful(Unit)
+    val iterator = allChannels.close().awaitUninterruptibly().iterator()
+    
+    Future.sequence(iterator.map(_.toScala)).map(_ => Unit)
   }
 }

@@ -39,6 +39,7 @@ object Main {
 class EstablishRtcActor(out: ActorRef) extends Actor {
   def receive: Receive = {
     case Connected(peer) =>
+      // TODO: Without actors...
       val (actorConnection, futureConnection) = ActorToConnection(context.system)
       use(futureConnection)
       peer ! actorConnection
