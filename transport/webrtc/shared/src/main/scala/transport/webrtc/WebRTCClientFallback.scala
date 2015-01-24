@@ -3,7 +3,7 @@ package transport.webrtc
 import scala.concurrent._
 import transport._
 
-/** TODoC */
+/** TODoc */
 class WebRTCClientFallback(implicit ec: ExecutionContext) extends Transport {
   type Address = ConnectionHandle
   

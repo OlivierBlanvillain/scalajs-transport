@@ -23,9 +23,9 @@ class TestClient extends FlatSpec with Matchers {
       promise.success(s)
     }}
     
-    val reviedMessage = Await.result(promise.future, 2.seconds)
+    val receivedMessage = Await.result(promise.future, 2.seconds)
     
-    assert (sentMessage == reviedMessage)
+    assert(sentMessage == receivedMessage)
   }
   
 }

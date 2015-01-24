@@ -36,9 +36,9 @@ class TestServer extends FlatSpec with Matchers {
       }}
       connection.foreach { _.write(message) }
       
-      val reviedMessage = Await.result(promise.future, 2.seconds)
+      val receivedMessage = Await.result(promise.future, 2.seconds)
       
-      assert (message.toUpperCase == reviedMessage)
+      assert(message.toUpperCase == receivedMessage)
       
     } finally server.shutdown()
   }

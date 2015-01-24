@@ -8,6 +8,7 @@ import play.api.libs.concurrent.Execution.Implicits._
 import actors._
 import models._
 
+import transport.ConnectionUtils
 import transport.play._
 import transport.akka._
 
@@ -29,5 +30,8 @@ object Application extends Controller {
   val webSocketTransport = new WebSocketServer()
   val webSocket = webSocketTransport.action()
   
-  ActorWrapper(webSocketTransport).acceptWithActor(UserActor.props(peerMatcher))
+  webSocketTransport.listen().foreach { _.success { connection =>
+    val (left, right) = ConnectionUtils.fork(connection)
+    system.actorOf(ConnectionToActor.props(left, UserActor.props(peerMatcher, right)))
+  }}
 }

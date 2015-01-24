@@ -39,7 +39,7 @@ object WebRTCExample {
   var remote: ActorRef = _
 
   def createConnection(): Unit = {
-    val (connection1, connection2) = ProxyConnectionHandle.newConnectionsPair()
+    val (connection1, connection2) = ConnectionUtils.dummyConnectionPair()
     
     ActorWrapper(new WebRTCClient()).connectWithActor(connection1) { out =>
       Props(new Local(out))

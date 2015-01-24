@@ -7,9 +7,6 @@ import scala.scalajs.js
 import transport._
 import transport.jsapi._
 
-import org.scalajs.spickling._
-import org.scalajs.spickling.jsany._
-
 /** WebRTC JavaScript client. (Chrome and Firefox only) 
  *  
  *  Usage example:
@@ -40,16 +37,13 @@ private class WebRTCPeer(
       implicit ec: ExecutionContext) {
 
   import WebRTCPeer._
-  registerPicklers()
   
   private val webRTCConnection = new webkitRTCPeerConnection(null, null)
   private val connectionPromise = Promise[ConnectionHandle]()
   private var isCaller: Boolean = _
 
   signalingChannel.handlerPromise.success { inboundPayload  =>
-    val parsedPayload : js.Any = js.JSON.parse(inboundPayload)
-    val unpickledPayload: Any = PicklerRegistry.unpickle(parsedPayload)
-    revievedViaSignaling(unpickledPayload)
+    revievedViaSignaling(unpickle(inboundPayload))
   }
   
   signalingChannel.closedFuture.onComplete { _ =>
@@ -59,7 +53,7 @@ private class WebRTCPeer(
 
   webRTCConnection.onicecandidate = { event: RTCIceCandidateEvent =>
     if(event.candidate != null) {
-      sendViaSignaling(IceCandidate(js.JSON.stringify(event.candidate)))
+      sendViaSignaling(IceCandidate(event.candidate))
     }
   }
   
@@ -67,46 +61,40 @@ private class WebRTCPeer(
   
   def future: Future[ConnectionHandle] = connectionPromise.future
 
-  private def sendViaSignaling(m: Any): Unit = {
-    signalingChannel.write(js.JSON.stringify(PicklerRegistry.pickle(m)))
+  private def sendViaSignaling(m: WebRTCMessage): Unit = {
+    signalingChannel.write(pickle(m))
   }
 
-  private def revievedViaSignaling(m: Any): Unit = {
+  private def revievedViaSignaling(m: WebRTCMessage): Unit = {
     // Each message is received exactly once, in the order of appearance in this match.
     m match {
-      
+      case Priority(hisPriority) if hisPriority > priority =>
+        isCaller = true
+        createConnectionHandle(webRTCConnection.createDataChannel("sendDataChannel"))
+        webRTCConnection.createOffer { description: RTCSessionDescription =>
+          webRTCConnection.setLocalDescription(description)
+          sendViaSignaling(SessionDescription(description))
+        }
+
       case Priority(hisPriority) =>
-        isCaller = hisPriority > priority
-        if(isCaller) {
-          createConnectionHandle(webRTCConnection.createDataChannel("sendDataChannel"))
-          webRTCConnection.createOffer { description: RTCSessionDescription =>
-            webRTCConnection.setLocalDescription(description)
-            sendViaSignaling(SessionDescription(js.JSON.stringify(description)))
-          }
-        } else {
-          webRTCConnection.ondatachannel = { event: Event =>
-            // WebRTC API typo?
-            createConnectionHandle(event.asInstanceOf[RTCDataChannelEvent].channel)
-          }
+        isCaller = false
+        webRTCConnection.ondatachannel = { event: Event =>
+          // WebRTC API typo?
+          createConnectionHandle(event.asInstanceOf[RTCDataChannelEvent].channel)
         }
       
       case IceCandidate(candidate) =>
-        webRTCConnection.addIceCandidate(new RTCIceCandidate(
-          js.JSON.parse(candidate).asInstanceOf[RTCIceCandidate]))
+        webRTCConnection.addIceCandidate(candidate)
 
-      case SessionDescription(description) =>
-        val remoteDescription = new RTCSessionDescription(
-            js.JSON.parse(description).asInstanceOf[RTCSessionDescriptionInit])
-        if(isCaller) {
-          webRTCConnection.setRemoteDescription(remoteDescription)
-        } else {
-          webRTCConnection.setRemoteDescription(remoteDescription)
-          webRTCConnection.createAnswer { localDescription: RTCSessionDescription =>
-            webRTCConnection.setLocalDescription(localDescription)
-            sendViaSignaling(SessionDescription(js.JSON.stringify(localDescription)))
-          }
+      case SessionDescription(remoteDescription) if isCaller =>
+        webRTCConnection.setRemoteDescription(remoteDescription)
+
+      case SessionDescription(remoteDescription) =>
+        webRTCConnection.setRemoteDescription(remoteDescription)
+        webRTCConnection.createAnswer { localDescription: RTCSessionDescription =>
+          webRTCConnection.setLocalDescription(localDescription)
+          sendViaSignaling(SessionDescription(localDescription))
         }
-        
     }
   }
   
@@ -136,19 +124,34 @@ private class WebRTCPeer(
     }
   }
 }
+
 private object WebRTCPeer {
-  case class Priority(value: Double)
-  case class IceCandidate(string: String)
-  case class SessionDescription(string: String)
-
-  private lazy val _registerPicklers: Unit = {
-    import org.scalajs.spickling._
-    import PicklerRegistry.register
-    
-    register[Priority]
-    register[IceCandidate]
-    register[SessionDescription]
+  sealed trait WebRTCMessage
+  case class Priority(value: Double) extends WebRTCMessage
+  case class IceCandidate(candidate: RTCIceCandidate) extends WebRTCMessage
+  case class SessionDescription(description: RTCSessionDescription) extends WebRTCMessage
+  
+  def pickle(message: WebRTCMessage): String = {
+    message match {
+      case Priority(value: Double) =>
+        "P" + value.toString
+      case IceCandidate(candidate: RTCIceCandidate) =>
+        "I" + js.JSON.stringify(candidate)
+      case SessionDescription(description: RTCSessionDescription) =>
+        "S" + js.JSON.stringify(description)
+    }
   }
-
-  def registerPicklers(): Unit = _registerPicklers
+  
+  def unpickle(pickle: String): WebRTCMessage = {
+    (pickle.head, pickle.tail) match {
+      case ('P', value) =>
+        Priority(value.toDouble)
+      case ('I', string) =>
+        IceCandidate(new RTCIceCandidate(
+          js.JSON.parse(string).asInstanceOf[RTCIceCandidate]))
+      case ('S', string) =>
+        SessionDescription(new RTCSessionDescription(
+          js.JSON.parse(string).asInstanceOf[RTCSessionDescriptionInit]))
+    }
+  }
 }

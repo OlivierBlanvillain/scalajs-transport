@@ -6,7 +6,6 @@ object RegisterPicklers {
   import PicklerRegistry.register
 
   register[Msg]
-  register[Connected]
     
   def registerPicklers(): Unit = ()
 }

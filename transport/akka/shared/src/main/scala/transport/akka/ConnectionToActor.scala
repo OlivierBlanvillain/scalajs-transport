@@ -4,8 +4,8 @@ import akka.actor._
 import transport._
 import scala.concurrent._
 
-// TODO: Private.
- class ConnectionToActor(
+// TODoc
+class ConnectionToActor(
       connection: ConnectionHandle,
       handlerProps: ActorRef => Props)(
       implicit ec: ExecutionContext)
@@ -35,7 +35,6 @@ import scala.concurrent._
   }
 }
 
-// TODO: Private.
- object ConnectionToActor {
+object ConnectionToActor {
   def props(connection: ConnectionHandle, handlerProps: ActorRef => Props)(implicit ec: ExecutionContext) = Props(new ConnectionToActor(connection, handlerProps))
 }

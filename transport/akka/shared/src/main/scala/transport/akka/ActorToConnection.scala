@@ -7,7 +7,7 @@ import akka.actor._
 
 import transport._
 
-// TODO Private.
+// TODoc
 class ActorToConnection(connectionPromise: Promise[ConnectionHandle])(
       implicit ec: ExecutionContext) extends Actor {
   val promise = QueueablePromise[MessageListener]()
@@ -40,7 +40,6 @@ class ActorToConnection(connectionPromise: Promise[ConnectionHandle])(
   }
 }
 
-// TODO Private.
 object ActorToConnection {
   def apply(system: ActorSystem)(implicit ec: ExecutionContext):
       (ActorRef, Future[ConnectionHandle]) = {

@@ -79,11 +79,8 @@ lazy val transportWebRTC = crossProject
   .settings(commonSettings: _*)
   .settings(name := "transport-webrtc")
   .dependsOn(transportCore)
-  .jsSettings(libraryDependencies ++= Seq(
-    "org.scala-js" %%% "scalajs-dom" % "0.7.0",
-    // TODO: These two should go away at some point.
-    "org.scalajs" %%% "scalajs-pickling" % "0.4-SNAPSHOT",
-    "org.scalajs" %%% "scalajs-actors" % "0.1-SNAPSHOT"))
+  .jsSettings(libraryDependencies +=
+    "org.scala-js" %%% "scalajs-dom" % "0.7.0")
 lazy val transportWebRTCJVM = transportWebRTC.jvm
 lazy val transportWebRTCJS = transportWebRTC.js
 
@@ -176,8 +173,8 @@ lazy val UK = new com.typesafe.sbt.packager.universal.UniversalKeys{}
 
 def playWithScalaJS(scalaJSProject: Project) = Seq(
   UK.dist <<= UK.dist dependsOn (fullOptJS in (scalaJSProject, Compile)),
-  UK.stage <<= UK.stage dependsOn (fullOptJS in (scalaJSProject, Compile)),
-  compile in Compile <<= (compile in Compile) dependsOn (fastOptJS in (scalaJSProject, Compile))
+  UK.stage <<= UK.stage dependsOn (fullOptJS in (scalaJSProject, Compile))
+  , compile in Compile <<= (compile in Compile) dependsOn (fastOptJS in (scalaJSProject, Compile))
 ) ++ sharedPlayScalaJS
 
 lazy val scalaJSWithPlay = Seq(
