@@ -1,5 +1,5 @@
 lazy val commonSettings = Seq(
-  organization := "org.scalajs",
+  organization := "com.github.olivierblanvillain",
   version := "0.1-SNAPSHOT",
   scalaVersion := "2.11.4",
   scalacOptions ++= Seq(
@@ -164,7 +164,7 @@ lazy val transportTestJVM = project.in(file("transport/test"))
     "org.scalatest" % "scalatest_2.11" % "2.2.1" % "test"))
   
 
-// Cross Play/Scala.JS settings
+// Cross Play/Scala.js settings
 
 lazy val sharedPlayScalaJS = Seq(
   unmanagedSourceDirectories in Compile += baseDirectory.value / "../shared/src/main/scala",
