@@ -3,7 +3,8 @@ package transport.webrtc
 import scala.concurrent._
 import transport._
 
-/** TODoc */
+/** WebRTC cross platform client which fallbacks transparently to the signaling channel when
+ *  WebRTC is not available. See `WebRTCClient` for an example of usage. */
 class WebRTCClientFallback(implicit ec: ExecutionContext) extends Transport {
   type Address = ConnectionHandle
   

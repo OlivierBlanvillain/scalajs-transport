@@ -7,7 +7,6 @@ import org.scalajs.jquery.{ jQuery => jQ, _ }
 
 import akka.actor._
 
-import models._
 import transport._
 import transport.webrtc._
 import transport.javascript._
@@ -18,8 +17,6 @@ import scalajs.concurrent.JSExecutionContext.Implicits.runNow
 
 @JSExport("Client")
 object Main {
-  RegisterPicklers.registerPicklers()
-
   implicit val system = ActorSystem("chat-client")
 
   @JSExport
@@ -30,37 +27,24 @@ object Main {
       else
         "<div>Does not support WebRTC</div>"
     )
-    
-    ActorWrapper(new WebSocketClient()).connectWithActor(webSocketFromPlayRoute())(
-      EstablishRtcActor.props)
-  }
-}
 
-class EstablishRtcActor(out: ActorRef) extends Actor {
-  def receive: Receive = {
-    case Connected(peer) =>
-      val (actorConnection, futureConnection) = ActorToConnection(context.system)
-      use(futureConnection)
-      peer ! actorConnection
-
-    case remoteActorConnection: ActorRef =>
-      val (actorConnection, futureConnection) = ActorToConnection(context.system)
-      actorConnection ! remoteActorConnection
-      remoteActorConnection ! actorConnection
-      use(futureConnection)
-  }
-  
-  def use(futureConnection: Future[ConnectionHandle]): Unit = {
-    futureConnection.foreach { signalingChannel =>
-      val futureRTC = new WebRTCClientFallback().connect(signalingChannel)
-      futureRTC.foreach { connection =>
-        context.actorOf(ConnectionToActor.props(connection, DemoActor.props))
-      }
+    new WebSocketClient().connect(webSocketFromPlayRoute()).foreach { connection =>
+      val (left, right) = ConnectionUtils.fork(connection)
+      system.actorOf(ConnectionToActor.props(left, EstablishRtcActor.props(right)))
     }
   }
 }
+
+class EstablishRtcActor(connection: ConnectionHandle, out: ActorRef) extends Actor {
+  def receive = {
+    case "Plugged" =>
+      import Main.system
+      ActorWrapper(new WebRTCClientFallback()).connectWithActor(connection)(DemoActor.props)
+  }
+}
 object EstablishRtcActor {
-  def props(out: ActorRef) = Props(new EstablishRtcActor(out))
+  def props(connection: ConnectionHandle)(out: ActorRef) =
+    Props(new EstablishRtcActor(connection, out))
 }
 
 class DemoActor(out: ActorRef) extends Actor {
@@ -83,11 +67,11 @@ class DemoActor(out: ActorRef) extends Actor {
       val text = jQ("#msgtext").value().toString
       if(!text.isEmpty) {
         jQ("#msgtext").value("")
-        out ! Msg(text)
+        out ! text
         Discussion.appendMy(text)
       }
       
-    case Msg(text) =>
+    case text: String =>
       Discussion.appendHis(text)
   }
   

@@ -9,17 +9,6 @@ import autowire._
 import upickle._
 import scala.concurrent.ExecutionContext.Implicits.global
 
-/* abstract /* */
-* class RpcWrapper[T <: Transport](t: T) {
-*   type StringServer = Server[String, Reader, Writer]
-*   type StringClient = Client[String, Reader, Writer]
-*   type Rpc = Request[String] => Future[String]
-*
-*   def serve(routeMacro: StringServer => Rpc): Unit
-*   def connect(address: t.Address): StringClient
-* }
-*/
-
 object Demo { /**/
 
 // Shared

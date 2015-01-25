@@ -2,14 +2,15 @@ package transport
 
 import scala.concurrent._
 import scala.util._
-
 import scala.collection.mutable
 
-/* TODoc */
+/* Utilities for `ConnectionHandles` */
 object ConnectionUtils {
   import MyPickler._
   
-  /* TODoc */
+  /** Forks a `base` connection into two, distinct connections going through `base`. The original
+   *  connection has to  be forked on both sides of the connection. The returned Connections can be
+   *  closed  independently, the `base` connection is closed when both connections are closed. */
   def fork(base: ConnectionHandle)(implicit ec: ExecutionContext): (ConnectionHandle, ConnectionHandle) = {
     val messageLeftPromise = QueueablePromise[MessageListener]
     val closeLeftPromise = Promise[Unit]
@@ -56,7 +57,8 @@ object ConnectionUtils {
     (connectionLeft, connectionRight)
   }
 
-  /* TODoc */
+  /** Plugs two `ConnectionHandles` together, such that every message received by the first is
+    * written in the second, and the other way around. */
   def plug(connectionLeft: ConnectionHandle, connectionRight: ConnectionHandle)(implicit ec: ExecutionContext): Unit = {
     connectionLeft.handlerPromise.success(connectionRight.write)
     connectionRight.handlerPromise.success(connectionLeft.write)
@@ -64,7 +66,7 @@ object ConnectionUtils {
     connectionRight.closedFuture.foreach(_ => connectionLeft.close())
   }
   
-  /** TODoc */
+  /** Creates a pair of connected `ConnectionHandle` objects, linked one to the other. */
   def dummyConnectionPair()(implicit ec: ExecutionContext): (ConnectionHandle, ConnectionHandle) = {
     val c1 = new ProxyConnectionHandle()
     val c2 = new ProxyConnectionHandle()

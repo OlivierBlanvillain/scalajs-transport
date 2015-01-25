@@ -7,7 +7,6 @@ import org.scalajs.jquery.{ jQuery => jQ, _ }
 
 import akka.actor._
 
-import models._
 import transport._
 import transport.webrtc._
 import transport.javascript._
@@ -18,8 +17,6 @@ import scalajs.concurrent.JSExecutionContext.Implicits.runNow
 
 @JSExport("Client")
 object Main {
-  RegisterPicklers.registerPicklers()
-  
   implicit val system = ActorSystem("chat-client")
 
   @JSExport
@@ -63,11 +60,11 @@ class DemoActor(out: ActorRef) extends Actor {
       val text = jQ("#msgtext").value().toString
       if(!text.isEmpty) {
         jQ("#msgtext").value("")
-        out ! Msg(text)
+        out ! text
         Discussion.appendMy(text)
       }
       
-    case Msg(text) =>
+    case text: String =>
       Discussion.appendHis(text)
   }
   

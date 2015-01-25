@@ -4,8 +4,12 @@ import akka.actor._
 import transport._
 import scala.concurrent._
 
-// TODoc
-class ConnectionToActor(
+/** Handles a connection with an actor. See ActorWrapper for details on the semantic. */
+object ConnectionToActor {
+  def props(connection: ConnectionHandle, handlerProps: ActorRef => Props)(implicit ec: ExecutionContext) = Props(new ConnectionToActor(connection, handlerProps))
+}
+
+private class ConnectionToActor(
       connection: ConnectionHandle,
       handlerProps: ActorRef => Props)(
       implicit ec: ExecutionContext)
@@ -33,8 +37,4 @@ class ConnectionToActor(
   override protected def sendPickleToPeer(pickle: PickleType): Unit = {
     connection.write(stringify(pickle))
   }
-}
-
-object ConnectionToActor {
-  def props(connection: ConnectionHandle, handlerProps: ActorRef => Props)(implicit ec: ExecutionContext) = Props(new ConnectionToActor(connection, handlerProps))
 }

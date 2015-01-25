@@ -2,7 +2,6 @@ package actors
 
 import akka.actor._
 import transport.{ ConnectionUtils, ConnectionHandle }
-import models._
 
 import play.api.libs.concurrent.Execution.Implicits._
 

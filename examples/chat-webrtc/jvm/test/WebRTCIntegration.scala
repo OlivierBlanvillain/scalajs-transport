@@ -4,7 +4,7 @@ import play.api.test._
 
 class WebRTCIntegration extends BrowserSpecification {
   "Two browsers" should {
-    "be able to chat via WebRTC" in new WithTwoBrowsers(Chrome, Chrome) {
+    "be able to chat via WebRTC Client" in new WithTwoBrowsers(Chrome, Chrome) {
     // "be able to chat via WebRTC" in new WithTwoBrowsers(Firefox, Firefox) {
     // "be able to chat via WebRTC" in new WithTwoBrowsers(Chrome, Firefox) {
       browser1 goTo "/"

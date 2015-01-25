@@ -50,7 +50,7 @@ lazy val examples = project
     exampleRPCJVM,
     chatWebSocketJVM,
     chatWebRTCJVM,
-    chatWebRTCClientFallbackJVM)
+    chatWebRTCFallbackJVM)
 
 // Transport
 
@@ -258,7 +258,7 @@ lazy val chatWebRTCJVM = project
     "org.webjars" %% "webjars-play" % "2.3.0",
     "org.webjars" % "jquery" % "2.1.1"))
 
-lazy val chatWebRTCClientFallbackJS = project
+lazy val chatWebRTCFallbackJS = project
   .in(file("examples/chat-webrtc-fallback/js"))
   .enablePlugins(ScalaJSPlugin)
   .settings(commonSettings: _*)
@@ -266,11 +266,11 @@ lazy val chatWebRTCClientFallbackJS = project
   .dependsOn(transportJavaScriptJS, transportPlayJS, transportAkkaJS, transportWebRTCJS)
   .settings(libraryDependencies ++= Seq(
     "be.doeraene" %%% "scalajs-jquery" % "0.7.1-SNAPSHOT"))
-lazy val chatWebRTCClientFallbackJVM = project
+lazy val chatWebRTCFallbackJVM = project
   .in(file("examples/chat-webrtc-fallback/jvm"))
   .enablePlugins(PlayScala)
   .settings(commonSettings: _*)
-  .settings(playWithScalaJS(chatWebRTCClientFallbackJS): _*)
+  .settings(playWithScalaJS(chatWebRTCFallbackJS): _*)
   .dependsOn(transportPlayJVM, transportAkkaJVM, transportTestPlayJVM % "test->test")
   .settings(libraryDependencies ++= Seq(
     "org.webjars" %% "webjars-play" % "2.3.0",
