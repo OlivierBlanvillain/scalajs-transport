@@ -1,7 +1,7 @@
 lazy val commonSettings = Seq(
   organization := "com.github.olivierblanvillain",
   version := "0.1-SNAPSHOT",
-  scalaVersion := "2.11.4",
+  scalaVersion := "2.11.5",
   scalacOptions ++= Seq(
     "-deprecation",           
     "-encoding", "UTF-8",
@@ -69,7 +69,7 @@ lazy val transportJavaScript = crossProject
   .settings(name := "transport-javascript")
   .dependsOn(transportCore)
   .jsSettings(libraryDependencies +=
-    "org.scala-js" %%% "scalajs-dom" % "0.7.0")
+    "org.scala-js" %%% "scalajs-dom" % "0.8.0")
 lazy val transportJavaScriptJVM = transportJavaScript.jvm
 lazy val transportJavaScriptJS = transportJavaScript.js
 
@@ -80,7 +80,7 @@ lazy val transportWebRTC = crossProject
   .settings(name := "transport-webrtc")
   .dependsOn(transportCore)
   .jsSettings(libraryDependencies +=
-    "org.scala-js" %%% "scalajs-dom" % "0.7.0")
+    "org.scala-js" %%% "scalajs-dom" % "0.8.0")
 lazy val transportWebRTCJVM = transportWebRTC.jvm
 lazy val transportWebRTCJS = transportWebRTC.js
 
@@ -141,8 +141,8 @@ lazy val transportRPC = crossProject
   .settings(name := "transport-rpc")
   .dependsOn(transportCore)
   .settings(libraryDependencies ++= Seq(
-    "com.lihaoyi" %%% "upickle" % "0.2.6-M3",
-    "com.lihaoyi" %%% "autowire" % "0.2.4-M3"))
+    "com.lihaoyi" %%% "upickle" % "0.2.6",
+    "com.lihaoyi" %%% "autowire" % "0.2.4"))
 lazy val transportRPCJVM = transportRPC.jvm
 lazy val transportRPCJS = transportRPC.js
 
@@ -209,7 +209,7 @@ lazy val exampleRPCJS = project
   .settings(scalaJSWithPlay: _*)
   .dependsOn(transportJavaScriptJS, transportPlayJS, transportRPCJS)
   .settings(libraryDependencies ++= Seq(
-    "com.scalatags" %%% "scalatags" % "0.4.3-M3"))
+    "com.lihaoyi" %%% "scalatags" % "0.4.5"))
 lazy val exampleRPCJVM = project
   .in(file("examples/rpc/jvm"))
   .enablePlugins(PlayScala)
@@ -228,7 +228,7 @@ lazy val chatWebSocketJS = project
   .settings(scalaJSWithPlay: _*)
   .dependsOn(transportJavaScriptJS, transportPlayJS, transportAkkaJS)
   .settings(libraryDependencies ++= Seq(
-    "be.doeraene" %%% "scalajs-jquery" % "0.7.1-SNAPSHOT"))
+    "be.doeraene" %%% "scalajs-jquery" % "0.8.0"))
 lazy val chatWebSocketJVM = project
   .in(file("examples/chat-websocket/jvm"))
   .enablePlugins(PlayScala)
@@ -247,7 +247,7 @@ lazy val chatWebRTCJS = project
   .settings(scalaJSWithPlay: _*)
   .dependsOn(transportJavaScriptJS, transportPlayJS, transportAkkaJS, transportWebRTCJS)
   .settings(libraryDependencies ++= Seq(
-    "be.doeraene" %%% "scalajs-jquery" % "0.7.1-SNAPSHOT"))
+    "be.doeraene" %%% "scalajs-jquery" % "0.8.0"))
 lazy val chatWebRTCJVM = project
   .in(file("examples/chat-webrtc/jvm"))
   .enablePlugins(PlayScala)
@@ -265,7 +265,7 @@ lazy val chatWebRTCFallbackJS = project
   .settings(scalaJSWithPlay: _*)
   .dependsOn(transportJavaScriptJS, transportPlayJS, transportAkkaJS, transportWebRTCJS)
   .settings(libraryDependencies ++= Seq(
-    "be.doeraene" %%% "scalajs-jquery" % "0.7.1-SNAPSHOT"))
+    "be.doeraene" %%% "scalajs-jquery" % "0.8.0"))
 lazy val chatWebRTCFallbackJVM = project
   .in(file("examples/chat-webrtc-fallback/jvm"))
   .enablePlugins(PlayScala)
