@@ -4,8 +4,7 @@ import scala.util._
 import transport.jsapi._
 
 object TestFeatureSupport {
-  /** Chrome only ATM. */
-  def webRTC(): Boolean = {
-    Try(new webkitRTCPeerConnection(null).iceConnectionState).isSuccess
-  }
+  def webRTC(): Boolean = webkitRTC || mozRTC
+  lazy val webkitRTC = Try(new webkitRTCPeerConnection(null).iceConnectionState).isSuccess
+  lazy val mozRTC = Try(new mozRTCPeerConnection(null).iceConnectionState).isSuccess
 }

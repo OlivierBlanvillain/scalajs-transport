@@ -37,8 +37,10 @@ private class WebRTCPeer(
       implicit ec: ExecutionContext) {
 
   import WebRTCPeer._
-  
-  private val webRTCConnection = new webkitRTCPeerConnection(null, null)
+  import TestFeatureSupport.mozRTC
+
+  private val webRTCConnection =
+    if(mozRTC) new mozRTCPeerConnection(null, null) else new webkitRTCPeerConnection(null, null)
   private val connectionPromise = Promise[ConnectionHandle]()
   private var isCaller: Boolean = _
 
@@ -49,6 +51,10 @@ private class WebRTCPeer(
   signalingChannel.closedFuture.onComplete { _ =>
     connectionPromise.tryFailure(new IllegalStateException(
       "Signaling channel closed before the end of connection establishment."))
+  }
+  
+  connectionPromise.future.onComplete { _ =>
+    signalingChannel.close()
   }
 
   webRTCConnection.onicecandidate = { event: RTCIceCandidateEvent =>
@@ -62,19 +68,21 @@ private class WebRTCPeer(
   def future: Future[ConnectionHandle] = connectionPromise.future
 
   private def sendViaSignaling(m: WebRTCMessage): Unit = {
+    println("Sending: " + m.toString)
     signalingChannel.write(pickle(m))
   }
 
   private def revievedViaSignaling(m: WebRTCMessage): Unit = {
     // Each message is received exactly once, in the order of appearance in this match.
+    println(m.toString)
     m match {
       case Priority(hisPriority) if hisPriority > priority =>
         isCaller = true
         createConnectionHandle(webRTCConnection.createDataChannel("sendDataChannel"))
-        webRTCConnection.createOffer { description: RTCSessionDescription =>
+        webRTCConnection.createOffer({ description: RTCSessionDescription =>
           webRTCConnection.setLocalDescription(description)
           sendViaSignaling(SessionDescription(description))
-        }
+        }, { err: Any => () })
 
       case Priority(hisPriority) =>
         isCaller = false
@@ -87,20 +95,23 @@ private class WebRTCPeer(
         webRTCConnection.addIceCandidate(candidate)
 
       case SessionDescription(remoteDescription) if isCaller =>
+        println("Set remote  decr" + remoteDescription)
         webRTCConnection.setRemoteDescription(remoteDescription)
 
       case SessionDescription(remoteDescription) =>
+        println("Try to createAnswer")
         webRTCConnection.setRemoteDescription(remoteDescription)
-        webRTCConnection.createAnswer { localDescription: RTCSessionDescription =>
+        webRTCConnection.createAnswer({ localDescription: RTCSessionDescription =>
+          println("Created Answer, set local descr" + localDescription)
           webRTCConnection.setLocalDescription(localDescription)
           sendViaSignaling(SessionDescription(localDescription))
-        }
+        }, { err: Any => {println("failed to Create Answer"); System.err.println(err.toString)} })
     }
   }
   
   private def createConnectionHandle(dc: RTCDataChannel): Unit = {
     new ConnectionHandle {
-      private val promise = QueueablePromise[MessageListener]()
+      private val promise = QueueablePromise[String => Unit]()
       private val closePromise = Promise[Unit]()
       
       dc.onopen = { event: Event =>
@@ -117,7 +128,7 @@ private class WebRTCPeer(
         closePromise.tryFailure(WebRTCException(message))
       }
       
-      def handlerPromise: Promise[MessageListener] = promise
+      def handlerPromise: Promise[String => Unit] = promise
       def closedFuture: Future[Unit] = closePromise.future
       def write(outboundPayload: String): Unit = dc.send(outboundPayload)
       def close(): Unit = dc.close()
@@ -126,6 +137,8 @@ private class WebRTCPeer(
 }
 
 private object WebRTCPeer {
+  import TestFeatureSupport.mozRTC
+  
   sealed trait WebRTCMessage
   case class Priority(value: Double) extends WebRTCMessage
   case class IceCandidate(candidate: RTCIceCandidate) extends WebRTCMessage
@@ -147,11 +160,16 @@ private object WebRTCPeer {
       case ('P', value) =>
         Priority(value.toDouble)
       case ('I', string) =>
-        IceCandidate(new RTCIceCandidate(
-          js.JSON.parse(string).asInstanceOf[RTCIceCandidate]))
+        IceCandidate(
+          if(mozRTC) new mozRTCIceCandidate(js.JSON.parse(string).asInstanceOf[mozRTCIceCandidate])
+          else new RTCIceCandidate(js.JSON.parse(string).asInstanceOf[RTCIceCandidate])
+        )
       case ('S', string) =>
-        SessionDescription(new RTCSessionDescription(
-          js.JSON.parse(string).asInstanceOf[RTCSessionDescriptionInit]))
+        val init = js.JSON.parse(string).asInstanceOf[RTCSessionDescriptionInit]
+        SessionDescription(
+          if(mozRTC) new mozRTCSessionDescription(init)
+          else new RTCSessionDescription(init)
+        )
     }
   }
 }

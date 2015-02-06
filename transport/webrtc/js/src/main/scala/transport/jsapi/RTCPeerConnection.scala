@@ -6,29 +6,9 @@ class RTCConfiguration extends js.Object {
   var iceServers: js.Array[RTCIceServer] = js.native
 }
 
-object RTCConfiguration extends js.Object {
-}
-
 class RTCIceServer extends js.Object {
   var url: String = js.native
   var credential: String = js.native
-}
-
-object RTCIceServer extends js.Object {
-}
-
-class mozwebkitRTCPeerConnection protected () extends webkitRTCPeerConnection {
-  def this(settings: webkitRTCPeerConnectionConfig, constraints: RTCMediaConstraints = js.native) = this()
-}
-
-object mozwebkitRTCPeerConnection extends js.Object {
-}
-
-class webkitwebkitRTCPeerConnection protected () extends webkitRTCPeerConnection {
-  def this(settings: webkitRTCPeerConnectionConfig, constraints: RTCMediaConstraints = js.native) = this()
-}
-
-object webkitwebkitRTCPeerConnection extends js.Object {
 }
 
 trait RTCOptionalMediaConstraint extends js.Object {
@@ -55,9 +35,6 @@ class RTCSessionDescription protected () extends js.Object {
   def this(descriptionInitDict: RTCSessionDescriptionInit = js.native) = this()
   var `type`: String = js.native
   var sdp: String = js.native
-}
-
-object RTCSessionDescription extends js.Object {
 }
 
 trait RTCDataChannelInit extends js.Object {
@@ -87,15 +64,9 @@ class RTCDataChannel extends EventTarget {
   def send(data: String): Unit = js.native
 }
 
-object RTCDataChannel extends js.Object {
-}
-
 class RTCDataChannelEvent protected () extends Event {
   def this(eventInitDict: RTCDataChannelEventInit) = this()
   var channel: RTCDataChannel = js.native
-}
-
-object RTCDataChannelEvent extends js.Object {
 }
 
 trait RTCIceCandidateEvent extends Event {
@@ -106,8 +77,7 @@ trait RTCMediaStreamEvent extends Event {
   var stream: MediaStream = js.native
 }
 
-trait EventInit extends js.Object {
-}
+trait EventInit extends js.Object {}
 
 trait RTCDataChannelEventInit extends EventInit {
   var channel: RTCDataChannel = js.native
@@ -117,14 +87,13 @@ trait RTCStatsReport extends js.Object {
   def stat(id: String): String = js.native
 }
 
-
-class webkitRTCPeerConnection protected () extends js.Object {
+class RTCPeerConnection protected () extends js.Object {
   def this(configuration: RTCConfiguration, constraints: RTCMediaConstraints = js.native) = this()
-  def createOffer(successCallback: RTCSessionDescriptionCallback, failureCallback: webkitRTCPeerConnectionErrorCallback = js.native, constraints: RTCMediaConstraints = js.native): Unit = js.native
-  def createAnswer(successCallback: RTCSessionDescriptionCallback, failureCallback: webkitRTCPeerConnectionErrorCallback = js.native, constraints: RTCMediaConstraints = js.native): Unit = js.native
-  def setLocalDescription(description: RTCSessionDescription, successCallback: RTCVoidCallback = js.native, failureCallback: webkitRTCPeerConnectionErrorCallback = js.native): Unit = js.native
+  def createOffer(successCallback: RTCSessionDescriptionCallback, failureCallback: RTCPeerConnectionErrorCallback, constraints: RTCMediaConstraints = js.native): Unit = js.native
+  def createAnswer(successCallback: RTCSessionDescriptionCallback, failureCallback: RTCPeerConnectionErrorCallback, constraints: RTCMediaConstraints = js.native): Unit = js.native
+  def setLocalDescription(description: RTCSessionDescription, successCallback: RTCVoidCallback = js.native, failureCallback: RTCPeerConnectionErrorCallback = js.native): Unit = js.native
   var localDescription: RTCSessionDescription = js.native
-  def setRemoteDescription(description: RTCSessionDescription, successCallback: RTCVoidCallback = js.native, failureCallback: webkitRTCPeerConnectionErrorCallback = js.native): Unit = js.native
+  def setRemoteDescription(description: RTCSessionDescription, successCallback: RTCVoidCallback = js.native, failureCallback: RTCPeerConnectionErrorCallback = js.native): Unit = js.native
   var remoteDescription: RTCSessionDescription = js.native
   var signalingState: String = js.native
   def updateIce(configuration: RTCConfiguration = js.native, constraints: RTCMediaConstraints = js.native): Unit = js.native
@@ -148,10 +117,7 @@ class webkitRTCPeerConnection protected () extends js.Object {
   var onicecandidate: js.Function1[RTCIceCandidateEvent, _] = js.native
   var onidentityresult: js.Function1[Event, _] = js.native
   var onsignalingstatechange: js.Function1[Event, _] = js.native
-  var getStats: js.Function2[RTCStatsCallback, webkitRTCPeerConnectionErrorCallback, _] = js.native
-}
-
-object webkitRTCPeerConnection extends js.Object {
+  var getStats: js.Function2[RTCStatsCallback, RTCPeerConnectionErrorCallback, _] = js.native
 }
 
 class RTCIceCandidate protected () extends js.Object {
@@ -161,29 +127,38 @@ class RTCIceCandidate protected () extends js.Object {
   var sdpMLineIndex: Int = js.native
 }
 
-object RTCIceCandidate extends js.Object {
-}
-
 class RTCIceCandidateInit extends js.Object {
   var candidate: String = js.native
   var sdpMid: String = js.native
   var sdpMLineIndex: Int = js.native
 }
 
-object RTCIceCandidateInit extends js.Object {
-}
-
 class PeerConnectionIceEvent extends js.Object {
-  var peer: webkitRTCPeerConnection = js.native
+  var peer: RTCPeerConnection = js.native
   var candidate: RTCIceCandidate = js.native
 }
 
-object PeerConnectionIceEvent extends js.Object {
-}
-
-class webkitRTCPeerConnectionConfig extends js.Object {
+class RTCPeerConnectionConfig extends js.Object {
   var iceServers: js.Array[RTCIceServer] = js.native
 }
 
-object webkitRTCPeerConnectionConfig extends js.Object {
+// moz
+
+class mozRTCPeerConnection protected () extends RTCPeerConnection {
+  def this(settings: RTCPeerConnectionConfig, constraints: RTCMediaConstraints = js.native) = this()
 }
+
+class mozRTCIceCandidate protected () extends RTCIceCandidate {
+  def this(candidateInitDict: mozRTCIceCandidate = js.native) = this()
+}
+
+class mozRTCSessionDescription protected () extends RTCSessionDescription {
+  def this(descriptionInitDict: RTCSessionDescriptionInit = js.native) = this()
+}
+
+// webkit
+
+class webkitRTCPeerConnection protected () extends RTCPeerConnection {
+  def this(settings: RTCPeerConnectionConfig, constraints: RTCMediaConstraints = js.native) = this()
+}
+
