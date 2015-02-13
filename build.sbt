@@ -12,8 +12,23 @@ lazy val commonSettings = Seq(
     "-Ywarn-numeric-widen",   
     "-Xfuture",
     "-Xlint"
+  ),
+  homepage := Some(url("https://github.com/OlivierBlanvillain/scalajs-transport")),
+  licenses := Seq(("MIT", url("http://opensource.org/licenses/mit-license.php"))),
+  scmInfo := Some(ScmInfo(
+    url("https://github.com/OlivierBlanvillain/scalajs-transport"),
+    "scm:git:git@github.com:OlivierBlanvillain/scalajs-transport.git",
+    Some("scm:git:git@github.com:OlivierBlanvillain/scalajs-transport.git"))),
+  pomExtra := (
+    <developers>
+      <developer>
+        <id>OlivierBlanvillain</id>
+        <name>Olivier Blanvillain</name>
+        <url>https://github.com/OlivierBlanvillain/</url>
+      </developer>
+    </developers>
   )
-)
+) ++ sonatypeSettings
 
 lazy val buildSettings = Defaults.defaultSettings ++ Seq(javaOptions += "-Xmx1G")
 
@@ -21,7 +36,6 @@ parallelExecution in Global := false
 
 lazy val root = project
   .in(file("."))
-  .settings(commonSettings: _*)
   .aggregate(
     transportCoreJS,
     transportCoreJVM,
@@ -42,7 +56,6 @@ lazy val root = project
 
 lazy val examples = project
   .in(file("examples"))
-  .settings(commonSettings: _*)
   .aggregate(
     transportTestJVM,
     transportTestPlayJVM,
