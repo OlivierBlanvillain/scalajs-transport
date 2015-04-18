@@ -7,6 +7,25 @@ import scala.collection.mutable
 /* Utilities for `ConnectionHandles` */
 object ConnectionUtils {
   import MyPickler._
+
+    /** Combines several connections passed in arguments and returns the resulting broadcast
+     *  connection. Messages send through the broadcast are copied and sent over each of the
+     *  combined connections. Messages received from any of the combined connections are
+     *  forwarded to the broadcast connection. Closing the broadcast connection closes all
+     *  combined connections, and the broadcast connection is closed when when any of the
+     *  combined connection is closed. */
+    def trivialBroadcast(cs: ConnectionHandle*)(implicit ec: ExecutionContext): ConnectionHandle = {
+      val queueablePromise = QueueablePromise[MessageListener]
+      val closePromise = Promise[Unit]
+      cs.foreach(_.handlerPromise.success(message => queueablePromise.queue(_(message))))
+      cs.foreach(_.closedFuture.foreach(_ => closePromise.trySuccess(())))
+      new ConnectionHandle {
+        def handlerPromise: Promise[MessageListener] = queueablePromise
+        def write(message: String): Unit = cs.foreach(_.write(message))
+        def closedFuture: Future[Unit] = closePromise.future
+        def close(): Unit = cs.foreach(_.close())
+      }
+    }
   
   /** Forks a `base` connection into two, distinct connections going through `base`. The original
    *  connection has to  be forked on both sides of the connection. The returned Connections can be
