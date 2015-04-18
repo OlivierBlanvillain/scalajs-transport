@@ -36,11 +36,15 @@ private object BridgeActor {
   def props(listener: ConnectionListener)(out: ActorRef)(implicit ec: ExecutionContext) =
     Props(new BridgeActor(listener, out))
 
-  def actionHandle(promise: Promise[ConnectionListener])(request: RequestHeader)(
-      implicit ec: ExecutionContext): Future[Either[Result, ActorRef => Props]] = {
+  def actionHandle(
+      promise: Promise[ConnectionListener],
+      authorise: RequestHeader => Boolean)
+     (request: RequestHeader)
+     (implicit ec: ExecutionContext)
+        : Future[Either[Result, ActorRef => Props]] = {
     Future.successful(
-      promise.future.value match {
-        case Some(Success(listener)) =>
+      (authorise(request), promise.future.value) match {
+        case (true, Some(Success(listener))) =>
           Right(BridgeActor.props(listener))
         case _ =>
           Left(Results.Forbidden)

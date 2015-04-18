@@ -3,7 +3,7 @@ package transport.play
 import scala.concurrent._
 
 import play.api.Application
-import play.api.mvc.WebSocket
+import play.api.mvc._
 
 import transport._
 
@@ -26,10 +26,12 @@ class WebSocketServer(implicit ec: ExecutionContext, app: Application)
   private val promise = Promise[ConnectionListener]()
   
   /** Method to be called from a play controller for each new WebSocket connection. */
-  def action(): WebSocket[String, String] = WebSocket.tryAcceptWithActor[String, String] {
-    BridgeActor.actionHandle(promise)
+  def action(authorise: RequestHeader => Boolean = _ => true): WebSocket[String, String] = {
+    WebSocket.tryAcceptWithActor[String, String] {
+      BridgeActor.actionHandle(promise, authorise)
+    }
   }
-
+  
   def listen(): Future[Promise[ConnectionListener]] =
     Future.successful(promise)
   

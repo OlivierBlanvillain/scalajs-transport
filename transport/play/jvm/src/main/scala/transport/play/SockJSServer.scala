@@ -4,6 +4,7 @@ import scala.concurrent._
 
 import play.api.Application
 import play.sockjs.api._
+import play.api.mvc._
 
 import transport._
 
@@ -45,10 +46,12 @@ class SockJSServer(implicit ec: ExecutionContext, app: Application)
   private val promise = Promise[ConnectionListener]()
   
   /** Method to be called from a play controller for each new SockJS connection. */
-  def action(): SockJSRouter = SockJSRouter.tryAcceptWithActor[String, String] {
-    BridgeActor.actionHandle(promise)
+  def action(authorise: RequestHeader => Boolean = _ => true): SockJSRouter = {
+    SockJSRouter.tryAcceptWithActor[String, String] {
+      BridgeActor.actionHandle(promise, authorise)
+    }
   }
-  
+
   def listen(): Future[Promise[ConnectionListener]] =
     Future.successful(promise)
   
